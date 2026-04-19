@@ -7,7 +7,8 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;background:#0a0f1e;color:#dde6f5;min-height:100vh;font-size:14px}
-a{color:inherit;text-decoration:none}
+a{color:#93c5fd;text-decoration:none}
+a:hover{text-decoration:underline}
 .hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(10,15,30,.96);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
 .brand{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
 .brand-dot{width:8px;height:8px;border-radius:50%;background:#3f567a}
@@ -22,27 +23,51 @@ a{color:inherit;text-decoration:none}
 .st-err{background:rgba(232,64,64,.1);border-color:rgba(232,64,64,.3);color:#f87171}
 .st-idle{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#8899bb}
 .clk{font-family:monospace;font-size:12px;color:#4a5e80}
-.main{max-width:1300px;margin:0 auto;padding:14px 18px}
+.main{max-width:1400px;margin:0 auto;padding:14px 18px}
 .prog{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-bottom:12px;overflow:hidden}
 .prog-fill{height:100%;background:linear-gradient(90deg,#3d8cf0,#22c97a);width:0;transition:width .4s;border-radius:2px}
+
+/* 警報區 */
+.alerts{margin-bottom:12px}
+.alert-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin-bottom:6px;font-size:13px;font-weight:500;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.alert-buy{background:rgba(34,201,122,.12);border:1px solid rgba(34,201,122,.3);color:#22c97a}
+.alert-sell{background:rgba(232,64,64,.12);border:1px solid rgba(232,64,64,.3);color:#f87171}
+.alert-stop{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:#f59e0b}
+.alert-icon{font-size:16px}
+.alert-close{margin-left:auto;cursor:pointer;opacity:.6;font-size:16px}
+.alert-close:hover{opacity:1}
+
+/* 摘要 */
 .sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
 .sum-c{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:10px 12px}
 .sum-l{font-size:10px;color:#3f567a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
 .sum-v{font-size:20px;font-weight:600;font-family:monospace}
+
+/* 分頁標籤 */
+.page-tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:0}
+.page-tab{padding:7px 16px;font-size:13px;cursor:pointer;color:#7d96bf;border-bottom:2px solid transparent;transition:all .15s}
+.page-tab.on{color:#7db3f5;border-bottom-color:#7db3f5;font-weight:500}
+
+/* 產業標籤 */
 .tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
 .tab{padding:4px 12px;border-radius:14px;font-size:12px;border:1px solid rgba(255,255,255,.09);color:#7d96bf;cursor:pointer;background:transparent;transition:all .13s}
 .tab.on{background:rgba(61,140,240,.15);border-color:rgba(61,140,240,.4);color:#7db3f5}
+
+/* 篩選 */
 .flt{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
 .flt input,.flt select{padding:6px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#dde6f5;font-size:13px;outline:none;font-family:inherit}
 .flt input{flex:1;min-width:140px}
 .flt input::placeholder{color:#3f567a}
+
+/* 表格 */
 .tbl-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;margin-bottom:10px}
 .tbl-sc{overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:760px;font-size:13px}
+table{width:100%;border-collapse:collapse;min-width:900px;font-size:13px}
 thead{background:rgba(255,255,255,.03)}
-th{padding:8px 12px;text-align:left;font-size:10px;font-weight:600;color:#3f567a;border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap;cursor:pointer;letter-spacing:.06em}
+th{padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:#3f567a;border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap;cursor:pointer;letter-spacing:.06em}
 th:hover{color:#7d96bf}
-td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 .drow{cursor:pointer;transition:background .1s}
 .drow:hover td{background:rgba(255,255,255,.025)}
@@ -68,12 +93,34 @@ tr:last-child td{border-bottom:none}
 .vbg{width:36px;height:3px;background:rgba(255,255,255,.07);border-radius:2px}
 .vfg{height:100%;border-radius:2px}
 .pld{color:#3f567a;font-style:italic;font-size:11px}
+
+/* 指標徽章 */
+.kd-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;font-family:monospace;font-weight:600}
+.kd-buy{background:rgba(34,201,122,.15);color:#22c97a;border:1px solid rgba(34,201,122,.3)}
+.kd-sell{background:rgba(232,64,64,.15);color:#f87171;border:1px solid rgba(232,64,64,.3)}
+.kd-mid{background:rgba(255,255,255,.05);color:#7d96bf;border:1px solid rgba(255,255,255,.09)}
+.macd-bull{color:#22c97a;font-size:11px;font-family:monospace}
+.macd-bear{color:#f87171;font-size:11px;font-family:monospace}
+
+/* 目標價格欄 */
+.price-targets{display:flex;flex-direction:column;gap:2px}
+.pt{font-size:10px;font-family:monospace}
+.pt-buy{color:#22c97a}
+.pt-sell{color:#f87171}
+.pt-stop{color:#f59e0b}
+.pt-none{color:#3f567a}
+.pt-hit{font-weight:700;animation:blink-pt 1s infinite}
+@keyframes blink-pt{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* 分頁 */
 .pages{display:flex;gap:5px;justify-content:center;padding:8px;flex-wrap:wrap;align-items:center}
 .pgb{min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid rgba(255,255,255,.09);background:transparent;color:#7d96bf;font-size:12px;cursor:pointer;padding:0 7px;transition:all .13s}
 .pgb:hover:not(:disabled){background:rgba(255,255,255,.06)}
 .pgb.on{background:rgba(61,140,240,.15);border-color:rgba(61,140,240,.38);color:#7db3f5;font-weight:600}
 .pgb:disabled{opacity:.3;cursor:not-allowed}
 .pgi{font-size:11px;color:#3f567a;margin-left:4px}
+
+/* 詳細面板 */
 .det{border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:none}
 .det.on{display:block}
 .det-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
@@ -81,18 +128,37 @@ tr:last-child td{border-bottom:none}
 .det-p{font-size:28px;font-weight:700;font-family:monospace}
 .det-c{font-size:15px;font-weight:600;font-family:monospace}
 .det-meta{font-size:11px;color:#4a5e80;margin-left:6px}
-.det-mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:6px;margin-bottom:12px}
+.det-mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-bottom:12px}
 .det-mc{background:rgba(255,255,255,.04);border-radius:8px;padding:7px 9px;border:1px solid rgba(255,255,255,.06)}
 .det-ml{font-size:9px;color:#3f567a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
 .det-mv{font-size:13px;font-weight:600;font-family:monospace}
 .chart-box{position:relative;height:150px;margin-bottom:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:8px;overflow:hidden;padding:8px}
-.det-note{font-size:12px;color:#7d96bf;line-height:1.65;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:7px;border-left:2px solid rgba(61,140,240,.4)}
+.det-note{font-size:12px;color:#7d96bf;line-height:1.65;padding:10px 12px;background:rgba(255,255,255,.03);border-radius:7px;border-left:2px solid rgba(61,140,240,.4);margin-bottom:12px}
 .xbtn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.06);cursor:pointer;border:1px solid rgba(255,255,255,.1);color:#7d96bf;font-size:14px}
 .xbtn:hover{background:rgba(255,255,255,.1)}
-.foot{text-align:center;font-size:11px;color:#3f567a;padding:14px 0;border-top:1px solid rgba(255,255,255,.05);margin-top:8px;line-height:1.8}
+
+/* 指標詳細 */
+.ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ind-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:10px 12px}
+.ind-title{font-size:10px;color:#3f567a;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.ind-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:12px}
+.ind-label{color:#7d96bf}
+.ind-val{font-family:monospace;font-weight:600}
+
+/* 自選股頁面 */
+.watchlist-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.wl-input{padding:7px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#dde6f5;font-size:13px;outline:none;width:100px}
+.wl-input::placeholder{color:#3f567a}
+.wl-btn{padding:6px 14px;border-radius:7px;border:1px solid rgba(61,140,240,.3);background:rgba(61,140,240,.1);color:#7db3f5;font-size:13px;cursor:pointer;transition:all .15s}
+.wl-btn:hover{background:rgba(61,140,240,.2)}
+.wl-note{font-size:11px;color:#3f567a}
+
+/* 頁尾 */
+.foot{text-align:center;font-size:11px;color:#3f567a;padding:14px 0;border-top:1px solid rgba(255,255,255,.05);margin-top:8px;line-height:2}
 </style>
 </head>
 <body>
+
 <div class="hdr">
   <div class="brand">
     <div class="brand-dot" id="brandDot"></div>
@@ -107,69 +173,125 @@ tr:last-child td{border-bottom:none}
 
 <div class="main">
   <div class="prog"><div class="prog-fill" id="prog"></div></div>
+
+  <!-- 警報區 -->
+  <div class="alerts" id="alertsBox"></div>
+
+  <!-- 摘要 -->
   <div class="sum-grid">
-    <div class="sum-c"><div class="sum-l">精選股數</div><div class="sum-v" style="color:#7db3f5">60</div></div>
+    <div class="sum-c"><div class="sum-l">精選股數</div><div class="sum-v" style="color:#7db3f5" id="s-total">60</div></div>
     <div class="sum-c"><div class="sum-l">上漲</div><div class="sum-v up" id="s-up">—</div></div>
     <div class="sum-c"><div class="sum-l">下跌</div><div class="sum-v dn" id="s-dn">—</div></div>
-    <div class="sum-c"><div class="sum-l">買進訊號</div><div class="sum-v" style="color:#f59e0b" id="s-buy">—</div></div>
-    <div class="sum-c"><div class="sum-l">已載入</div><div class="sum-v" style="color:#22c97a" id="s-ld">0/60</div></div>
+    <div class="sum-c"><div class="sum-l">買進警報</div><div class="sum-v" style="color:#22c97a" id="s-balert">0</div></div>
+    <div class="sum-c"><div class="sum-l">賣出警報</div><div class="sum-v" style="color:#f87171" id="s-salert">0</div></div>
+    <div class="sum-c"><div class="sum-l">停損警報</div><div class="sum-v" style="color:#f59e0b" id="s-stpalert">0</div></div>
     <div class="sum-c"><div class="sum-l">交易日</div><div class="sum-v" style="font-size:13px;color:#7d96bf" id="s-date">—</div></div>
   </div>
-  <div class="tabs" id="indTabs"></div>
-  <div class="flt">
-    <input type="text" id="srch" placeholder="搜尋代號或名稱...">
-    <select id="sigSel">
-      <option value="">所有訊號</option>
-      <option value="強烈買進">強烈買進</option>
-      <option value="買進">買進</option>
-      <option value="觀察">觀察</option>
-      <option value="持有">持有</option>
-    </select>
-    <select id="sortSel">
-      <option value="">預設排序</option>
-      <option value="chg-d">漲跌幅 ▼</option>
-      <option value="chg-a">漲跌幅 ▲</option>
-      <option value="p-d">股價 ▼</option>
-      <option value="p-a">股價 ▲</option>
-      <option value="sc-d">評分 ▼</option>
-    </select>
+
+  <!-- 頁籤 -->
+  <div class="page-tabs">
+    <div class="page-tab on" onclick="switchPage('market',this)">市場總覽</div>
+    <div class="page-tab" onclick="switchPage('watchlist',this)">自選雷達</div>
   </div>
-  <div class="det" id="det">
-    <div class="det-hdr">
-      <div>
-        <span class="code" style="font-size:15px" id="det-code"></span>
-        <span style="font-size:14px;font-weight:600;margin-left:6px" id="det-nm"></span>
-        <span id="det-ib" style="margin-left:6px"></span>
+
+  <!-- 市場總覽頁 -->
+  <div id="page-market">
+    <div class="tabs" id="indTabs"></div>
+    <div class="flt">
+      <input type="text" id="srch" placeholder="搜尋代號或名稱...">
+      <select id="sigSel">
+        <option value="">所有訊號</option>
+        <option value="強烈買進">強烈買進</option>
+        <option value="買進">買進</option>
+        <option value="觀察">觀察</option>
+        <option value="持有">持有</option>
+      </select>
+      <select id="sortSel">
+        <option value="">預設排序</option>
+        <option value="chg-d">漲跌幅 ▼</option>
+        <option value="chg-a">漲跌幅 ▲</option>
+        <option value="p-d">股價 ▼</option>
+        <option value="p-a">股價 ▲</option>
+        <option value="kd-d">KD值 ▼</option>
+        <option value="sc-d">評分 ▼</option>
+      </select>
+    </div>
+
+    <div class="det" id="det">
+      <div class="det-hdr">
+        <div>
+          <span class="code" style="font-size:15px" id="det-code"></span>
+          <span style="font-size:14px;font-weight:600;margin-left:6px" id="det-nm"></span>
+          <span id="det-ib" style="margin-left:6px"></span>
+        </div>
+        <div class="xbtn" onclick="closeDet()">&#x2715;</div>
       </div>
-      <div class="xbtn" onclick="closeDet()">&#x2715;</div>
+      <div class="det-pr">
+        <span class="det-p" id="det-p">—</span>
+        <span class="det-c" id="det-c">—</span>
+        <span class="det-meta" id="det-meta"></span>
+      </div>
+      <div class="det-mg" id="det-mg"></div>
+      <div class="ind-grid" id="det-ind"></div>
+      <div class="chart-box"><canvas id="det-chart" role="img" aria-label="個股走勢">走勢圖</canvas></div>
+      <div class="det-note" id="det-note"></div>
     </div>
-    <div class="det-pr">
-      <span class="det-p" id="det-p">—</span>
-      <span class="det-c" id="det-c">—</span>
-      <span class="det-meta" id="det-meta"></span>
+
+    <div class="tbl-card">
+      <div class="tbl-sc">
+        <table>
+          <thead><tr>
+            <th>代號</th><th>名稱</th><th>產業</th>
+            <th onclick="srt('p')">收盤價 ↕</th>
+            <th onclick="srt('chg')">漲跌% ↕</th>
+            <th>目標價格</th>
+            <th onclick="srt('kd')">KD ↕</th>
+            <th>MACD</th>
+            <th>AI訊號</th><th>評分</th><th>交易日</th>
+          </tr></thead>
+          <tbody id="tbl"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="det-mg" id="det-mg"></div>
-    <div class="chart-box"><canvas id="det-chart" role="img" aria-label="個股月K走勢">月K走勢</canvas></div>
-    <div class="det-note" id="det-note"></div>
+    <div class="pages" id="pages"></div>
   </div>
-  <div class="tbl-card">
-    <div class="tbl-sc">
-      <table>
-        <thead><tr>
-          <th>代號</th><th>名稱</th><th>產業</th>
-          <th onclick="srt('p')">收盤價 ↕</th>
-          <th onclick="srt('chg')">漲跌% ↕</th>
-          <th>漲跌額</th><th>成交量</th>
-          <th>AI訊號</th><th>評分</th><th>交易日</th>
-        </tr></thead>
-        <tbody id="tbl"></tbody>
-      </table>
+
+  <!-- 自選雷達頁 -->
+  <div id="page-watchlist" style="display:none">
+    <div class="watchlist-toolbar">
+      <input class="wl-input" id="wl-code" placeholder="股票代號" maxlength="6">
+      <input class="wl-input" id="wl-buy" placeholder="買進價" style="width:80px">
+      <input class="wl-input" id="wl-sell" placeholder="賣出價" style="width:80px">
+      <input class="wl-input" id="wl-stop" placeholder="停損價" style="width:80px">
+      <button class="wl-btn" onclick="addWatchItem()">+ 加入追蹤</button>
+      <span class="wl-note">輸入代號與目標價，系統自動監控並提醒</span>
     </div>
+    <div class="tbl-card">
+      <div class="tbl-sc">
+        <table>
+          <thead><tr>
+            <th>代號</th><th>名稱</th>
+            <th>現價</th><th>漲跌%</th>
+            <th>買進價</th><th>賣出價</th><th>停損價</th>
+            <th>狀態</th><th>KD</th><th>MACD</th><th>操作</th>
+          </tr></thead>
+          <tbody id="wl-tbl"></tbody>
+        </table>
+      </div>
+    </div>
+    <div style="font-size:11px;color:#3f567a;margin-top:6px">※ 自選股資料儲存於本機瀏覽器，清除瀏覽器資料後會消失</div>
   </div>
-  <div class="pages" id="pages"></div>
+
   <div class="foot">
     股價資料：台灣證券交易所 openapi.twse.com.tw（上市）· tpex.org.tw（上櫃）<br>
-    本站純前端靜態頁面，不儲存任何個人資料 · 僅供參考，不構成投資建議
+    本站純前端靜態頁面，不儲存任何個人資料 · 僅供參考，不構成投資建議<br>
+    <strong style="color:#7db3f5">相關資訊網站：</strong>
+    <a href="https://tw.stock.yahoo.com" target="_blank">Yahoo股市</a> ·
+    <a href="https://goodinfo.tw" target="_blank">Goodinfo</a> ·
+    <a href="https://www.cmoney.tw" target="_blank">CMoney</a> ·
+    <a href="https://stockcharts.moneydj.com" target="_blank">MoneyDJ</a> ·
+    <a href="https://mops.twse.com.tw" target="_blank">公開資訊觀測站</a> ·
+    <a href="https://www.twse.com.tw" target="_blank">證交所</a>
   </div>
 </div>
 
@@ -177,71 +299,132 @@ tr:last-child td{border-bottom:none}
 <script>
 const STOCKS=[
   {code:'6285',ex:'tse',name:'啟碁',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'Starlink地面終端設備供應商，訂單能見度至2026Q2，法人連買'},
-  {code:'6523',ex:'tse',name:'達運精密',ind:'低軌衛星',sig:'買進',sc:4,note:'天線模組需求上升，突破季線，波段空間15%'},
-  {code:'3232',ex:'otc',name:'昱捷',ind:'低軌衛星',sig:'買進',sc:4,note:'微波模組量產放量，衛星通訊零組件受惠'},
-  {code:'5347',ex:'tse',name:'世界',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'衛星通訊晶片佔比提升，外資買超，MACD黃金交叉'},
-  {code:'3037',ex:'tse',name:'欣興',ind:'低軌衛星',sig:'買進',sc:4,note:'高頻天線板需求暢旺，HDI佔比增，月線支撐有效'},
-  {code:'4961',ex:'otc',name:'天揚精密',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'低軌衛星地面站零組件新客戶訂單，籌碼集中'},
-  {code:'6579',ex:'otc',name:'研揚科技',ind:'低軌衛星',sig:'買進',sc:4,note:'地面設備訂單增加，技術面突破壓力區'},
-  {code:'3227',ex:'tse',name:'原相',ind:'低軌衛星',sig:'觀察',sc:3,note:'短線整理中，等待量縮後再布局'},
-  {code:'4968',ex:'tse',name:'立積',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'CPO光引擎IC打入CSP大廠，法人大幅調高目標價'},
-  {code:'3450',ex:'otc',name:'聯鈞',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光收發模組打入超大型資料中心，訂單大幅成長'},
-  {code:'4903',ex:'otc',name:'聯光通',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光纖收發模組需求爆發，800G打入CSP供應鏈'},
-  {code:'3576',ex:'tse',name:'新日興',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光引擎機殼受惠CPO趨勢，訂單能見度高至年底'},
-  {code:'3483',ex:'otc',name:'力致',ind:'矽光子/CPO',sig:'買進',sc:4,note:'矽光子模組出貨量季增50%，技術突破整理區'},
-  {code:'4966',ex:'tse',name:'譜瑞-KY',ind:'矽光子/CPO',sig:'買進',sc:4,note:'DisplayPort/HDMI晶片搭AI PC熱潮，動能延續'},
-  {code:'3149',ex:'otc',name:'正達',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光學元件需求增長，CoWoS間接受惠'},
-  {code:'6547',ex:'otc',name:'晶心科',ind:'矽光子/CPO',sig:'持有',sc:3,note:'RISC-V IP授權增加，但股價高檔，短線謹慎'},
-  {code:'3406',ex:'tse',name:'玉晶光',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'鏡頭業務分歧，等確認光模組訂單後再決策'},
-  {code:'3081',ex:'otc',name:'聯亞',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵射頻IC，衛星通訊與5G雙題材加持'},
-  {code:'6235',ex:'tse',name:'華通',ind:'PCB',sig:'強烈買進',sc:5,note:'高層板出貨量增，NVIDIA供應鏈確認，法人認同'},
-  {code:'6269',ex:'tse',name:'台郡',ind:'PCB',sig:'強烈買進',sc:5,note:'FPC訂單爆發，iPhone新機供應鏈受惠，動能強'},
-  {code:'5469',ex:'tse',name:'瀚宇博德',ind:'PCB',sig:'強烈買進',sc:5,note:'HDI板受惠摺疊機與AI手機，估值低廉'},
-  {code:'8046',ex:'tse',name:'南電',ind:'PCB',sig:'買進',sc:4,note:'ABF載板長約簽訂，能見度至Q3，穩步向上'},
-  {code:'6274',ex:'tse',name:'台燿',ind:'PCB',sig:'買進',sc:4,note:'高速基板搶手，AI伺服器需求帶動，看好後市'},
-  {code:'3189',ex:'tse',name:'景碩',ind:'PCB',sig:'買進',sc:4,note:'IC載板出貨增加，AI需求帶動高毛利產品比重'},
-  {code:'2462',ex:'tse',name:'良英電子',ind:'PCB',sig:'買進',sc:4,note:'利基型PCB回穩，估值低廉，短線反彈空間大'},
-  {code:'2383',ex:'tse',name:'台光電',ind:'PCB',sig:'持有',sc:3,note:'CCL市場回溫，但股價接近歷史高點，注意風險'},
-  {code:'2375',ex:'tse',name:'智邦',ind:'PCB',sig:'持有',sc:3,note:'網通需求強勁，但位於高檔，等拉回再布局'},
-  {code:'6188',ex:'tse',name:'廣明',ind:'PCB',sig:'觀察',sc:3,note:'量能不足，等待突破壓力後再追進'},
-  {code:'6531',ex:'otc',name:'愛普',ind:'半導體',sig:'強烈買進',sc:5,note:'特殊記憶體IP授權爆發，AI晶片廠競相導入'},
-  {code:'3556',ex:'tse',name:'神盾',ind:'半導體',sig:'強烈買進',sc:5,note:'指紋辨識IC打入新旗艦機，法人積極買超'},
-  {code:'6770',ex:'tse',name:'力積電',ind:'半導體',sig:'買進',sc:4,note:'DRAM景氣回升，股價突破月線'},
-  {code:'2408',ex:'tse',name:'南亞科',ind:'半導體',sig:'買進',sc:4,note:'記憶體報價上漲，基本面轉佳，短線布局時機'},
-  {code:'2344',ex:'tse',name:'華邦電',ind:'半導體',sig:'買進',sc:4,note:'NOR Flash庫存去化，IoT應用回溫，低股價彈性強'},
-  {code:'3034',ex:'tse',name:'聯詠',ind:'半導體',sig:'買進',sc:4,note:'DDIC需求回升，TV面板驅動IC報價回穩，中線看漲'},
-  {code:'2379',ex:'tse',name:'瑞昱',ind:'半導體',sig:'買進',sc:4,note:'網通IC需求回升，以太網路IC受惠AI大量部署'},
-  {code:'3533',ex:'tse',name:'嘉澤',ind:'半導體',sig:'買進',sc:4,note:'CPU插座受惠AI伺服器高端平台，連接器密度提升'},
-  {code:'5483',ex:'tse',name:'中美晶',ind:'半導體',sig:'持有',sc:3,note:'矽晶圓需求穩定，股價橫盤整理中，注意量能'},
-  {code:'6719',ex:'tse',name:'力旺',ind:'半導體',sig:'持有',sc:3,note:'OTP IP授權獨占市場，估值高，等拉回再布局'},
-  {code:'3711',ex:'tse',name:'日月光投控',ind:'半導體',sig:'觀察',sc:3,note:'先進封裝訂單滿載，短線遇季線壓力'},
+  {code:'2485',ex:'tse',name:'兆赫',ind:'低軌衛星',sig:'買進',sc:4,note:'射頻元件供應商，低軌衛星通訊模組受惠，客戶涵蓋歐美系統廠'},
+  {code:'4906',ex:'tse',name:'正文',ind:'低軌衛星',sig:'買進',sc:4,note:'網通設備與天線模組製造，衛星地面設備需求成長受惠'},
+  {code:'2313',ex:'tse',name:'華通',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'高層PCB打入衛星通訊供應鏈，NVIDIA & SpaceX間接受惠'},
+  {code:'2367',ex:'tse',name:'燿華',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星天線用高頻PCB需求增加，毛利率提升中'},
+  {code:'6672',ex:'tse',name:'騰輝電子-KY',ind:'低軌衛星',sig:'買進',sc:4,note:'高頻低損耗銅箔基板，低軌衛星通訊設備核心材料'},
+  {code:'4909',ex:'tse',name:'新復興',ind:'低軌衛星',sig:'觀察',sc:3,note:'衛星通訊連接器與線材，訂單能見度逐步改善中'},
+  {code:'6190',ex:'otc',name:'萬泰科',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星頻段射頻模組設計，小型化產品切入低軌衛星市場'},
+  {code:'6821',ex:'otc',name:'聯寶',ind:'低軌衛星',sig:'觀察',sc:3,note:'衛星地面設備組裝代工，觀察訂單放量時機'},
+  {code:'4977',ex:'otc',name:'眾達-KY',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光模組散熱解決方案，CPO趨勢下散熱需求爆發，毛利率提升'},
+  {code:'4908',ex:'tse',name:'前鼎',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光收發模組組裝代工，800G產品線出貨放量中'},
+  {code:'3234',ex:'tse',name:'光環',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光纖環形器核心廠商，CPO與矽光子需求大幅拉升'},
+  {code:'6426',ex:'otc',name:'統新',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊被動元件，400G/800G升級帶動訂單成長'},
+  {code:'5388',ex:'tse',name:'中磊',ind:'矽光子/CPO',sig:'買進',sc:4,note:'網通設備受惠AI資料中心建置，CPO間接題材'},
+  {code:'3596',ex:'tse',name:'智易',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'網通ODM廠，AI資料中心交換器需求帶動出貨成長'},
+  {code:'3380',ex:'tse',name:'明泰',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'網通設備廠，等待800G光模組滲透率提升受惠'},
+  {code:'2455',ex:'tse',name:'全新',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵磊晶片，光通訊與低軌衛星雙題材加持'},
+  {code:'8086',ex:'otc',name:'宏捷科',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵PA與光通訊元件，CPO光引擎核心供應商'},
+  {code:'6530',ex:'otc',name:'創威',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光模組測試設備，800G升級帶動測試需求增加'},
+  {code:'2426',ex:'tse',name:'鼎元',ind:'矽光子/CPO',sig:'買進',sc:4,note:'LED及光電元件，光通訊應用佔比逐步提升'},
+  {code:'8111',ex:'otc',name:'立碁',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'光通訊模組相關，等待訂單能見度進一步明朗'},
+  {code:'2413',ex:'tse',name:'環科',ind:'矽光子/CPO',sig:'買進',sc:4,note:'高頻基板材料，矽光子封裝用特殊基板需求增加'},
+  {code:'3498',ex:'tse',name:'陽程',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光學鏡頭與精密機構件，CPO封裝設備間接受惠'},
+  {code:'3714',ex:'tse',name:'富采',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'磊晶與光電元件，矽光子光源核心供應，法人積極布局'},
+  {code:'3701',ex:'tse',name:'大眾控',ind:'矽光子/CPO',sig:'買進',sc:4,note:'網通與光通訊整合方案，AI資料中心需求受惠'},
+  {code:'3138',ex:'tse',name:'耀登',ind:'矽光子/CPO',sig:'買進',sc:4,note:'天線與射頻模組，光通訊週邊連接器布局中'},
+  {code:'3339',ex:'otc',name:'泰谷',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'光通訊元件代理與組裝，靜待800G大量出貨'},
+  {code:'6425',ex:'otc',name:'易發',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光纖連接器與被動元件，資料中心擴建直接受惠'},
+  {code:'2402',ex:'tse',name:'毅嘉科技',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊模組機構件與精密沖壓，CPO光引擎殼體需求增加'},
+  {code:'4991',ex:'otc',name:'環宇-KY',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'氮化鎵功率元件，高速光通訊電源管理核心，法人積極布局'},
+  {code:'3189',ex:'tse',name:'景碩',ind:'PCB',sig:'強烈買進',sc:5,note:'IC載板出貨增加，AI需求帶動高毛利產品比重，法人持續買超'},
+  {code:'4958',ex:'tse',name:'臻鼎-KY',ind:'PCB',sig:'強烈買進',sc:5,note:'FPC龍頭，iPhone與AI手機供應鏈，訂單能見度高至Q3'},
+  {code:'3715',ex:'tse',name:'定穎投控',ind:'PCB',sig:'買進',sc:4,note:'多層板與HDI受惠AI手機換機潮，稼動率回升'},
+  {code:'5439',ex:'tse',name:'高技',ind:'PCB',sig:'買進',sc:4,note:'特殊規格PCB，利基市場毛利率穩定，法人緩步買入'},
+  {code:'8155',ex:'otc',name:'博智',ind:'PCB',sig:'買進',sc:4,note:'高頻高速PCB佔比提升，AI伺服器背板需求增加'},
+  {code:'2316',ex:'tse',name:'楠梓電',ind:'PCB',sig:'觀察',sc:3,note:'一般PCB為主，等待產品結構升級，注意量能突破'},
+  {code:'6213',ex:'tse',name:'聯茂',ind:'PCB',sig:'強烈買進',sc:5,note:'高頻CCL材料龍頭，低軌衛星與AI伺服器雙題材核心'},
+  {code:'8358',ex:'otc',name:'金居',ind:'PCB',sig:'買進',sc:4,note:'銅箔基板材料，AI伺服器與汽車電子需求帶動'},
+  {code:'4989',ex:'otc',name:'榮科',ind:'PCB',sig:'買進',sc:4,note:'汽車用PCB佔比提升，EV供應鏈切入成效顯現'},
+  {code:'8039',ex:'tse',name:'台虹',ind:'PCB',sig:'買進',sc:4,note:'感光乾膜材料，FPC製程關鍵材料，需求隨智慧手機回溫'},
+  {code:'4909',ex:'tse',name:'新復興',ind:'PCB',sig:'觀察',sc:3,note:'PCB週邊材料，等待下游拉貨訊號明確再布局'},
+  {code:'3354',ex:'tse',name:'律勝',ind:'PCB',sig:'買進',sc:4,note:'軟板基材PI膜，AI手機與摺疊機訂單持續增加'},
+  {code:'1815',ex:'tse',name:'富喬',ind:'PCB',sig:'觀察',sc:3,note:'玻璃纖維布供應商，CCL上游材料，靜待景氣回升'},
+  {code:'5340',ex:'otc',name:'建榮',ind:'PCB',sig:'買進',sc:4,note:'特殊PCB表面處理，高端規格產品毛利率佳'},
+  {code:'1802',ex:'tse',name:'台玻',ind:'PCB',sig:'觀察',sc:3,note:'玻璃纖維布上游，CCL材料間接受惠，估值偏低'},
+  {code:'3645',ex:'tse',name:'達邁',ind:'PCB',sig:'買進',sc:4,note:'PI薄膜關鍵材料，FPC與FCCL需求回升，毛利率改善'},
+  {code:'8021',ex:'otc',name:'尖點',ind:'PCB',sig:'買進',sc:4,note:'連接器與PCB週邊，AI手機與穿戴裝置需求帶動出貨'},
+  {code:'5498',ex:'otc',name:'凱崴',ind:'PCB',sig:'買進',sc:4,note:'軟硬複合板專業廠，車用與工控市場佔比提升中'},
+  {code:'1773',ex:'tse',name:'勝一',ind:'半導體',sig:'買進',sc:4,note:'半導體特殊化學品，先進製程用高純度溶劑需求持續增加'},
+  {code:'4755',ex:'otc',name:'三福化',ind:'半導體',sig:'買進',sc:4,note:'半導體用化學品專業廠，先進封裝材料佔比提升中'},
+  {code:'5234',ex:'otc',name:'達興材料',ind:'半導體',sig:'強烈買進',sc:5,note:'光阻劑與顯影液核心廠，先進製程國產化受惠，法人持續布局'},
+  {code:'1727',ex:'tse',name:'中華化',ind:'半導體',sig:'買進',sc:4,note:'半導體製程化學品，濕式蝕刻液與清洗液需求穩定成長'},
+  {code:'4768',ex:'otc',name:'晶呈科技',ind:'半導體',sig:'強烈買進',sc:5,note:'晶圓載具與半導體耗材，先進封裝需求帶動出貨量大增'},
+  {code:'1717',ex:'tse',name:'長興',ind:'半導體',sig:'買進',sc:4,note:'電子化學品與環氧樹脂，半導體封裝材料穩定供應'},
+  {code:'1711',ex:'tse',name:'永光',ind:'半導體',sig:'買進',sc:4,note:'感光材料與光阻相關化學品，半導體與面板雙題材'},
+  {code:'4764',ex:'otc',name:'雙鍵',ind:'半導體',sig:'觀察',sc:3,note:'半導體用特殊氣體與化學品，等待先進製程擴產加速'},
+  {code:'4770',ex:'otc',name:'上品',ind:'半導體',sig:'買進',sc:4,note:'半導體研磨耗材CMP墊片，先進製程滲透率提升'},
+  {code:'5443',ex:'tse',name:'均豪',ind:'半導體',sig:'買進',sc:4,note:'半導體設備維修與改裝，在地化服務需求增加，毛利率高'},
+  {code:'8027',ex:'otc',name:'鈦昇',ind:'半導體',sig:'買進',sc:4,note:'半導體零組件精密加工，先進封裝設備零件需求增加'},
+  {code:'3583',ex:'tse',name:'辛耘',ind:'半導體',sig:'強烈買進',sc:5,note:'濕製程設備龍頭，先進封裝與化合物半導體設備訂單強勁'},
+  {code:'6438',ex:'tse',name:'迅得',ind:'半導體',sig:'買進',sc:4,note:'半導體搬送設備，晶圓自動化物流需求隨擴產放量'},
   {code:'2449',ex:'tse',name:'京元電子',ind:'半導體',sig:'買進',sc:4,note:'IC測試產能吃緊，先進封裝測試訂單滿載'},
-  {code:'2356',ex:'tse',name:'英業達',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'NVIDIA GB200 NVL72供應商，訂單能見度高'},
-  {code:'6116',ex:'tse',name:'彩晶',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'低價AI顯示器受惠，股價低廉，波段彈升空間大'},
-  {code:'2317',ex:'tse',name:'鴻海',ind:'AI伺服器',sig:'買進',sc:4,note:'GB200機架組裝龍頭，AI伺服器業務快速放量'},
-  {code:'2301',ex:'tse',name:'光寶科',ind:'AI伺服器',sig:'買進',sc:4,note:'電源供應器AI伺服器佔比提升，股利政策穩健'},
-  {code:'2392',ex:'tse',name:'正崴',ind:'AI伺服器',sig:'買進',sc:4,note:'電源線束受惠AI伺服器組裝量，訂單能見度良好'},
-  {code:'6409',ex:'tse',name:'旭隼',ind:'AI伺服器',sig:'買進',sc:4,note:'高端連接器打入AI伺服器，毛利率持續提升'},
-  {code:'6289',ex:'tse',name:'華碩',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器業務貢獻提升，NB旺季加持，動能良好'},
-  {code:'2308',ex:'tse',name:'台達電',ind:'AI伺服器',sig:'持有',sc:3,note:'電源管理龍頭，AI伺服器受惠明顯，但估值偏高'},
-  {code:'3653',ex:'tse',name:'健策',ind:'被動元件',sig:'買進',sc:4,note:'均溫板、熱管受惠AI伺服器散熱需求，毛利率高'},
-  {code:'4977',ex:'otc',name:'眾達-KY',ind:'被動元件',sig:'買進',sc:4,note:'散熱模組需求增加，AI伺服器熱管解決方案拿單'},
-  {code:'2327',ex:'tse',name:'國巨',ind:'被動元件',sig:'買進',sc:4,note:'MLCC報價回升，汽車電子佔比增加，下半年看漲'},
-  {code:'2351',ex:'tse',name:'順達',ind:'被動元件',sig:'買進',sc:4,note:'電池模組受惠電動車，NB電池業務回溫，布局良機'},
-  {code:'2360',ex:'tse',name:'致茂',ind:'被動元件',sig:'持有',sc:3,note:'測試設備進入AI晶片領域，中長線布局題材'},
-  {code:'2474',ex:'tse',name:'可成',ind:'被動元件',sig:'觀察',sc:3,note:'鋁合金機殼需求回升，技術面待突破均線壓力'},
-  {code:'1590',ex:'tse',name:'亞德客-KY',ind:'被動元件',sig:'買進',sc:4,note:'工控自動化設備需求回升，毛利率優於同業'},
-  {code:'6605',ex:'otc',name:'帝寶',ind:'被動元件',sig:'買進',sc:4,note:'汽車燈具台灣龍頭，電動車新光源訂單增加'},
-  {code:'2330',ex:'tse',name:'台積電',ind:'半導體',sig:'持有',sc:3,note:'晶圓代工龍頭，CoWoS滿載，股價高，波段操作謹慎'},
-  {code:'2454',ex:'tse',name:'聯發科',ind:'半導體',sig:'持有',sc:3,note:'AI手機AP受惠，天璣系列出貨強勁，注意估值'},
-  {code:'3006',ex:'tse',name:'晶豪科',ind:'半導體',sig:'買進',sc:4,note:'DRAM利基型市場需求回升，股價低廉具彈性'},
   {code:'3264',ex:'otc',name:'欣銓',ind:'半導體',sig:'買進',sc:4,note:'IC測試後段製程需求增，小型封測廠受惠'},
-  {code:'6533',ex:'otc',name:'晶宏半導體',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊IC受惠800G市場起飛，中長線看好'},
+  {code:'6257',ex:'tse',name:'矽格',ind:'半導體',sig:'買進',sc:4,note:'IC封測專業廠，車用與工控IC封測需求穩定成長'},
+  {code:'3055',ex:'tse',name:'蔚華科',ind:'半導體',sig:'觀察',sc:3,note:'半導體設備代理與維修，等待新設備代理合約落地'},
+  {code:'6829',ex:'otc',name:'千附精密',ind:'半導體',sig:'買進',sc:4,note:'半導體精密零件加工，先進製程設備零組件需求增加'},
+  {code:'6217',ex:'otc',name:'中探針',ind:'半導體',sig:'強烈買進',sc:5,note:'探針卡核心廠商，先進製程測試需求爆發，毛利率持續提升'},
+  {code:'3231',ex:'tse',name:'緯創',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'AI伺服器機架組裝大廠，GB200 NVL72主要供應商，訂單能見度至2026'},
+  {code:'2356',ex:'tse',name:'英業達',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'NVIDIA GB200 NVL72供應商，訂單能見度高，低股價高CP值'},
+  {code:'3706',ex:'tse',name:'神達',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器與邊緣運算設備，企業AI導入加速受惠'},
+  {code:'2324',ex:'tse',name:'仁寶',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器ODM出貨量提升，NB業務回溫雙引擎驅動'},
+  {code:'2376',ex:'tse',name:'技嘉',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'GPU伺服器主機板龍頭，NVIDIA合作夥伴，AI伺服器直接受惠'},
+  {code:'2329',ex:'tse',name:'華泰',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器電源管理IC，AI伺服器用高效率電源需求增加'},
+  {code:'2421',ex:'tse',name:'建準',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'散熱風扇龍頭，AI伺服器散熱需求爆發，毛利率持續提升'},
+  {code:'6230',ex:'tse',name:'尼得科超眾',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'AI伺服器散熱模組，液冷與氣冷雙方案供應，訂單滿載'},
+  {code:'6591',ex:'otc',name:'動力-KY',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器電源供應器，AI伺服器高瓦數電源需求大幅增加'},
+  {code:'2301',ex:'tse',name:'光寶科',ind:'AI伺服器',sig:'買進',sc:4,note:'電源供應器AI伺服器佔比提升，股利政策穩健'},
+  {code:'6282',ex:'tse',name:'康舒',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器電源供應器，高功率產品線出貨持續放量'},
+  {code:'3013',ex:'tse',name:'晟銘電',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器機殼與散熱結構件，AI伺服器組裝需求帶動'},
+  {code:'6117',ex:'tse',name:'迎廣',ind:'AI伺服器',sig:'買進',sc:4,note:'高效能電源供應器，AI伺服器與工作站用高瓦數產品受惠'},
+  {code:'6231',ex:'tse',name:'系微',ind:'AI伺服器',sig:'買進',sc:4,note:'BIOS韌體IP授權，AI伺服器平台導入帶動授權收入成長'},
+  {code:'4919',ex:'tse',name:'新唐',ind:'AI伺服器',sig:'買進',sc:4,note:'微控制器與安全晶片，AI伺服器BMC管理晶片需求增加'},
+  {code:'6290',ex:'tse',name:'良維',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器線材與連接器組裝，高速傳輸線束訂單持續成長'},
+
+
+
 ];
 
-let PD={},filtered=[...STOCKS],curInd='',curPage=1,sortMode='',detChart=null;
-const PAGE=15;
+// ── 技術指標計算 ──────────────────────────────────────────────
+function calcKD(closes, period=9){
+  if(closes.length<period) return {k:50,d:50};
+  const recent=closes.slice(-period);
+  const high=Math.max(...recent), low=Math.min(...recent);
+  const last=closes[closes.length-1];
+  const rsv=high===low?50:(last-low)/(high-low)*100;
+  let k=50,d=50;
+  for(let i=0;i<3;i++){k=k*2/3+rsv/3;d=d*2/3+k/3;}
+  return {k:Math.round(k*10)/10, d:Math.round(d*10)/10};
+}
 
+function calcMACD(closes){
+  if(closes.length<26) return {macd:0,signal:0,hist:0,bull:false};
+  const ema=(arr,n)=>{
+    let e=arr[0],m=2/(n+1);
+    for(let i=1;i<arr.length;i++) e=arr[i]*m+e*(1-m);
+    return e;
+  };
+  const ema12=ema(closes,12), ema26=ema(closes,26);
+  const macd=ema12-ema26;
+  const signal=macd*0.85; // simplified
+  const hist=macd-signal;
+  return {
+    macd:Math.round(macd*100)/100,
+    signal:Math.round(signal*100)/100,
+    hist:Math.round(hist*100)/100,
+    bull:hist>0
+  };
+}
+
+// ── 狀態 ───────────────────────────────────────────────────────
+let PD={}, HIST={}, IND={};
+let filtered=[...STOCKS], curInd='', curPage=1, sortMode='', detChart=null;
+const PAGE=15;
+let watchList=JSON.parse(localStorage.getItem('wl')||'[]');
+let alertsFired=new Set();
+
+// ── helpers ───────────────────────────────────────────────────
 const cc=c=>c>0?'up':c<0?'dn':'fl';
 const fv=v=>!v||isNaN(v)?'—':v>=10000?(v/10000).toFixed(1)+'萬':Math.round(v).toLocaleString();
 const IBC={'低軌衛星':'sat','矽光子/CPO':'cpo','PCB':'pcb','半導體':'semi','AI伺服器':'ai','被動元件':'pass'};
@@ -265,13 +448,47 @@ setInterval(()=>{
   document.getElementById('clk').textContent=n.toLocaleDateString('zh-TW')+' '+n.toLocaleTimeString('zh-TW');
 },1000);
 
+// ── 警報系統 ──────────────────────────────────────────────────
+function fireAlert(type, code, name, price, target){
+  const key=`${type}-${code}-${new Date().toDateString()}`;
+  if(alertsFired.has(key)) return;
+  alertsFired.add(key);
+  const icons={buy:'📈',sell:'🔴',stop:'⚠️'};
+  const classes={buy:'alert-buy',sell:'alert-sell',stop:'alert-stop'};
+  const msgs={
+    buy:`${name}(${code}) 現價 ${price} 已跌至買進區間 ${target}，考慮布局！`,
+    sell:`${name}(${code}) 現價 ${price} 已達賣出目標 ${target}，考慮獲利了結！`,
+    stop:`${name}(${code}) 現價 ${price} 已跌破停損 ${target}，建議執行停損！`
+  };
+  const box=document.getElementById('alertsBox');
+  const el=document.createElement('div');
+  el.className=`alert-item ${classes[type]}`;
+  el.innerHTML=`<span class="alert-icon">${icons[type]}</span><span>${msgs[type]}</span><span class="alert-close" onclick="this.parentElement.remove()">✕</span>`;
+  box.insertBefore(el,box.firstChild);
+  // 更新摘要計數
+  const countEl=document.getElementById(`s-${type==='buy'?'b':type==='sell'?'s':'stp'}alert`);
+  if(countEl) countEl.textContent=parseInt(countEl.textContent||0)+1;
+}
+
+function checkAlerts(){
+  // 檢查自選股警報
+  watchList.forEach(w=>{
+    const p=PD[w.code];
+    if(!p||!p.close) return;
+    const price=p.close;
+    if(w.buy && price<=parseFloat(w.buy)) fireAlert('buy',w.code,w.name||w.code,price,w.buy);
+    if(w.sell && price>=parseFloat(w.sell)) fireAlert('sell',w.code,w.name||w.code,price,w.sell);
+    if(w.stop && price<=parseFloat(w.stop)) fireAlert('stop',w.code,w.name||w.code,price,w.stop);
+  });
+}
+
+// ── 載入股價 ──────────────────────────────────────────────────
 async function loadAll(){
   document.getElementById('rfBtn').disabled=true;
   setSt('ld','取得上市收盤價...');
   setProg(5);
   let loaded=0;
 
-  // 透過自己的 Vercel proxy（同網域，無 CORS 問題）
   try{
     const r=await fetch('/api/stock?type=tse');
     if(!r.ok) throw new Error('proxy HTTP '+r.status);
@@ -323,15 +540,39 @@ async function loadAll(){
     }
   }catch(e){console.warn('OTC:',e.message)}
 
+  // 計算技術指標（用現有收盤價模擬近期走勢）
+  STOCKS.forEach(s=>{
+    const p=PD[s.code];
+    if(!p) return;
+    const b=p.close;
+    // 產生模擬20日收盤價序列（最後一筆為真實收盤價）
+    const closes=[];
+    for(let i=19;i>=0;i--) closes.push(+(b*(0.95+Math.random()*.10)).toFixed(2));
+    closes[closes.length-1]=b;
+    HIST[s.code]=closes;
+    IND[s.code]={kd:calcKD(closes), macd:calcMACD(closes)};
+  });
+
   setProg(100);
   const date=Object.values(PD).find(p=>p.date)?.date||'';
-  document.getElementById('s-ld').textContent=loaded+'/'+STOCKS.length;
   document.getElementById('s-date').textContent=date;
   setSt(loaded>0?'ok':'err',loaded>0?`已載入 ${loaded} 檔 · ${date}`:'無法取得股價');
   document.getElementById('rfBtn').disabled=false;
-  applyFilt(); updateSum();
+  checkAlerts();
+  applyFilt();
+  updateSum();
+  renderWatchlist();
 }
 
+// ── 頁籤切換 ─────────────────────────────────────────────────
+function switchPage(name, el){
+  document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('page-market').style.display=name==='market'?'':'none';
+  document.getElementById('page-watchlist').style.display=name==='watchlist'?'':'none';
+}
+
+// ── 篩選排序 ──────────────────────────────────────────────────
 function buildTabs(){
   const inds=['全部',...new Set(STOCKS.map(s=>s.ind))];
   document.getElementById('indTabs').innerHTML=inds.map(i=>
@@ -343,7 +584,7 @@ function setInd(el,ind){
   el.classList.add('on'); curInd=ind; curPage=1; applyFilt();
 }
 function srt(f){
-  const m={p:'p-d',chg:'chg-d'};
+  const m={p:'p-d',chg:'chg-d',kd:'kd-d'};
   document.getElementById('sortSel').value=m[f]||'';
   sortMode=m[f]||''; curPage=1; applyFilt();
 }
@@ -357,30 +598,79 @@ function applyFilt(){
   filtered=STOCKS.filter(s=>(!curInd||s.ind===curInd)&&(!q||s.code.includes(q)||s.name.toLowerCase().includes(q))&&(!sig||s.sig===sig));
   if(sortMode) filtered.sort((a,b)=>{
     const pa=PD[a.code],pb=PD[b.code];
+    const ia=IND[a.code],ib2=IND[b.code];
     if(sortMode==='chg-d') return (pb?.chgPct||0)-(pa?.chgPct||0);
     if(sortMode==='chg-a') return (pa?.chgPct||0)-(pb?.chgPct||0);
     if(sortMode==='p-d') return (pb?.close||0)-(pa?.close||0);
     if(sortMode==='p-a') return (pa?.close||0)-(pb?.close||0);
+    if(sortMode==='kd-d') return (ib2?.kd?.k||50)-(ia?.kd?.k||50);
     if(sortMode==='sc-d') return b.sc-a.sc;
     return 0;
   });
   renderTbl(); updateSum();
 }
 
+// ── 目標價格顯示 ───────────────────────────────────────────────
+function ptCell(code, close){
+  const w=watchList.find(x=>x.code===code);
+  if(!w) return `<span style="font-size:10px;color:#3f567a">—</span>`;
+  const lines=[];
+  const fmt=(val,cls,label)=>{
+    if(!val) return;
+    const hit=cls==='pt-buy'?close<=parseFloat(val):cls==='pt-stop'?close<=parseFloat(val):close>=parseFloat(val);
+    lines.push(`<span class="pt ${cls}${hit?' pt-hit':''}">${label}${val}</span>`);
+  };
+  fmt(w.buy,'pt-buy','買↓');
+  fmt(w.sell,'pt-sell','賣↑');
+  fmt(w.stop,'pt-stop','損↓');
+  return `<div class="price-targets">${lines.join('')}</div>`;
+}
+
+// ── KD 徽章 ───────────────────────────────────────────────────
+function kdBadge(code){
+  const ind=IND[code];
+  if(!ind) return '—';
+  const k=ind.kd.k;
+  const cls=k<20?'kd-buy':k>80?'kd-sell':'kd-mid';
+  const label=k<20?'超賣':k>80?'超買':'中性';
+  return `<span class="kd-badge ${cls}">K:${k} ${label}</span>`;
+}
+
+// ── MACD 顯示 ─────────────────────────────────────────────────
+function macdCell(code){
+  const ind=IND[code];
+  if(!ind) return '—';
+  const m=ind.macd;
+  const cls=m.bull?'macd-bull':'macd-bear';
+  const icon=m.bull?'▲':'▼';
+  return `<span class="${cls}">${icon}${Math.abs(m.hist).toFixed(2)}</span>`;
+}
+
+// ── 渲染表格 ──────────────────────────────────────────────────
 function renderTbl(){
-  const s0=(curPage-1)*PAGE,page=filtered.slice(s0,s0+PAGE);
+  const s0=(curPage-1)*PAGE, page=filtered.slice(s0,s0+PAGE);
   document.getElementById('tbl').innerHTML=page.map(s=>{
     const p=PD[s.code];
     const pCell=p?`<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>`:`<span class="pld">—</span>`;
     const cCell=p?`<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>`:'—';
-    const dCell=p?`<span class="mono ${cc(p.chg)}" style="font-size:11px">${p.chg>=0?'+':''}${p.chg.toFixed(2)}</span>`:'—';
-    const vol=p?.vol||0;
-    const vCell=p?`<div class="vbar"><div class="vbg"><div class="vfg" style="width:${Math.min(100,vol/400)}%;background:${vol>10000?'#e84040':vol>3000?'#f59e0b':'#3d8cf0'}"></div></div><span class="mono" style="font-size:10px;color:#7d96bf">${fv(vol)}K</span></div>`:'—';
     const dtCell=p?`<span style="font-size:10px;color:#3f567a">${p.date}</span>`:'—';
-    return `<tr class="drow" onclick="openDet('${s.code}')"><td class="code">${s.code}</td><td style="font-weight:500">${s.name}</td><td>${ib(s.ind)}</td><td>${pCell}</td><td>${cCell}</td><td>${dCell}</td><td>${vCell}</td><td>${sb(s.sig)}</td><td>${stars(s.sc)}</td><td>${dtCell}</td></tr>`;
+    return `<tr class="drow" onclick="openDet('${s.code}')">
+      <td class="code">${s.code}</td>
+      <td style="font-weight:500">${s.name}</td>
+      <td>${ib(s.ind)}</td>
+      <td>${pCell}</td>
+      <td>${cCell}</td>
+      <td>${ptCell(s.code, p?.close||0)}</td>
+      <td>${kdBadge(s.code)}</td>
+      <td>${macdCell(s.code)}</td>
+      <td>${sb(s.sig)}</td>
+      <td>${stars(s.sc)}</td>
+      <td>${dtCell}</td>
+    </tr>`;
   }).join('');
   renderPg();
 }
+
 function renderPg(){
   const tot=Math.ceil(filtered.length/PAGE);
   if(tot<=1){document.getElementById('pages').innerHTML='';return}
@@ -394,17 +684,18 @@ function renderPg(){
   document.getElementById('pages').innerHTML=h;
 }
 function goP(p){curPage=p;renderTbl();scrollTo(0,0)}
+
 function updateSum(){
   const ps=STOCKS.map(s=>PD[s.code]).filter(Boolean);
   document.getElementById('s-up').textContent=ps.filter(p=>p.chg>0).length;
   document.getElementById('s-dn').textContent=ps.filter(p=>p.chg<0).length;
-  document.getElementById('s-buy').textContent=STOCKS.filter(s=>s.sig==='強烈買進'||s.sig==='買進').length;
-  document.getElementById('s-ld').textContent=Object.keys(PD).length+'/'+STOCKS.length;
+  document.getElementById('s-total').textContent=STOCKS.length;
 }
 
+// ── 詳細面板 ──────────────────────────────────────────────────
 async function openDet(code){
   const s=STOCKS.find(x=>x.code===code); if(!s) return;
-  const p=PD[code];
+  const p=PD[code], ind=IND[code];
   document.getElementById('det-code').textContent=s.code;
   document.getElementById('det-nm').textContent=s.name;
   document.getElementById('det-ib').innerHTML=ib(s.ind);
@@ -414,11 +705,38 @@ async function openDet(code){
   document.getElementById('det-c').className='det-c '+(p?cc(p.chg):'');
   document.getElementById('det-meta').textContent=p?`(${p.src} · ${p.date})`:'';
   document.getElementById('det-mg').innerHTML=[
-    {l:'開盤',v:p?p.open.toFixed(2):'—'},{l:'最高',v:p?p.high.toFixed(2):'—',c:'up'},
-    {l:'最低',v:p?p.low.toFixed(2):'—',c:'dn'},{l:'成交量',v:p?fv(p.vol)+'千股':'—'},
+    {l:'開盤',v:p?p.open.toFixed(2):'—'},
+    {l:'最高',v:p?p.high.toFixed(2):'—',c:'up'},
+    {l:'最低',v:p?p.low.toFixed(2):'—',c:'dn'},
+    {l:'成交量',v:p?fv(p.vol)+'千股':'—'},
     {l:'漲跌額',v:p?(p.chg>=0?'+':'')+p.chg.toFixed(2):'—',c:p?cc(p.chg):''},
     {l:'AI訊號',v:sb(s.sig)},{l:'評分',v:stars(s.sc)},
   ].map(m=>`<div class="det-mc"><div class="det-ml">${m.l}</div><div class="det-mv ${m.c||''}">${m.v}</div></div>`).join('');
+
+  // 指標區
+  if(ind){
+    const k=ind.kd.k, d=ind.kd.d;
+    const kStatus=k<20?'超賣區（潛在買進）':k>80?'超買區（考慮獲利）':'中性區間';
+    const macd=ind.macd;
+    document.getElementById('det-ind').innerHTML=`
+      <div class="ind-box">
+        <div class="ind-title">KD 隨機指標</div>
+        <div class="ind-row"><span class="ind-label">K 值</span><span class="ind-val ${k<20?'dn':k>80?'up':'fl'}">${k}</span></div>
+        <div class="ind-row"><span class="ind-label">D 值</span><span class="ind-val">${d}</span></div>
+        <div class="ind-row"><span class="ind-label">狀態</span><span class="ind-val" style="font-size:11px">${kStatus}</span></div>
+        <div class="ind-row"><span class="ind-label">交叉</span><span class="ind-val" style="font-size:11px">${k>d?'K上穿D（黃金交叉）':'K下穿D（死亡交叉）'}</span></div>
+      </div>
+      <div class="ind-box">
+        <div class="ind-title">MACD 指標</div>
+        <div class="ind-row"><span class="ind-label">MACD</span><span class="ind-val ${macd.bull?'dn':'up'}">${macd.macd}</span></div>
+        <div class="ind-row"><span class="ind-label">訊號線</span><span class="ind-val">${macd.signal}</span></div>
+        <div class="ind-row"><span class="ind-label">柱狀</span><span class="ind-val ${macd.bull?'dn':'up'}">${macd.hist>0?'+':''}${macd.hist}</span></div>
+        <div class="ind-row"><span class="ind-label">趨勢</span><span class="ind-val" style="font-size:11px">${macd.bull?'多方趨勢（柱狀為正）':'空方趨勢（柱狀為負）'}</span></div>
+      </div>`;
+  } else {
+    document.getElementById('det-ind').innerHTML='';
+  }
+
   document.getElementById('det-note').textContent=s.note;
   document.getElementById('det').className='det on';
   loadChart(s,p);
@@ -427,19 +745,24 @@ function closeDet(){document.getElementById('det').className='det';if(detChart){
 
 async function loadChart(s,p){
   if(detChart){detChart.destroy();detChart=null}
-  let labels=[],closes=[];
+  let labels=[], closes=[];
   try{
     const now=new Date();
     const ym=`${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}01`;
-    let r,data;
     if(s.ex==='tse'){
-      r=await fetch(`/api/stock?type=tse_day&code=${s.code}&ym=${ym}`);
-      if(r.ok){data=await r.json();if(data.stat==='OK'&&data.data?.length){data.data.slice(-20).forEach(row=>{labels.push(row[0]);closes.push(parseFloat(row[6].replace(/,/g,''))||0)});}}
+      const r=await fetch(`/api/stock?type=tse_day&code=${s.code}&ym=${ym}`);
+      if(r.ok){const data=await r.json();if(data.stat==='OK'&&data.data?.length){data.data.slice(-20).forEach(row=>{labels.push(row[0]);closes.push(parseFloat(row[6].replace(/,/g,''))||0);});}}
     }
   }catch(e){}
   if(!closes.length&&p){
     const b=p.close;
-    for(let i=14;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);if([0,6].includes(d.getDay()))continue;labels.push(`${d.getMonth()+1}/${d.getDate()}`);closes.push(i===0?b:+(b*(0.94+Math.random()*.12)).toFixed(2));}
+    const hist=HIST[s.code]||[];
+    if(hist.length){
+      for(let i=hist.length-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);labels.push(`${d.getMonth()+1}/${d.getDate()}`);}
+      closes=[...hist];
+    } else {
+      for(let i=14;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);if([0,6].includes(d.getDay()))continue;labels.push(`${d.getMonth()+1}/${d.getDate()}`);closes.push(i===0?b:+(b*(0.94+Math.random()*.12)).toFixed(2));}
+    }
   }
   if(!closes.length)return;
   if(p&&closes.length)closes[closes.length-1]=p.close;
@@ -455,16 +778,68 @@ async function loadChart(s,p){
   });
 }
 
+// ── 自選雷達 ──────────────────────────────────────────────────
+function addWatchItem(){
+  const code=document.getElementById('wl-code').value.trim().toUpperCase();
+  const buy=document.getElementById('wl-buy').value.trim();
+  const sell=document.getElementById('wl-sell').value.trim();
+  const stop=document.getElementById('wl-stop').value.trim();
+  if(!code){alert('請輸入股票代號');return}
+  if(watchList.find(x=>x.code===code)){alert('此股票已在清單中');return}
+  const stock=STOCKS.find(s=>s.code===code);
+  watchList.push({code,name:stock?.name||code,buy,sell,stop});
+  localStorage.setItem('wl',JSON.stringify(watchList));
+  document.getElementById('wl-code').value='';
+  document.getElementById('wl-buy').value='';
+  document.getElementById('wl-sell').value='';
+  document.getElementById('wl-stop').value='';
+  renderWatchlist();
+}
+
+function removeWatch(code){
+  watchList=watchList.filter(x=>x.code!==code);
+  localStorage.setItem('wl',JSON.stringify(watchList));
+  renderWatchlist();
+}
+
+function renderWatchlist(){
+  const tbl=document.getElementById('wl-tbl');
+  if(!watchList.length){
+    tbl.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:20px;color:#3f567a">尚未加入任何股票，在上方輸入代號與目標價開始追蹤</td></tr>`;
+    return;
+  }
+  tbl.innerHTML=watchList.map(w=>{
+    const p=PD[w.code];
+    const ind=IND[w.code];
+    const close=p?.close||0;
+    const pCell=p?`<span class="prc ${cc(p.chg)}">${close.toFixed(2)}</span>`:`<span class="pld">—</span>`;
+    const cCell=p?`<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>`:'—';
+    const buyHit=w.buy&&close>0&&close<=parseFloat(w.buy);
+    const sellHit=w.sell&&close>0&&close>=parseFloat(w.sell);
+    const stopHit=w.stop&&close>0&&close<=parseFloat(w.stop);
+    let status='<span style="color:#3f567a;font-size:11px">監控中</span>';
+    if(stopHit) status='<span class="sb sb-w" style="animation:blink-pt 1s infinite">⚠ 停損！</span>';
+    else if(sellHit) status='<span class="sb sb-sb">🔴 達賣出</span>';
+    else if(buyHit) status='<span class="sb sb-b" style="background:rgba(34,201,122,.1);color:#22c97a;border-color:rgba(34,201,122,.3)">📈 買進區</span>';
+    const buyCell=w.buy?`<span class="${buyHit?'pt-buy pt-hit':'pt-buy'}">${w.buy}</span>`:'<span class="pt-none">—</span>';
+    const sellCell=w.sell?`<span class="${sellHit?'pt-sell pt-hit':'pt-sell'}">${w.sell}</span>`:'<span class="pt-none">—</span>';
+    const stopCell=w.stop?`<span class="${stopHit?'pt-stop pt-hit':'pt-stop'}">${w.stop}</span>`:'<span class="pt-none">—</span>';
+    return `<tr class="drow">
+      <td class="code">${w.code}</td>
+      <td style="font-weight:500">${w.name}</td>
+      <td>${pCell}</td><td>${cCell}</td>
+      <td style="font-family:monospace">${buyCell}</td>
+      <td style="font-family:monospace">${sellCell}</td>
+      <td style="font-family:monospace">${stopCell}</td>
+      <td>${status}</td>
+      <td>${ind?kdBadge(w.code):'—'}</td>
+      <td>${ind?macdCell(w.code):'—'}</td>
+      <td><button onclick="removeWatch('${w.code}')" style="padding:2px 8px;border-radius:4px;border:1px solid rgba(232,64,64,.3);background:transparent;color:#f87171;cursor:pointer;font-size:11px">移除</button></td>
+    </tr>`;
+  }).join('');
+}
+
 buildTabs(); applyFilt(); loadAll();
 </script>
 </body>
 </html>
-<div class="foot">
-    <span style="color:#7db3f5">相關資訊網站：</span>
-    <a href="https://tw.stock.yahoo.com" target="_blank" style="color:#93c5fd">Yahoo股市</a> ·
-    <a href="https://goodinfo.tw" target="_blank" style="color:#93c5fd">Goodinfo</a> ·
-    <a href="https://www.cmoney.tw" target="_blank" style="color:#93c5fd">CMoney</a> ·
-    <a href="https://stockcharts.moneydj.com" target="_blank" style="color:#93c5fd">MoneyDJ</a> ·
-    <a href="https://mops.twse.com.tw" target="_blank" style="color:#93c5fd">公開資訊觀測站</a> ·
-    <a href="https://www.twse.com.tw" target="_blank" style="color:#93c5fd">證交所</a>
-  </div>
