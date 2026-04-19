@@ -192,6 +192,9 @@ tr:last-child td{border-bottom:none}
   <div class="page-tabs">
     <div class="page-tab on" onclick="switchPage('market',this)">市場總覽</div>
     <div class="page-tab" onclick="switchPage('watchlist',this)">自選雷達</div>
+    <div class="page-tab" onclick="switchPage('revenue',this)">月營收</div>
+    <div class="page-tab" onclick="switchPage('chip',this)">籌碼追蹤</div>
+    <div class="page-tab" onclick="switchPage('radar',this)">飆股雷達</div>
   </div>
 
   <!-- 市場總覽頁 -->
@@ -280,6 +283,87 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
     <div style="font-size:11px;color:#3f567a;margin-top:6px">※ 自選股資料儲存於本機瀏覽器，清除瀏覽器資料後會消失</div>
+  </div>
+
+  <!-- 月營收頁 -->
+  <div id="page-revenue" style="display:none">
+    <div class="watchlist-toolbar">
+      <button class="wl-btn" onclick="loadRevenue()">↻ 載入最新月營收</button>
+      <select id="rev-sort" style="padding:6px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#dde6f5;font-size:13px;outline:none">
+        <option value="yoy-d">年增率 ▼</option>
+        <option value="yoy-a">年增率 ▲</option>
+        <option value="mom-d">月增率 ▼</option>
+        <option value="rev-d">營收 ▼</option>
+      </select>
+      <span class="wl-note" id="rev-status">點擊載入按鈕取得最新月營收資料</span>
+    </div>
+    <div class="tbl-card">
+      <div class="tbl-sc">
+        <table>
+          <thead><tr>
+            <th>代號</th><th>名稱</th><th>產業</th>
+            <th>當月營收(千)</th><th>月增率%</th><th>年增率%</th>
+            <th>累計營收(千)</th><th>累計年增%</th><th>現價</th><th>漲跌%</th>
+          </tr></thead>
+          <tbody id="rev-tbl"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 籌碼追蹤頁 -->
+  <div id="page-chip" style="display:none">
+    <div class="watchlist-toolbar">
+      <button class="wl-btn" onclick="loadChip()">↻ 載入三大法人</button>
+      <select id="chip-sort" style="padding:6px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#dde6f5;font-size:13px;outline:none">
+        <option value="foreign-d">外資買超 ▼</option>
+        <option value="trust-d">投信買超 ▼</option>
+        <option value="total-d">三大合計 ▼</option>
+        <option value="foreign-a">外資賣超 ▼</option>
+      </select>
+      <span class="wl-note" id="chip-status">點擊載入按鈕取得最新籌碼資料</span>
+    </div>
+    <div class="tbl-card">
+      <div class="tbl-sc">
+        <table>
+          <thead><tr>
+            <th>代號</th><th>名稱</th><th>產業</th>
+            <th>外資買賣(張)</th><th>投信買賣(張)</th><th>自營商(張)</th><th>三大合計(張)</th>
+            <th>現價</th><th>漲跌%</th><th>籌碼評分</th>
+          </tr></thead>
+          <tbody id="chip-tbl"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 飆股雷達頁 -->
+  <div id="page-radar" style="display:none">
+    <div class="watchlist-toolbar">
+      <button class="wl-btn" onclick="runRadar()">⚡ 執行飆股掃描</button>
+      <select id="radar-filter" style="padding:6px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#dde6f5;font-size:13px;outline:none">
+        <option value="all">全部條件</option>
+        <option value="breakout">突破上漲</option>
+        <option value="volume">爆量異動</option>
+        <option value="kd-buy">KD低檔買訊</option>
+        <option value="macd-bull">MACD翻多</option>
+      </select>
+      <span class="wl-note" id="radar-status">需先更新股價後執行掃描</span>
+    </div>
+    <!-- 說明卡片 -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:12px" id="radar-stats"></div>
+    <div class="tbl-card">
+      <div class="tbl-sc">
+        <table>
+          <thead><tr>
+            <th>排名</th><th>代號</th><th>名稱</th><th>產業</th>
+            <th>現價</th><th>漲跌%</th><th>成交量</th>
+            <th>KD狀態</th><th>MACD</th><th>飆股評分</th><th>觸發條件</th>
+          </tr></thead>
+          <tbody id="radar-tbl"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div class="foot">
@@ -568,9 +652,290 @@ async function loadAll(){
 function switchPage(name, el){
   document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
-  document.getElementById('page-market').style.display=name==='market'?'':'none';
-  document.getElementById('page-watchlist').style.display=name==='watchlist'?'':'none';
+  ['market','watchlist','revenue','chip','radar'].forEach(p=>{
+    const el=document.getElementById('page-'+p);
+    if(el) el.style.display=p===name?'':'none';
+  });
 }
+
+// ── 月營收 ────────────────────────────────────────────────────
+let revenueData = {};
+
+async function loadRevenue(){
+  document.getElementById('rev-status').textContent = '載入中...';
+  const now = new Date();
+  // 嘗試抓本月，若太早則抓上月
+  const tryDates = [];
+  for(let i=0;i<3;i++){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 10);
+    tryDates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}10`);
+  }
+
+  let loaded = false;
+  for(const date of tryDates){
+    try{
+      const r = await fetch(`/api/stock?type=revenue_tse&date=${date}`);
+      if(!r.ok) continue;
+      const data = await r.json();
+      if(data.stat === 'OK' && data.data && data.data.length > 0){
+        // 解析上市月營收
+        // fields: 公司代號、公司名稱、當月營收、當月比較增減(%)、去年當月營收、當月前期比較增減(%)、當年累計營收、去年累計營收、前期比較增減(%)
+        data.data.forEach(row => {
+          const code = row[0]?.trim();
+          if(!code) return;
+          revenueData[code] = {
+            rev: parseInt((row[2]||'0').replace(/,/g,'')),
+            mom: parseFloat(row[3]||0),
+            yoy: parseFloat(row[5]||0),
+            cumRev: parseInt((row[6]||'0').replace(/,/g,'')),
+            cumYoy: parseFloat(row[8]||0),
+          };
+        });
+        loaded = true;
+        document.getElementById('rev-status').textContent =
+          `已載入 ${Object.keys(revenueData).length} 筆月營收 · ${date.slice(0,4)}/${date.slice(4,6)}`;
+        break;
+      }
+    }catch(e){ console.warn('revenue error', e); }
+  }
+  if(!loaded){
+    document.getElementById('rev-status').textContent = '月營收資料暫無法取得（可能尚未公布）';
+  }
+  renderRevenue();
+}
+
+function renderRevenue(){
+  const sortMode = document.getElementById('rev-sort').value;
+  // 只顯示我們追蹤的股票
+  let list = STOCKS.map(s => ({
+    ...s,
+    p: PD[s.code],
+    rv: revenueData[s.code]
+  })).filter(s => s.rv || s.p);
+
+  list.sort((a,b) => {
+    if(sortMode==='yoy-d') return (b.rv?.yoy||0)-(a.rv?.yoy||0);
+    if(sortMode==='yoy-a') return (a.rv?.yoy||0)-(b.rv?.yoy||0);
+    if(sortMode==='mom-d') return (b.rv?.mom||0)-(a.rv?.mom||0);
+    if(sortMode==='rev-d') return (b.rv?.rev||0)-(a.rv?.rev||0);
+    return 0;
+  });
+
+  document.getElementById('rev-tbl').innerHTML = list.map(s => {
+    const rv = s.rv;
+    const p = s.p;
+    const revCell = rv ? rv.rev.toLocaleString() : '<span class="pld">—</span>';
+    const momCell = rv ? `<span class="${rv.mom>0?'up':rv.mom<0?'dn':'fl'}">${rv.mom>0?'+':''}${rv.mom.toFixed(1)}%</span>` : '—';
+    const yoyCell = rv ? `<span class="${rv.yoy>0?'up':rv.yoy<0?'dn':'fl'}">${rv.yoy>0?'+':''}${rv.yoy.toFixed(1)}%</span>` : '—';
+    const cumCell = rv ? rv.cumRev.toLocaleString() : '—';
+    const cumYoyCell = rv ? `<span class="${rv.cumYoy>0?'up':rv.cumYoy<0?'dn':'fl'}">${rv.cumYoy>0?'+':''}${rv.cumYoy.toFixed(1)}%</span>` : '—';
+    const priceCell = p ? `<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>` : '—';
+    const chgCell = p ? `<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>` : '—';
+    return `<tr class="drow">
+      <td class="code">${s.code}</td>
+      <td style="font-weight:500">${s.name}</td>
+      <td>${ib(s.ind)}</td>
+      <td class="mono" style="font-size:12px">${revCell}</td>
+      <td>${momCell}</td><td>${yoyCell}</td>
+      <td class="mono" style="font-size:12px">${cumCell}</td>
+      <td>${cumYoyCell}</td>
+      <td>${priceCell}</td><td>${chgCell}</td>
+    </tr>`;
+  }).join('');
+}
+document.getElementById('rev-sort').addEventListener('change', renderRevenue);
+
+// ── 籌碼追蹤 ──────────────────────────────────────────────────
+let chipData = {};
+
+async function loadChip(){
+  document.getElementById('chip-status').textContent = '載入中...';
+  const now = new Date();
+  // 往前找最近交易日
+  const tryDates = [];
+  for(let i=0;i<5;i++){
+    const d = new Date(now); d.setDate(now.getDate()-i);
+    if(d.getDay()===0||d.getDay()===6) continue;
+    tryDates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
+  }
+
+  let loaded = false;
+  for(const date of tryDates){
+    try{
+      const r = await fetch(`/api/stock?type=chip_tse&date=${date}`);
+      if(!r.ok) continue;
+      const data = await r.json();
+      if(data.stat==='OK' && data.data?.length){
+        // fields: 證券代號、證券名稱、外陸資買進、外陸資賣出、外陸資買賣超、投信買進、投信賣出、投信買賣超、自營商買賣超、三大法人買賣超
+        data.data.forEach(row=>{
+          const code = row[0]?.trim();
+          if(!code) return;
+          const parse = v => parseInt((v||'0').replace(/,/g,'').replace(/\+/g,'')) || 0;
+          chipData[code] = {
+            foreign: parse(row[4]),
+            trust:   parse(row[7]),
+            dealer:  parse(row[8]),
+            total:   parse(row[9]),
+          };
+        });
+        loaded = true;
+        document.getElementById('chip-status').textContent =
+          `已載入 ${Object.keys(chipData).length} 筆法人資料 · ${date.slice(0,4)}/${date.slice(4,6)}/${date.slice(6,8)}`;
+        break;
+      }
+    }catch(e){ console.warn('chip error', e); }
+  }
+  if(!loaded){
+    document.getElementById('chip-status').textContent = '法人資料暫無法取得（今日可能尚未更新）';
+  }
+  renderChip();
+}
+
+function renderChip(){
+  const sortMode = document.getElementById('chip-sort').value;
+  let list = STOCKS.map(s=>({...s, p:PD[s.code], ch:chipData[s.code]}));
+
+  list.sort((a,b)=>{
+    if(sortMode==='foreign-d') return (b.ch?.foreign||0)-(a.ch?.foreign||0);
+    if(sortMode==='foreign-a') return (a.ch?.foreign||0)-(b.ch?.foreign||0);
+    if(sortMode==='trust-d')   return (b.ch?.trust||0)-(a.ch?.trust||0);
+    if(sortMode==='total-d')   return (b.ch?.total||0)-(a.ch?.total||0);
+    return 0;
+  });
+
+  const fmt = v => {
+    if(v===undefined||v===null) return '—';
+    const cls = v>0?'up':v<0?'dn':'fl';
+    return `<span class="mono ${cls}" style="font-size:12px">${v>0?'+':''}${v.toLocaleString()}</span>`;
+  };
+
+  // 籌碼評分
+  const chipScore = ch => {
+    if(!ch) return 0;
+    let score = 0;
+    if(ch.foreign > 0) score += 2;
+    if(ch.foreign > 1000) score += 1;
+    if(ch.trust > 0) score += 2;
+    if(ch.dealer > 0) score += 1;
+    if(ch.total > 0) score += 1;
+    return Math.min(score, 5);
+  };
+
+  document.getElementById('chip-tbl').innerHTML = list.map(s=>{
+    const ch = s.ch, p = s.p;
+    const sc = chipScore(ch);
+    const priceCell = p ? `<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>` : '—';
+    const chgCell = p ? `<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>` : '—';
+    return `<tr class="drow">
+      <td class="code">${s.code}</td>
+      <td style="font-weight:500">${s.name}</td>
+      <td>${ib(s.ind)}</td>
+      <td>${fmt(ch?.foreign)}</td>
+      <td>${fmt(ch?.trust)}</td>
+      <td>${fmt(ch?.dealer)}</td>
+      <td>${fmt(ch?.total)}</td>
+      <td>${priceCell}</td><td>${chgCell}</td>
+      <td><span class="stars">${'<span class="son">★</span>'.repeat(sc)}${'<span class="sof">☆</span>'.repeat(5-sc)}</span></td>
+    </tr>`;
+  }).join('');
+}
+document.getElementById('chip-sort').addEventListener('change', renderChip);
+
+// ── 飆股雷達 ──────────────────────────────────────────────────
+function runRadar(){
+  const filter = document.getElementById('radar-filter').value;
+  document.getElementById('radar-status').textContent = '掃描中...';
+
+  let list = STOCKS.map(s=>{
+    const p = PD[s.code];
+    const ind = IND[s.code];
+    const ch = chipData[s.code];
+    const rv = revenueData[s.code];
+    if(!p) return null;
+
+    const k = ind?.kd?.k || 50;
+    const macdBull = ind?.macd?.bull || false;
+    const macdHist = ind?.macd?.hist || 0;
+
+    // 計算飆股評分
+    let score = 0;
+    const triggers = [];
+
+    // 漲幅條件
+    if(p.chgPct >= 3){ score += 2; triggers.push('強勢上漲'); }
+    else if(p.chgPct >= 1){ score += 1; triggers.push('溫和上漲'); }
+
+    // 成交量條件
+    if(p.vol > 5000){ score += 2; triggers.push('爆量'); }
+    else if(p.vol > 2000){ score += 1; triggers.push('放量'); }
+
+    // KD條件
+    if(k < 20){ score += 2; triggers.push('KD超賣'); }
+    else if(k > 80 && p.chgPct > 0){ score += 1; triggers.push('KD強勢'); }
+
+    // MACD條件
+    if(macdBull && macdHist > 0){ score += 1; triggers.push('MACD翻多'); }
+
+    // 法人條件
+    if(ch?.foreign > 500){ score += 1; triggers.push('外資買超'); }
+    if(ch?.trust > 100){ score += 1; triggers.push('投信買超'); }
+
+    // 營收條件
+    if(rv?.yoy > 20){ score += 1; triggers.push('營收年增'); }
+
+    // 過濾條件
+    let pass = true;
+    if(filter==='breakout' && p.chgPct < 2) pass = false;
+    if(filter==='volume' && p.vol < 3000) pass = false;
+    if(filter==='kd-buy' && k >= 30) pass = false;
+    if(filter==='macd-bull' && !macdBull) pass = false;
+
+    if(!pass) return null;
+    return { ...s, p, ind, score, triggers, k };
+  }).filter(Boolean);
+
+  // 排序
+  list.sort((a,b) => b.score - a.score);
+  const top = list.slice(0, 20);
+
+  // 統計卡
+  const breakouts = list.filter(s=>s.p.chgPct>=3).length;
+  const volumes = list.filter(s=>s.p.vol>=5000).length;
+  const kdBuys = list.filter(s=>s.k<20).length;
+  const macdBulls = list.filter(s=>s.ind?.macd?.bull).length;
+
+  document.getElementById('radar-stats').innerHTML = [
+    {l:'強勢股', v:breakouts, c:'up'},
+    {l:'爆量股', v:volumes, c:'#f59e0b'},
+    {l:'KD超賣', v:kdBuys, c:'#22c97a'},
+    {l:'MACD翻多', v:macdBulls, c:'#7db3f5'},
+  ].map(s=>`<div class="sum-c"><div class="sum-l">${s.l}</div><div class="sum-v" style="color:${s.c};font-size:18px">${s.v}</div></div>`).join('');
+
+  document.getElementById('radar-tbl').innerHTML = top.map((s,i)=>{
+    const p = s.p;
+    const scoreBar = `<span style="font-size:13px;color:${s.score>=6?'#f59e0b':s.score>=4?'#7db3f5':'#7d96bf'};font-weight:600">${s.score}分</span>`;
+    const triggerBadges = s.triggers.slice(0,3).map(t=>
+      `<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:rgba(61,140,240,.15);color:#7db3f5;border:1px solid rgba(61,140,240,.25);margin-right:2px">${t}</span>`
+    ).join('');
+    return `<tr class="drow">
+      <td style="font-weight:700;color:${i<3?'#f59e0b':'#7d96bf'}">#${i+1}</td>
+      <td class="code">${s.code}</td>
+      <td style="font-weight:500">${s.name}</td>
+      <td>${ib(s.ind)}</td>
+      <td class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</td>
+      <td><span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span></td>
+      <td><span class="mono" style="font-size:11px;color:#7d96bf">${fv(p.vol)}K</span></td>
+      <td>${kdBadge(s.code)}</td>
+      <td>${macdCell(s.code)}</td>
+      <td>${scoreBar}</td>
+      <td>${triggerBadges}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('radar-status').textContent =
+    `掃描完成，找到 ${list.length} 檔符合條件，顯示前 20 名`;
+}
+document.getElementById('radar-filter').addEventListener('change', ()=>{ if(Object.keys(PD).length>0) runRadar(); });
 
 // ── 篩選排序 ──────────────────────────────────────────────────
 function buildTabs(){
