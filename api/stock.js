@@ -6,23 +6,86 @@ export default async function handler(req, res) {
 
   const now = new Date();
   const twDate = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
-  const rocYear = now.getFullYear() - 1911;
-  const rocMon = String(now.getMonth()+1).padStart(2,'0');
+
+  // 處置股：直接抓 TWSE HTML 公告頁面解析
+  if (type === 'disposition') {
+    try {
+      const results = [];
+
+      // 上市處置股公告頁
+      const r1 = await fetch('https://www.twse.com.tw/zh/markets/regular/punish.html', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
+          'Accept': 'text/html,application/xhtml+xml',
+          'Referer': 'https://www.twse.com.tw/',
+        }
+      });
+      if (r1.ok) {
+        const html = await r1.text();
+        // 解析 table rows: 找股票代號(4碼數字)、起訖日期
+        const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+        rows.forEach(row => {
+          const cells = (row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [])
+            .map(td => td.replace(/<[^>]+>/g, '').trim());
+          if (cells.length >= 3) {
+            const code = cells[0]?.match(/^\d{4}$/)?.[0];
+            if (code) {
+              results.push({
+                code,
+                name: cells[1] || '',
+                startDate: cells[2] || '',
+                endDate: cells[3] || '',
+                market: 'tse'
+              });
+            }
+          }
+        });
+      }
+
+      // 上櫃處置股公告頁
+      const r2 = await fetch('https://www.tpex.org.tw/web/bulletin/announcement/punish/punish_list.php?l=zh-tw', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Accept': 'text/html,application/xhtml+xml',
+          'Referer': 'https://www.tpex.org.tw/',
+        }
+      });
+      if (r2.ok) {
+        const html = await r2.text();
+        const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+        rows.forEach(row => {
+          const cells = (row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [])
+            .map(td => td.replace(/<[^>]+>/g, '').trim());
+          if (cells.length >= 3) {
+            const code = cells[0]?.match(/^\d{4,5}$/)?.[0];
+            if (code) {
+              results.push({
+                code,
+                name: cells[1] || '',
+                startDate: cells[2] || '',
+                endDate: cells[3] || '',
+                market: 'otc'
+              });
+            }
+          }
+        });
+      }
+
+      res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=3600');
+      return res.status(200).json({ stocks: results, count: results.length });
+    } catch(e) {
+      return res.status(502).json({ error: e.message, stocks: [] });
+    }
+  }
 
   const targets = {
-    // 股價
     tse: 'https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL',
     otc: 'https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes',
     tse_day: `https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY?date=${ym||twDate}&stockNo=${code}&response=json`,
-    // 月營收 (上市)
     revenue_tse: `https://www.twse.com.tw/rwd/zh/cgData/t21sc04?date=${date||twDate}&response=json`,
-    // 月營收 (上櫃)
     revenue_otc: `https://www.tpex.org.tw/openapi/v1/tpex_revenue`,
-    // 三大法人 (上市)
     chip_tse: `https://www.twse.com.tw/rwd/zh/fund/T86?date=${date||twDate}&selectType=ALL&response=json`,
-    // 三大法人 (上櫃)
     chip_otc: `https://www.tpex.org.tw/openapi/v1/tpex_mainboard_3major_investors_daily`,
-    // 個股法人
     chip_stock: `https://www.twse.com.tw/rwd/zh/fund/TWT38U?date=${date||twDate}&stockNo=${code}&response=json`,
   };
 
