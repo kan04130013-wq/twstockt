@@ -410,6 +410,7 @@ const STOCKS=[
   {code:'3138',ex:'tse',name:'耀登',ind:'矽光子/CPO',sig:'買進',sc:4,note:'天線與射頻模組，光通訊週邊連接器布局中'},
   {code:'3339',ex:'otc',name:'泰谷',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'光通訊元件代理與組裝，靜待800G大量出貨'},
   {code:'6425',ex:'otc',name:'易發',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光纖連接器與被動元件，資料中心擴建直接受惠'},
+  {code:'6147',ex:'tse',name:'頎邦',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'CoWoS與先進封裝基板龍頭，矽光子晶片封裝核心夥伴，法人大買'},
   {code:'2402',ex:'tse',name:'毅嘉科技',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊模組機構件與精密沖壓，CPO光引擎殼體需求增加'},
   {code:'4991',ex:'otc',name:'環宇-KY',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'氮化鎵功率元件，高速光通訊電源管理核心，法人積極布局'},
   {code:'3189',ex:'tse',name:'景碩',ind:'PCB',sig:'強烈買進',sc:5,note:'IC載板出貨增加，AI需求帶動高毛利產品比重，法人持續買超'},
@@ -441,7 +442,10 @@ const STOCKS=[
   {code:'4770',ex:'otc',name:'上品',ind:'半導體',sig:'買進',sc:4,note:'半導體研磨耗材CMP墊片，先進製程滲透率提升'},
   {code:'5443',ex:'tse',name:'均豪',ind:'半導體',sig:'買進',sc:4,note:'半導體設備維修與改裝，在地化服務需求增加，毛利率高'},
   {code:'8027',ex:'otc',name:'鈦昇',ind:'半導體',sig:'買進',sc:4,note:'半導體零組件精密加工，先進封裝設備零件需求增加'},
-  {code:'3583',ex:'tse',name:'辛耘',ind:'半導體',sig:'強烈買進',sc:5,note:'濕製程設備龍頭，先進封裝與化合物半導體設備訂單強勁'},
+  {code:'6239',ex:'tse',name:'力成',ind:'半導體',sig:'買進',sc:4,note:'IC封測大廠，HBM與先進封裝需求帶動，AI晶片測試訂單增加'},
+  {code:'6854',ex:'otc',name:'錼創科技-KY',ind:'半導體',sig:'強烈買進',sc:5,note:'Micro LED技術領先，AR/VR顯示核心供應商，蘋果供應鏈受惠'},
+  {code:'3587',ex:'otc',name:'閎康',ind:'半導體',sig:'買進',sc:4,note:'半導體材料分析與失效分析，先進製程良率提升服務需求大'},
+  {code:'3581',ex:'otc',name:'博磊',ind:'半導體',sig:'買進',sc:4,note:'半導體封裝材料，先進封裝用特殊基板材料需求持續成長'},
   {code:'6438',ex:'tse',name:'迅得',ind:'半導體',sig:'買進',sc:4,note:'半導體搬送設備，晶圓自動化物流需求隨擴產放量'},
   {code:'2449',ex:'tse',name:'京元電子',ind:'半導體',sig:'買進',sc:4,note:'IC測試產能吃緊，先進封裝測試訂單滿載'},
   {code:'3264',ex:'otc',name:'欣銓',ind:'半導體',sig:'買進',sc:4,note:'IC測試後段製程需求增，小型封測廠受惠'},
@@ -502,7 +506,7 @@ function calcMACD(closes){
 }
 
 // ── 狀態 ───────────────────────────────────────────────────────
-let PD={}, HIST={}, IND={};
+let PD={}, HIST={}, IND={}, DISP=new Set();
 let filtered=[...STOCKS], curInd='', curPage=1, sortMode='', detChart=null;
 const PAGE=15;
 let watchList=JSON.parse(localStorage.getItem('wl')||'[]');
@@ -552,6 +556,69 @@ function fireAlert(type, code, name, price, target){
   // 更新摘要計數
   const countEl=document.getElementById(`s-${type==='buy'?'b':type==='sell'?'s':'stp'}alert`);
   if(countEl) countEl.textContent=parseInt(countEl.textContent||0)+1;
+}
+
+// ── 處置股 ────────────────────────────────────────────────────
+// DISP: Map<code, {startDate, endDate, reason}>
+let DISP_INFO = {};
+
+async function fetchDisposition(){
+  DISP.clear();
+  DISP_INFO = {};
+
+  const parseRows = (data, src) => {
+    (Array.isArray(data)?data:[]).forEach(d=>{
+      // 嘗試各種欄位名稱
+      const code = (d.Code||d.SecuritiesCompanyCode||d['股票代號']||d.stockCode||'').trim();
+      if(!code) return;
+      const startDate = d.DispStartDate||d['開始日期']||d.startDate||d.StartDate||d['處置起始日']||'';
+      const endDate   = d.DispEndDate  ||d['結束日期']||d.endDate  ||d.EndDate  ||d['處置結束日']||'';
+      const reason    = d.Reason||d['處置原因']||d.reason||src==='tse'?'上市處置':'上櫃處置';
+      DISP.add(code);
+      DISP_INFO[code] = { startDate, endDate, reason };
+    });
+  };
+
+  try{
+    const r1 = await fetch('/api/stock?type=disposition_tse');
+    if(r1.ok){ const data=await r1.json(); parseRows(data,'tse'); }
+  }catch(e){ console.warn('disposition_tse:', e.message); }
+
+  try{
+    const r2 = await fetch('/api/stock?type=disposition_otc');
+    if(r2.ok){ const data=await r2.json(); parseRows(data,'otc'); }
+  }catch(e){ console.warn('disposition_otc:', e.message); }
+
+  if(DISP.size > 0){
+    STOCKS.forEach(s=>{
+      if(DISP.has(s.code)){
+        const info = DISP_INFO[s.code]||{};
+        const dateStr = info.startDate && info.endDate
+          ? `${info.startDate} ~ ${info.endDate}`
+          : info.startDate || '日期未知';
+        const key = `disp-${s.code}-${new Date().toDateString()}`;
+        if(!alertsFired.has(key)){
+          alertsFired.add(key);
+          const box = document.getElementById('alertsBox');
+          const el = document.createElement('div');
+          el.className = 'alert-item alert-sell';
+          el.innerHTML = `<span class="alert-icon">⛔</span><span><b>${s.name}(${s.code})</b> 為<b>處置股</b>　處置期間：${dateStr}　交易受限，請注意風險！</span><span class="alert-close" onclick="this.parentElement.remove()">✕</span>`;
+          box.insertBefore(el, box.firstChild);
+        }
+      }
+    });
+  }
+  applyFilt();
+}
+
+// 處置標籤 HTML
+function dispBadge(code){
+  if(!DISP.has(code)) return '';
+  const info = DISP_INFO[code]||{};
+  const tip = info.startDate && info.endDate
+    ? `處置期間：${info.startDate}～${info.endDate}`
+    : '處置中';
+  return `<span title="${tip}" style="margin-left:4px;font-size:10px;padding:1px 6px;border-radius:3px;background:rgba(232,64,64,.2);color:#f87171;border:1px solid rgba(232,64,64,.4);cursor:help">⛔處置 ${info.startDate?info.startDate:''}</span>`;
 }
 
 function checkAlerts(){
@@ -643,6 +710,7 @@ async function loadAll(){
   setSt(loaded>0?'ok':'err',loaded>0?`已載入 ${loaded} 檔 · ${date}`:'無法取得股價');
   document.getElementById('rfBtn').disabled=false;
   checkAlerts();
+  fetchDisposition();
   applyFilt();
   updateSum();
   renderWatchlist();
@@ -733,7 +801,7 @@ function renderRevenue(){
     const chgCell = p ? `<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>` : '—';
     return `<tr class="drow">
       <td class="code">${s.code}</td>
-      <td style="font-weight:500">${s.name}</td>
+      <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
       <td>${ib(s.ind)}</td>
       <td class="mono" style="font-size:12px">${revCell}</td>
       <td>${momCell}</td><td>${yoyCell}</td>
@@ -828,7 +896,7 @@ function renderChip(){
     const chgCell = p ? `<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>` : '—';
     return `<tr class="drow">
       <td class="code">${s.code}</td>
-      <td style="font-weight:500">${s.name}</td>
+      <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
       <td>${ib(s.ind)}</td>
       <td>${fmt(ch?.foreign)}</td>
       <td>${fmt(ch?.trust)}</td>
@@ -920,7 +988,7 @@ function runRadar(){
     return `<tr class="drow">
       <td style="font-weight:700;color:${i<3?'#f59e0b':'#7d96bf'}">#${i+1}</td>
       <td class="code">${s.code}</td>
-      <td style="font-weight:500">${s.name}</td>
+      <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
       <td>${ib(s.ind)}</td>
       <td class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</td>
       <td><span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span></td>
@@ -1019,9 +1087,9 @@ function renderTbl(){
     const pCell=p?`<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>`:`<span class="pld">—</span>`;
     const cCell=p?`<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>`:'—';
     const dtCell=p?`<span style="font-size:10px;color:#3f567a">${p.date}</span>`:'—';
-    return `<tr class="drow" onclick="openDet('${s.code}')">
+    return `<tr class="drow" onclick="openDet('${s.code}')" style="${DISP.has(s.code)?'background:rgba(232,64,64,.06)':''}">
       <td class="code">${s.code}</td>
-      <td style="font-weight:500">${s.name}</td>
+      <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
       <td>${ib(s.ind)}</td>
       <td>${pCell}</td>
       <td>${cCell}</td>
