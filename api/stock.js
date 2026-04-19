@@ -7,34 +7,44 @@ export default async function handler(req, res) {
   const now = new Date();
   const twDate = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
 
-  // 處置股：直接抓 TWSE HTML 公告頁面解析
+  // 處置股：抓 TWSE HTML 公告頁面解析
   if (type === 'disposition') {
     try {
       const results = [];
 
-      // 上市處置股公告頁
-      const r1 = await fetch('https://www.twse.com.tw/zh/markets/regular/punish.html', {
+      // 上市處置股 - 正確端點
+      const r1 = await fetch('https://www.twse.com.tw/announcement/punish?response=html', {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
-          'Accept': 'text/html,application/xhtml+xml',
-          'Referer': 'https://www.twse.com.tw/',
+          'Accept': 'text/html,application/xhtml+xml,application/xml',
+          'Referer': 'https://www.twse.com.tw/zh/announcement/punish.html',
         }
       });
       if (r1.ok) {
         const html = await r1.text();
-        // 解析 table rows: 找股票代號(4碼數字)、起訖日期
-        const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+        // 解析 <tr> rows，每行有10欄：編號|公布日期|證券代號|證券名稱|累計|處置條件|處置起迄時間|處置措施|處置內容|備註
+        const rows = html.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
         rows.forEach(row => {
           const cells = (row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [])
-            .map(td => td.replace(/<[^>]+>/g, '').trim());
-          if (cells.length >= 3) {
-            const code = cells[0]?.match(/^\d{4}$/)?.[0];
-            if (code) {
+            .map(td => td.replace(/<[^>]+>/g, '').replace(/&nbsp;/g,' ').trim());
+          // 代號在第3格(index 2)，名稱第4格(index 3)，起迄時間第7格(index 6)
+          if (cells.length >= 7) {
+            const rawCode = cells[2]?.trim();
+            const code = rawCode?.match(/^\d{4,6}$/)?.[0];
+            if (code && code.length <= 5) { // 排除ETF代號過長
+              const dateRange = cells[6] || '';
+              // 格式: 115/04/15～115/04/28 → 轉換為西元
+              const rocToAD = (rocDate) => {
+                const m = rocDate.match(/(\d+)\/(\d+)\/(\d+)/);
+                if (!m) return rocDate;
+                return `${parseInt(m[1])+1911}/${m[2]}/${m[3]}`;
+              };
+              const parts = dateRange.split(/[～~]/);
               results.push({
                 code,
-                name: cells[1] || '',
-                startDate: cells[2] || '',
-                endDate: cells[3] || '',
+                name: cells[3] || '',
+                startDate: rocToAD(parts[0]?.trim() || ''),
+                endDate:   rocToAD(parts[1]?.trim() || ''),
                 market: 'tse'
               });
             }
@@ -42,8 +52,8 @@ export default async function handler(req, res) {
         });
       }
 
-      // 上櫃處置股公告頁
-      const r2 = await fetch('https://www.tpex.org.tw/web/bulletin/announcement/punish/punish_list.php?l=zh-tw', {
+      // 上櫃處置股
+      const r2 = await fetch('https://www.tpex.org.tw/web/bulletin/disposal_information/disposal_information.php?l=zh-tw', {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
           'Accept': 'text/html,application/xhtml+xml',
@@ -52,18 +62,27 @@ export default async function handler(req, res) {
       });
       if (r2.ok) {
         const html = await r2.text();
-        const rows = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+        const rows = html.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
         rows.forEach(row => {
           const cells = (row.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [])
-            .map(td => td.replace(/<[^>]+>/g, '').trim());
-          if (cells.length >= 3) {
-            const code = cells[0]?.match(/^\d{4,5}$/)?.[0];
+            .map(td => td.replace(/<[^>]+>/g, '').replace(/&nbsp;/g,' ').trim());
+          if (cells.length >= 5) {
+            const rawCode = cells[1]?.trim() || cells[0]?.trim();
+            const code = rawCode?.match(/^\d{4,5}$/)?.[0];
             if (code) {
+              const rocToAD = (rocDate) => {
+                const m = rocDate.match(/(\d+)\/(\d+)\/(\d+)/);
+                if (!m) return rocDate;
+                return `${parseInt(m[1])+1911}/${m[2]}/${m[3]}`;
+              };
+              // 找日期欄位
+              const dateCell = cells.find(c => c.includes('/') && c.includes('～')) || '';
+              const parts = dateCell.split(/[～~]/);
               results.push({
                 code,
-                name: cells[1] || '',
-                startDate: cells[2] || '',
-                endDate: cells[3] || '',
+                name: cells[2] || cells[1] || '',
+                startDate: rocToAD(parts[0]?.trim() || ''),
+                endDate:   rocToAD(parts[1]?.trim() || ''),
                 market: 'otc'
               });
             }
@@ -71,8 +90,16 @@ export default async function handler(req, res) {
         });
       }
 
+      // 去除重複
+      const seen = new Set();
+      const unique = results.filter(r => {
+        if (seen.has(r.code)) return false;
+        seen.add(r.code);
+        return true;
+      });
+
       res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=3600');
-      return res.status(200).json({ stocks: results, count: results.length });
+      return res.status(200).json({ stocks: unique, count: unique.length });
     } catch(e) {
       return res.status(502).json({ error: e.message, stocks: [] });
     }
