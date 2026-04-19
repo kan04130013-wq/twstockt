@@ -565,29 +565,21 @@ let DISP_INFO = {};
 async function fetchDisposition(){
   DISP.clear();
   DISP_INFO = {};
-
-  const parseRows = (data, src) => {
-    (Array.isArray(data)?data:[]).forEach(d=>{
-      // 嘗試各種欄位名稱
-      const code = (d.Code||d.SecuritiesCompanyCode||d['股票代號']||d.stockCode||'').trim();
+  try{
+    const r = await fetch('/api/stock?type=disposition');
+    if(!r.ok) return;
+    const data = await r.json();
+    (data.stocks||[]).forEach(d=>{
+      const code = String(d.code||'').trim();
       if(!code) return;
-      const startDate = d.DispStartDate||d['開始日期']||d.startDate||d.StartDate||d['處置起始日']||'';
-      const endDate   = d.DispEndDate  ||d['結束日期']||d.endDate  ||d.EndDate  ||d['處置結束日']||'';
-      const reason    = d.Reason||d['處置原因']||d.reason||src==='tse'?'上市處置':'上櫃處置';
       DISP.add(code);
-      DISP_INFO[code] = { startDate, endDate, reason };
+      DISP_INFO[code] = {
+        startDate: d.startDate||'',
+        endDate:   d.endDate||'',
+        market:    d.market||''
+      };
     });
-  };
-
-  try{
-    const r1 = await fetch('/api/stock?type=disposition_tse');
-    if(r1.ok){ const data=await r1.json(); parseRows(data,'tse'); }
-  }catch(e){ console.warn('disposition_tse:', e.message); }
-
-  try{
-    const r2 = await fetch('/api/stock?type=disposition_otc');
-    if(r2.ok){ const data=await r2.json(); parseRows(data,'otc'); }
-  }catch(e){ console.warn('disposition_otc:', e.message); }
+  }catch(e){ console.warn('disposition:', e.message); }
 
   if(DISP.size > 0){
     STOCKS.forEach(s=>{
