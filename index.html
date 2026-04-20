@@ -168,6 +168,7 @@ tr:last-child td{border-bottom:none}
     <span class="clk" id="clk"></span>
     <span class="st st-idle" id="stBadge">準備中</span>
     <button class="rf-btn" id="rfBtn" onclick="loadAll()">↻ 更新股價</button>
+    <span id="rt-badge" style="font-size:11px;display:none;padding:3px 9px;border-radius:12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);color:#f59e0b">⚡ 盤中即時</span>
   </div>
 </div>
 
@@ -507,6 +508,64 @@ function calcMACD(closes){
 
 // ── 狀態 ───────────────────────────────────────────────────────
 let PD={}, HIST={}, IND={}, DISP=new Set();
+let rtTimer = null;   // 盤中自動更新 timer
+let isTrading = false; // 是否盤中
+
+// ── 判斷是否為盤中時間（台灣時間 09:00~13:30，週一~週五）──
+function checkTradingHours(){
+  const now = new Date();
+  const tw = new Date(now.toLocaleString('en-US', {timeZone:'Asia/Taipei'}));
+  const day = tw.getDay(); // 0=日, 6=六
+  const h = tw.getHours(), m = tw.getMinutes();
+  const mins = h * 60 + m;
+  return day >= 1 && day <= 5 && mins >= 9*60 && mins <= 13*60+30;
+}
+
+// ── 盤中即時更新（每30秒）──────────────────────────────────────
+async function startRealtime(){
+  if(rtTimer) return; // 已在執行
+  await fetchRealtime();
+  rtTimer = setInterval(fetchRealtime, 30000);
+}
+function stopRealtime(){
+  if(rtTimer){ clearInterval(rtTimer); rtTimer=null; }
+}
+
+async function fetchRealtime(){
+  if(!checkTradingHours()){ stopRealtime(); return; }
+
+  // 組合代號清單：tse_6285.tw|otc_3450.tw...
+  const codeList = STOCKS.map(s => `${s.ex}_${s.code}.tw`).join(',');
+  try{
+    const r = await fetch(`/api/stock?type=realtime&codes=${encodeURIComponent(codeList)}`);
+    if(!r.ok) throw new Error('RT HTTP '+r.status);
+    const data = await r.json();
+    let updated = 0;
+    (data.stocks||[]).forEach(s=>{
+      if(!s.code || !s.close) return;
+      PD[s.code] = {
+        close:  s.close,
+        chg:    s.chg,
+        chgPct: s.chgPct,
+        open:   s.open,
+        high:   s.high,
+        low:    s.low,
+        vol:    Math.round(s.vol / 1000), // 股→千股
+        date:   '盤中即時',
+        src:    'MIS即時',
+        isRT:   true,
+      };
+      updated++;
+    });
+    if(updated > 0){
+      const n = new Date();
+      const timeStr = n.toLocaleTimeString('zh-TW');
+      setSt('ok', `⚡ 盤中即時 · 已更新 ${updated} 檔 · ${timeStr}`);
+      document.getElementById('rfBtn').textContent = '⚡ 盤中更新中';
+      applyFilt(); updateSum();
+    }
+  }catch(e){ console.warn('realtime error:', e.message); }
+}
 let filtered=[...STOCKS], curInd='', curPage=1, sortMode='', detChart=null;
 const PAGE=15;
 let watchList=JSON.parse(localStorage.getItem('wl')||'[]');
@@ -706,6 +765,22 @@ async function loadAll(){
   applyFilt();
   updateSum();
   renderWatchlist();
+
+  // 盤中自動啟動即時更新
+  if(checkTradingHours()){
+    setSt('ok', `⚡ 盤中交易時間，啟動即時報價（每30秒更新）`);
+    document.getElementById('rt-badge').style.display='';
+    startRealtime();
+  } else {
+    document.getElementById('rt-badge').style.display='none';
+    stopRealtime();
+    const n=new Date();
+    const tw=new Date(n.toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+    const h=tw.getHours(), m=tw.getMinutes();
+    const isWeekend = tw.getDay()===0||tw.getDay()===6;
+    const hint = isWeekend ? '（今日休市）' : h<9 ? '（開盤前）' : '（收盤後）';
+    setSt('ok', `已載入 ${loaded} 檔收盤價 · ${date} ${hint}`);
+  }
 }
 
 // ── 頁籤切換 ─────────────────────────────────────────────────
