@@ -534,38 +534,50 @@ function stopRealtime(){
 async function fetchRealtime(){
   if(!checkTradingHours()){ stopRealtime(); document.getElementById('rt-badge').style.display='none'; return; }
 
-  const codeList = STOCKS.map(s => `${s.ex}_${s.code}.tw`).join(',');
-  try{
-    const r = await fetch(`/api/stock?type=realtime&codes=${encodeURIComponent(codeList)}`);
-    if(!r.ok) throw new Error('RT HTTP '+r.status);
-    const data = await r.json();
-    let updated = 0;
-    (data.stocks||[]).forEach(s=>{
-      if(!s.code || !s.close) return;
-      PD[s.code] = {
-        close:  s.close,
-        chg:    s.chg,
-        chgPct: s.chgPct,
-        open:   s.open,
-        high:   s.high,
-        low:    s.low,
-        vol:    Math.round(s.vol / 1000),
-        date:   '盤中即時',
-        src:    'MIS即時',
-        isRT:   true,
-      };
-      updated++;
-    });
-    if(updated > 0){
-      const timeStr = new Date().toLocaleTimeString('zh-TW');
-      setSt('ok', `⚡ 盤中即時 · 已更新 ${updated} 檔 · ${timeStr}`);
-      document.getElementById('rt-badge').style.display='';
-      document.getElementById('rfBtn').textContent = '⚡ 盤中更新中';
-      applyFilt(); updateSum();
+  // 直接從瀏覽器呼叫 TWSE MIS（不透過 Vercel proxy，避免美國IP被擋）
+  const tseStocks = STOCKS.filter(s=>s.ex==='tse');
+  const otcStocks = STOCKS.filter(s=>s.ex==='otc');
+  let updated = 0;
+
+  const fetchBatch = async (list, prefix) => {
+    if(!list.length) return;
+    // 分批，每批20檔
+    for(let i=0; i<list.length; i+=20){
+      const batch = list.slice(i, i+20);
+      const exCh = batch.map(s=>`${prefix}_${s.code}.tw`).join('|');
+      try{
+        const r = await fetch(`https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${encodeURIComponent(exCh)}&json=1&delay=0&_=${Date.now()}`);
+        if(!r.ok) continue;
+        const data = await r.json();
+        (data.msgArray||[]).forEach(s=>{
+          if(!s.c) return;
+          const close  = parseFloat(s.z!=='-'?s.z:s.y)||0;
+          const prev   = parseFloat(s.y)||0;
+          const chg    = Math.round((close-prev)*100)/100;
+          const chgPct = prev?Math.round(chg/prev*10000)/100:0;
+          if(!close) return;
+          PD[s.c]={close,chg,chgPct,
+            open:parseFloat(s.o)||0,high:parseFloat(s.h)||0,low:parseFloat(s.l)||0,
+            vol:Math.round(parseInt(s.v||0)/1000),
+            date:'盤中即時',src:'MIS即時',isRT:true};
+          updated++;
+        });
+      }catch(e){ continue; }
     }
-  }catch(e){
-    // 靜默失敗，不顯示錯誤，下次再試
-    console.warn('realtime error:', e.message);
+  };
+
+  await fetchBatch(tseStocks,'tse');
+  await fetchBatch(otcStocks,'otc');
+
+  if(updated>0){
+    const timeStr=new Date().toLocaleTimeString('zh-TW');
+    setSt('ok',`⚡ 盤中即時 · 已更新 ${updated} 檔 · ${timeStr}`);
+    document.getElementById('rt-badge').style.display='';
+    document.getElementById('rfBtn').textContent='⚡ 盤中更新中';
+    applyFilt(); updateSum();
+  } else {
+    // MIS 無資料（非交易時間或被擋），靜默失敗
+    console.warn('MIS 無即時資料');
   }
 }
 let filtered=[...STOCKS], curInd='', curPage=1, sortMode='', detChart=null;
@@ -715,7 +727,9 @@ async function loadAll(){
     });
     setProg(55);
   }catch(e){
-    setSt('err','載入失敗：'+e.message);
+    const isWeekend = [0,6].includes(new Date().getDay());
+    const msg = isWeekend ? '今日休市，股價將於週一開盤後更新' : '股價暫時無法取得，請稍後再試';
+    setSt('err', msg);
     document.getElementById('rfBtn').disabled=false;
     return;
   }
