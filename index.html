@@ -725,14 +725,37 @@ async function loadAll(){
   setProg(5);
   let loaded=0;
 
-  // 直接從瀏覽器呼叫 TWSE/TPEx（台灣IP不被擋，繞過 Vercel 美國IP限制）
+  // 策略：先嘗試 Vercel proxy，若失敗再直接呼叫（CORS mode: cors）
+  const fetchTSE = async () => {
+    // 方法1: Vercel proxy
+    try{
+      const r = await fetch('/api/stock?type=tse');
+      if(r.ok){
+        const rows = await r.json();
+        if(!rows.error && Array.isArray(rows)) return rows;
+      }
+    }catch(e){}
+
+    // 方法2: 直接呼叫（台灣IP + TWSE 允許 CORS 的端點）
+    try{
+      const r = await fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL',{
+        method:'GET',
+        headers:{'Accept':'application/json','Cache-Control':'no-cache'},
+        mode:'cors',
+        cache:'no-store',
+      });
+      if(r.ok){
+        const rows = await r.json();
+        if(Array.isArray(rows)) return rows;
+      }
+    }catch(e){}
+
+    return null;
+  };
+
   try{
-    const r=await fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL',{
-      headers:{'Accept':'application/json'}
-    });
-    if(!r.ok) throw new Error('TWSE HTTP '+r.status);
-    const rows=await r.json();
-    if(rows.error) throw new Error(rows.error);
+    const rows = await fetchTSE();
+    if(!rows) throw new Error('無法取得上市股價');
     const map={}; rows.forEach(row=>map[row.Code]=row);
     STOCKS.filter(s=>s.ex==='tse').forEach(s=>{
       const row=map[s.code]; if(!row) return;
@@ -750,53 +773,32 @@ async function loadAll(){
     });
     setProg(55);
   }catch(e){
-    // 若直接呼叫失敗，嘗試透過 Vercel proxy
-    try{
-      const r=await fetch('/api/stock?type=tse');
-      if(!r.ok) throw new Error('proxy HTTP '+r.status);
-      const rows=await r.json();
-      if(rows.error) throw new Error(rows.error);
-      const map={}; rows.forEach(row=>map[row.Code]=row);
-      STOCKS.filter(s=>s.ex==='tse').forEach(s=>{
-        const row=map[s.code]; if(!row) return;
-        const close=parseFloat(row.ClosingPrice)||0;
-        const chg=parseFloat(row.Change)||0;
-        const prev=close-chg;
-        PD[s.code]={close,chg,chgPct:prev?chg/prev*100:0,
-          vol:parseInt((row.TradeVolume||'0').replace(/,/g,''))/1000,
-          open:parseFloat(row.OpeningPrice)||0,
-          high:parseFloat(row.HighestPrice)||0,
-          low:parseFloat(row.LowestPrice)||0,
-          date:row.Date?row.Date.replace(/^(\d{3})(\d{2})(\d{2})$/,(_,y,m,d)=>`${+y+1911}/${m}/${d}`):'',
-          src:'TWSE'};
-        loaded++;
-      });
-      setProg(55);
-    }catch(e2){
-      const tw=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
-      const isWeekend=[0,6].includes(tw.getDay());
-      setSt('err', isWeekend?'今日休市，股價將於下一個交易日收盤後更新':'股價暫時無法取得，請稍後再試');
-      document.getElementById('rfBtn').disabled=false;
-      document.getElementById('rfBtn').textContent='↻ 更新股價';
-      return;
-    }
+    const tw=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+    const isWeekend=[0,6].includes(tw.getDay());
+    setSt('err', isWeekend?'今日休市，股價將於下一個交易日收盤後更新':'股價暫時無法取得，請稍後再試');
+    document.getElementById('rfBtn').disabled=false;
+    document.getElementById('rfBtn').textContent='↻ 更新股價';
+    return;
   }
 
   setSt('ld','取得上櫃收盤價...');
   try{
-    // 先嘗試直接呼叫
     let rows=null;
+    // 方法1: Vercel proxy
     try{
-      const r=await fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes',{headers:{'Accept':'application/json'}});
-      if(r.ok) rows=await r.json();
-    }catch(e){ /* fallback to proxy */ }
-
-    if(!rows){
       const r=await fetch('/api/stock?type=otc');
-      if(r.ok) rows=await r.json();
+      if(r.ok){ const d=await r.json(); if(!d.error&&Array.isArray(d)) rows=d; }
+    }catch(e){}
+    // 方法2: 直接呼叫
+    if(!rows){
+      try{
+        const r=await fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes',{
+          headers:{'Accept':'application/json'},mode:'cors',cache:'no-store'
+        });
+        if(r.ok){ const d=await r.json(); if(Array.isArray(d)) rows=d; }
+      }catch(e){}
     }
-
-    if(rows && !rows.error){
+    if(rows){
       const map={}; rows.forEach(row=>map[row.SecuritiesCompanyCode]=row);
       STOCKS.filter(s=>s.ex==='otc').forEach(s=>{
         const row=map[s.code]; if(!row) return;
@@ -805,9 +807,7 @@ async function loadAll(){
         const prev=close-chg;
         PD[s.code]={close,chg,chgPct:prev?chg/prev*100:0,
           vol:parseInt((row.TradeVolume||'0').replace(/,/g,''))/1000,
-          open:parseFloat(row.Open)||0,
-          high:parseFloat(row.High)||0,
-          low:parseFloat(row.Low)||0,
+          open:parseFloat(row.Open)||0,high:parseFloat(row.High)||0,low:parseFloat(row.Low)||0,
           date:row.Date||'',src:'TPEx'};
         loaded++;
       });
