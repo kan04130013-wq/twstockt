@@ -725,9 +725,19 @@ async function loadAll(){
   setProg(5);
   let loaded=0;
 
-  // 策略：先嘗試 Vercel proxy，若失敗再直接呼叫（CORS mode: cors）
+  // 使用 Cloudflare Worker proxy（全球IP，不被TWSE封鎖）
+  const CF_PROXY = 'https://cool-limit-f6a0twse-proxy.kan04130013.workers.dev';
+
   const fetchTSE = async () => {
-    // 方法1: Vercel proxy
+    // 方法1: Cloudflare Worker proxy
+    try{
+      const r = await fetch(`${CF_PROXY}?type=tse`);
+      if(r.ok){
+        const rows = await r.json();
+        if(!rows.error && Array.isArray(rows)) return rows;
+      }
+    }catch(e){}
+    // 方法2: Vercel proxy
     try{
       const r = await fetch('/api/stock?type=tse');
       if(r.ok){
@@ -735,21 +745,6 @@ async function loadAll(){
         if(!rows.error && Array.isArray(rows)) return rows;
       }
     }catch(e){}
-
-    // 方法2: 直接呼叫（台灣IP + TWSE 允許 CORS 的端點）
-    try{
-      const r = await fetch('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL',{
-        method:'GET',
-        headers:{'Accept':'application/json','Cache-Control':'no-cache'},
-        mode:'cors',
-        cache:'no-store',
-      });
-      if(r.ok){
-        const rows = await r.json();
-        if(Array.isArray(rows)) return rows;
-      }
-    }catch(e){}
-
     return null;
   };
 
@@ -784,18 +779,16 @@ async function loadAll(){
   setSt('ld','取得上櫃收盤價...');
   try{
     let rows=null;
-    // 方法1: Vercel proxy
+    // 方法1: Cloudflare Worker proxy
     try{
-      const r=await fetch('/api/stock?type=otc');
+      const r=await fetch();
       if(r.ok){ const d=await r.json(); if(!d.error&&Array.isArray(d)) rows=d; }
     }catch(e){}
-    // 方法2: 直接呼叫
+    // 方法2: Vercel proxy
     if(!rows){
       try{
-        const r=await fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes',{
-          headers:{'Accept':'application/json'},mode:'cors',cache:'no-store'
-        });
-        if(r.ok){ const d=await r.json(); if(Array.isArray(d)) rows=d; }
+        const r=await fetch('/api/stock?type=otc');
+        if(r.ok){ const d=await r.json(); if(!d.error&&Array.isArray(d)) rows=d; }
       }catch(e){}
     }
     if(rows){
