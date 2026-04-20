@@ -7,63 +7,87 @@ export default async function handler(req, res) {
   const now = new Date();
   const twDate = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
 
-  // ── 盤中即時報價 (TWSE MIS) ──────────────────────────────────
+  // ── 盤中即時報價 ─────────────────────────────────────────────
   if (type === 'realtime') {
     try {
-      // codes = 逗號分隔的代號清單，格式: tse_6285.tw|tse_2313.tw|otc_3450.tw
       const codeList = (codes || '').split(',').filter(Boolean);
       if (!codeList.length) return res.status(400).json({ error: 'no codes' });
 
-      // 先取得 session cookie (MIS 需要)
-      const sessionRes = await fetch('https://mis.twse.com.tw/stock/index.jsp', {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
-          'Accept': 'text/html',
-        },
-        redirect: 'follow',
-      });
-      const cookies = sessionRes.headers.get('set-cookie') || '';
-      const jSession = cookies.match(/JSESSIONID=[^;]+/)?.[0] || '';
+      // 分離上市/上櫃代號
+      const tseList = codeList.filter(c => c.startsWith('tse_')).map(c => c.replace('tse_','').replace('.tw',''));
+      const otcList = codeList.filter(c => c.startsWith('otc_')).map(c => c.replace('otc_','').replace('.tw',''));
 
-      // 組合 ex_ch 參數
-      const exCh = codeList.join('|');
-      const ts = Date.now();
-      const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${exCh}&json=1&delay=0&_=${ts}`;
+      const result = [];
 
-      const dataRes = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124',
-          'Referer': 'https://mis.twse.com.tw/stock/index.jsp',
-          'Accept': 'application/json, text/plain, */*',
-          ...(jSession ? { 'Cookie': jSession } : {}),
-        },
-      });
+      // 上市：用 TWSE MIS getStockInfo (多試幾個 Referer)
+      if (tseList.length > 0) {
+        // 分批，每批最多20檔避免 URL 過長
+        for (let i = 0; i < tseList.length; i += 20) {
+          const batch = tseList.slice(i, i + 20);
+          const exCh = batch.map(c => `tse_${c}.tw`).join('|');
+          const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${exCh}&json=1&delay=0&_=${Date.now()}`;
+          try {
+            const r = await fetch(url, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                'Referer': 'https://mis.twse.com.tw/',
+                'Accept': '*/*',
+                'Origin': 'https://mis.twse.com.tw',
+              }
+            });
+            if (r.ok) {
+              const data = await r.json();
+              (data.msgArray || []).forEach(s => {
+                const close  = parseFloat(s.z !== '-' ? s.z : s.y) || 0;
+                const prev   = parseFloat(s.y) || 0;
+                const chg    = Math.round((close - prev) * 100) / 100;
+                const chgPct = prev ? Math.round(chg / prev * 10000) / 100 : 0;
+                result.push({
+                  code: s.c, name: s.n, close, prev, chg, chgPct,
+                  open: parseFloat(s.o)||0, high: parseFloat(s.h)||0, low: parseFloat(s.l)||0,
+                  vol: parseInt(s.v)||0, time: s.t||'', isRT: true,
+                });
+              });
+            }
+          } catch(e) { /* 批次失敗繼續 */ }
+          await new Promise(r => setTimeout(r, 200)); // 避免過快
+        }
+      }
 
-      if (!dataRes.ok) throw new Error(`MIS HTTP ${dataRes.status}`);
-      const data = await dataRes.json();
+      // 上櫃：TPEx 即時
+      if (otcList.length > 0) {
+        for (let i = 0; i < otcList.length; i += 20) {
+          const batch = otcList.slice(i, i + 20);
+          const exCh = batch.map(c => `otc_${c}.tw`).join('|');
+          const url = `https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${exCh}&json=1&delay=0&_=${Date.now()}`;
+          try {
+            const r = await fetch(url, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                'Referer': 'https://mis.twse.com.tw/',
+                'Accept': '*/*',
+              }
+            });
+            if (r.ok) {
+              const data = await r.json();
+              (data.msgArray || []).forEach(s => {
+                const close  = parseFloat(s.z !== '-' ? s.z : s.y) || 0;
+                const prev   = parseFloat(s.y) || 0;
+                const chg    = Math.round((close - prev) * 100) / 100;
+                const chgPct = prev ? Math.round(chg / prev * 10000) / 100 : 0;
+                result.push({
+                  code: s.c, name: s.n, close, prev, chg, chgPct,
+                  open: parseFloat(s.o)||0, high: parseFloat(s.h)||0, low: parseFloat(s.l)||0,
+                  vol: parseInt(s.v)||0, time: s.t||'', isRT: true,
+                });
+              });
+            }
+          } catch(e) { /* 繼續 */ }
+          await new Promise(r => setTimeout(r, 200));
+        }
+      }
 
-      // 解析回傳資料
-      // z=成交價, y=昨收, o=開盤, h=最高, l=最低, v=成交量, t=時間, n=名稱, c=代號
-      const result = (data.msgArray || []).map(s => {
-        const close  = parseFloat(s.z !== '-' ? s.z : s.y) || 0;
-        const prev   = parseFloat(s.y) || 0;
-        const chg    = close - prev;
-        const chgPct = prev ? chg / prev * 100 : 0;
-        return {
-          code:    s.c,
-          name:    s.n,
-          close,
-          prev,
-          chg:     Math.round(chg * 100) / 100,
-          chgPct:  Math.round(chgPct * 100) / 100,
-          open:    parseFloat(s.o) || 0,
-          high:    parseFloat(s.h) || 0,
-          low:     parseFloat(s.l) || 0,
-          vol:     parseInt(s.v) || 0,
-          time:    s.t || '',
-          isRT:    true,
-        };
-      });
+      if (result.length === 0) throw new Error('無即時資料，可能非交易時間');
 
       res.setHeader('Cache-Control', 'no-store');
       return res.status(200).json({ stocks: result, ts: Date.now() });
