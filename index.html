@@ -532,9 +532,8 @@ function stopRealtime(){
 }
 
 async function fetchRealtime(){
-  if(!checkTradingHours()){ stopRealtime(); return; }
+  if(!checkTradingHours()){ stopRealtime(); document.getElementById('rt-badge').style.display='none'; return; }
 
-  // 組合代號清單：tse_6285.tw|otc_3450.tw...
   const codeList = STOCKS.map(s => `${s.ex}_${s.code}.tw`).join(',');
   try{
     const r = await fetch(`/api/stock?type=realtime&codes=${encodeURIComponent(codeList)}`);
@@ -550,7 +549,7 @@ async function fetchRealtime(){
         open:   s.open,
         high:   s.high,
         low:    s.low,
-        vol:    Math.round(s.vol / 1000), // 股→千股
+        vol:    Math.round(s.vol / 1000),
         date:   '盤中即時',
         src:    'MIS即時',
         isRT:   true,
@@ -558,13 +557,16 @@ async function fetchRealtime(){
       updated++;
     });
     if(updated > 0){
-      const n = new Date();
-      const timeStr = n.toLocaleTimeString('zh-TW');
+      const timeStr = new Date().toLocaleTimeString('zh-TW');
       setSt('ok', `⚡ 盤中即時 · 已更新 ${updated} 檔 · ${timeStr}`);
+      document.getElementById('rt-badge').style.display='';
       document.getElementById('rfBtn').textContent = '⚡ 盤中更新中';
       applyFilt(); updateSum();
     }
-  }catch(e){ console.warn('realtime error:', e.message); }
+  }catch(e){
+    // 靜默失敗，不顯示錯誤，下次再試
+    console.warn('realtime error:', e.message);
+  }
 }
 let filtered=[...STOCKS], curInd='', curPage=1, sortMode='', detChart=null;
 const PAGE=15;
