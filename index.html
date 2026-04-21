@@ -762,12 +762,19 @@ async function loadAll(){
   setSt('ld','取得上櫃收盤價...');
   try{
     let rows=null;
-    // 方法1: Cloudflare Worker proxy
+    // 方法1: Cloudflare Worker proxy（最可靠）
     try{
-      const r=await fetch('/api/stock?type=otc');
+      const r=await fetch(`${CF_PROXY}?type=otc`);
       if(r.ok){ const d=await r.json(); if(!d.error&&Array.isArray(d)) rows=d; }
     }catch(e){}
-    // 方法2: 直接呼叫 TPEx
+    // 方法2: Vercel proxy
+    if(!rows){
+      try{
+        const r=await fetch('/api/stock?type=otc');
+        if(r.ok){ const d=await r.json(); if(!d.error&&Array.isArray(d)) rows=d; }
+      }catch(e){}
+    }
+    // 方法3: 直接呼叫 TPEx
     if(!rows){
       try{
         const r=await fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes',{
