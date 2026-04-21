@@ -237,6 +237,35 @@ tr:last-child td{border-bottom:none}
       </div>
       <div class="det-mg" id="det-mg"></div>
       <div class="ind-grid" id="det-ind"></div>
+      <!-- 目標價格區塊 -->
+      <div id="det-targets" style="display:none;margin-bottom:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px">
+        <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📊 目標價格（法人參考）</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div>
+            <div style="font-size:11px;color:#16a34a;font-weight:600;margin-bottom:4px">▲ 買進目標</div>
+            <input id="tp-buy" type="number" step="0.1" placeholder="自動計算"
+              style="width:100%;padding:6px 8px;border:1px solid #86efac;border-radius:6px;font-size:14px;font-family:monospace;font-weight:600;color:#16a34a;background:#f0fdf4;outline:none">
+            <div id="tp-buy-auto" style="font-size:11px;color:#94a3b8;margin-top:3px"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:#dc2626;font-weight:600;margin-bottom:4px">▲ 賣出目標</div>
+            <input id="tp-sell" type="number" step="0.1" placeholder="自動計算"
+              style="width:100%;padding:6px 8px;border:1px solid #fca5a5;border-radius:6px;font-size:14px;font-family:monospace;font-weight:600;color:#dc2626;background:#fef2f2;outline:none">
+            <div id="tp-sell-auto" style="font-size:11px;color:#94a3b8;margin-top:3px"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:#d97706;font-weight:600;margin-bottom:4px">▼ 停損</div>
+            <input id="tp-stop" type="number" step="0.1" placeholder="自動計算"
+              style="width:100%;padding:6px 8px;border:1px solid #fde68a;border-radius:6px;font-size:14px;font-family:monospace;font-weight:600;color:#d97706;background:#fffbeb;outline:none">
+            <div id="tp-stop-auto" style="font-size:11px;color:#94a3b8;margin-top:3px"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+          <button onclick="saveTargets()" style="padding:6px 16px;border-radius:6px;border:1px solid #bfdbfe;background:#eff6ff;color:#2563eb;font-size:13px;font-weight:600;cursor:pointer">儲存目標價</button>
+          <button onclick="clearTargets()" style="padding:6px 14px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;cursor:pointer">恢復自動</button>
+          <span id="tp-saved" style="font-size:12px;color:#16a34a;display:none">✓ 已儲存</span>
+        </div>
+      </div>
       <div class="chart-box"><canvas id="det-chart" role="img" aria-label="個股走勢">走勢圖</canvas></div>
       <div class="det-note" id="det-note"></div>
     </div>
@@ -383,112 +412,112 @@ tr:last-child td{border-bottom:none}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 const STOCKS=[
-  {code:'6285',ex:'tse',name:'啟碁',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'Starlink地面終端設備供應商，訂單能見度至2026Q2，法人連買'},
-  {code:'2485',ex:'tse',name:'兆赫',ind:'低軌衛星',sig:'買進',sc:4,note:'射頻元件供應商，低軌衛星通訊模組受惠，客戶涵蓋歐美系統廠'},
-  {code:'4906',ex:'tse',name:'正文',ind:'低軌衛星',sig:'買進',sc:4,note:'網通設備與天線模組製造，衛星地面設備需求成長受惠'},
-  {code:'2313',ex:'tse',name:'華通',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'高層PCB打入衛星通訊供應鏈，NVIDIA & SpaceX間接受惠'},
-  {code:'2367',ex:'tse',name:'燿華',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星天線用高頻PCB需求增加，毛利率提升中'},
-  {code:'6672',ex:'tse',name:'騰輝電子-KY',ind:'低軌衛星',sig:'買進',sc:4,note:'高頻低損耗銅箔基板，低軌衛星通訊設備核心材料'},
-  {code:'4909',ex:'otc',name:'新復興',ind:'低軌衛星',sig:'觀察',sc:3,note:'衛星通訊連接器與線材，訂單能見度逐步改善中'},
-  {code:'6190',ex:'otc',name:'萬泰科',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星頻段射頻模組設計，小型化產品切入低軌衛星市場'},
-  {code:'6821',ex:'otc',name:'聯寶',ind:'低軌衛星',sig:'觀察',sc:3,note:'衛星地面設備組裝代工，觀察訂單放量時機'},
-  {code:'3305',ex:'tse',name:'昇貿',ind:'低軌衛星',sig:'買進',sc:4,note:'射頻同軸連接器專業廠，低軌衛星天線連接器需求增加'},
-  {code:'2419',ex:'tse',name:'仲琦',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星網通設備製造，Starlink地面設備間接受惠'},
-  {code:'3138',ex:'tse',name:'耀登',ind:'低軌衛星',sig:'買進',sc:4,note:'天線與射頻模組，低軌衛星地面終端天線供應鏈布局'},
-  {code:'2355',ex:'tse',name:'敬鵬',ind:'低軌衛星',sig:'買進',sc:4,note:'高階PCB製造，衛星通訊設備用高頻板需求增加'},
-  {code:'6271',ex:'tse',name:'同欣電',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'衛星通訊用陶瓷封裝元件，低軌衛星核心零件供應商'},
-  {code:'3380',ex:'tse',name:'明泰',ind:'低軌衛星',sig:'觀察',sc:3,note:'網通設備廠，Starlink用戶終端設備間接受惠'},
-  {code:'6282',ex:'tse',name:'康舒',ind:'低軌衛星',sig:'買進',sc:4,note:'電源供應器，衛星地面站設備電源模組需求成長'},
-  {code:'1582',ex:'tse',name:'信錦',ind:'低軌衛星',sig:'買進',sc:4,note:'精密機構件，衛星相控陣天線支架與外殼結構件'},
-  {code:'5243',ex:'otc',name:'乙盛-KY',ind:'低軌衛星',sig:'買進',sc:4,note:'鋁合金精密壓鑄，衛星地面終端機殼供應商'},
-  {code:'3152',ex:'otc',name:'璟德',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'RF微波元件專業廠，低軌衛星通訊射頻模組核心供應'},
-  {code:'4977',ex:'otc',name:'眾達-KY',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光模組散熱解決方案，CPO趨勢下散熱需求爆發，毛利率提升'},
-  {code:'4908',ex:'tse',name:'前鼎',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光收發模組組裝代工，800G產品線出貨放量中'},
-  {code:'3234',ex:'tse',name:'光環',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光纖環形器核心廠商，CPO與矽光子需求大幅拉升'},
-  {code:'6426',ex:'otc',name:'統新',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊被動元件，400G/800G升級帶動訂單成長'},
-  {code:'5388',ex:'tse',name:'中磊',ind:'矽光子/CPO',sig:'買進',sc:4,note:'網通設備受惠AI資料中心建置，CPO間接題材'},
-  {code:'3596',ex:'tse',name:'智易',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'網通ODM廠，AI資料中心交換器需求帶動出貨成長'},
-  {code:'3380',ex:'tse',name:'明泰',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'網通設備廠，等待800G光模組滲透率提升受惠'},
-  {code:'2455',ex:'tse',name:'全新',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵磊晶片，光通訊與低軌衛星雙題材加持'},
-  {code:'8086',ex:'otc',name:'宏捷科',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵PA與光通訊元件，CPO光引擎核心供應商'},
-  {code:'6530',ex:'otc',name:'創威',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光模組測試設備，800G升級帶動測試需求增加'},
-  {code:'2426',ex:'tse',name:'鼎元',ind:'矽光子/CPO',sig:'買進',sc:4,note:'LED及光電元件，光通訊應用佔比逐步提升'},
-  {code:'8111',ex:'otc',name:'立碁',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'光通訊模組相關，等待訂單能見度進一步明朗'},
-  {code:'2413',ex:'tse',name:'環科',ind:'矽光子/CPO',sig:'買進',sc:4,note:'高頻基板材料，矽光子封裝用特殊基板需求增加'},
-  {code:'3498',ex:'tse',name:'陽程',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光學鏡頭與精密機構件，CPO封裝設備間接受惠'},
-  {code:'3714',ex:'tse',name:'富采',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'磊晶與光電元件，矽光子光源核心供應，法人積極布局'},
-  {code:'3701',ex:'tse',name:'大眾控',ind:'矽光子/CPO',sig:'買進',sc:4,note:'網通與光通訊整合方案，AI資料中心需求受惠'},
-  {code:'3138',ex:'tse',name:'耀登',ind:'矽光子/CPO',sig:'買進',sc:4,note:'天線與射頻模組，光通訊週邊連接器布局中'},
-  {code:'3339',ex:'otc',name:'泰谷',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'光通訊元件代理與組裝，靜待800G大量出貨'},
-  {code:'6425',ex:'otc',name:'易發',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光纖連接器與被動元件，資料中心擴建直接受惠'},
-  {code:'6147',ex:'tse',name:'頎邦',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'CoWoS與先進封裝基板龍頭，矽光子晶片封裝核心夥伴，法人大買'},
-  {code:'2402',ex:'tse',name:'毅嘉科技',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊模組機構件與精密沖壓，CPO光引擎殼體需求增加'},
-  {code:'4991',ex:'otc',name:'環宇-KY',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'氮化鎵功率元件，高速光通訊電源管理核心，法人積極布局'},
-  {code:'6205',ex:'otc',name:'詮欣',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光纖連接器與光模組封裝，資料中心800G升級直接受惠'},
-  {code:'2466',ex:'tse',name:'冠西電',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光電連接器與線纜組件，高速傳輸模組需求持續成長'},
-  {code:'8431',ex:'otc',name:'匯鑽科',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'矽光子晶片測試與量測設備，CPO量產必備關鍵設備廠'},
-  {code:'6456',ex:'otc',name:'GIS-KY',ind:'矽光子/CPO',sig:'買進',sc:4,note:'精密光學元件與機構件，CPO光引擎封裝結構受惠'},
-  {code:'3450',ex:'otc',name:'聯鈞',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光收發模組打入超大型資料中心，800G訂單大幅成長'},
-  {code:'6278',ex:'tse',name:'台表科',ind:'矽光子/CPO',sig:'買進',sc:4,note:'表面聲波濾波器，光通訊與衛星用高頻元件需求增加'},
-  {code:'3105',ex:'tse',name:'穩懋',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵晶圓代工龍頭，光通訊PA與矽光子驅動IC核心供應'},
-  {code:'3189',ex:'tse',name:'景碩',ind:'PCB',sig:'強烈買進',sc:5,note:'IC載板出貨增加，AI需求帶動高毛利產品比重，法人持續買超'},
-  {code:'4958',ex:'tse',name:'臻鼎-KY',ind:'PCB',sig:'強烈買進',sc:5,note:'FPC龍頭，iPhone與AI手機供應鏈，訂單能見度高至Q3'},
-  {code:'3715',ex:'tse',name:'定穎投控',ind:'PCB',sig:'買進',sc:4,note:'多層板與HDI受惠AI手機換機潮，稼動率回升'},
-  {code:'5439',ex:'otc',name:'高技',ind:'PCB',sig:'買進',sc:4,note:'特殊規格PCB，利基市場毛利率穩定，法人緩步買入'},
-  {code:'8155',ex:'otc',name:'博智',ind:'PCB',sig:'買進',sc:4,note:'高頻高速PCB佔比提升，AI伺服器背板需求增加'},
-  {code:'2316',ex:'tse',name:'楠梓電',ind:'PCB',sig:'觀察',sc:3,note:'一般PCB為主，等待產品結構升級，注意量能突破'},
-  {code:'6213',ex:'tse',name:'聯茂',ind:'PCB',sig:'強烈買進',sc:5,note:'高頻CCL材料龍頭，低軌衛星與AI伺服器雙題材核心'},
-  {code:'8358',ex:'otc',name:'金居',ind:'PCB',sig:'買進',sc:4,note:'銅箔基板材料，AI伺服器與汽車電子需求帶動'},
-  {code:'4989',ex:'tse',name:'榮科',ind:'PCB',sig:'買進',sc:4,note:'汽車用PCB佔比提升，EV供應鏈切入成效顯現'},
-  {code:'8039',ex:'tse',name:'台虹',ind:'PCB',sig:'買進',sc:4,note:'感光乾膜材料，FPC製程關鍵材料，需求隨智慧手機回溫'},
-  {code:'4973',ex:'otc',name:'廣穎',ind:'PCB',sig:'買進',sc:4,note:'PCB鑽孔用鑽針專業廠，先進製程細孔徑需求持續增加'},
-  {code:'8074',ex:'otc',name:'鉅橡',ind:'PCB',sig:'買進',sc:4,note:'PCB製程用特殊橡膠材料，高階PCB生產耗材需求穩定'},
-  {code:'1303',ex:'tse',name:'南亞',ind:'PCB',sig:'買進',sc:4,note:'覆銅板CCL上游材料龍頭，AI伺服器PCB需求帶動銅箔基板出貨'},
-  {code:'3354',ex:'otc',name:'律勝',ind:'PCB',sig:'買進',sc:4,note:'軟板基材PI膜，AI手機與摺疊機訂單持續增加'},
-  {code:'1815',ex:'otc',name:'富喬',ind:'PCB',sig:'觀察',sc:3,note:'玻璃纖維布供應商，CCL上游材料，靜待景氣回升'},
-  {code:'5340',ex:'otc',name:'建榮',ind:'PCB',sig:'買進',sc:4,note:'特殊PCB表面處理，高端規格產品毛利率佳'},
-  {code:'1802',ex:'tse',name:'台玻',ind:'PCB',sig:'觀察',sc:3,note:'玻璃纖維布上游，CCL材料間接受惠，估值偏低'},
-  {code:'3645',ex:'tse',name:'達邁',ind:'PCB',sig:'買進',sc:4,note:'PI薄膜關鍵材料，FPC與FCCL需求回升，毛利率改善'},
-  {code:'8021',ex:'tse',name:'尖點',ind:'PCB',sig:'買進',sc:4,note:'連接器與PCB週邊，AI手機與穿戴裝置需求帶動出貨'},
-  {code:'5498',ex:'otc',name:'凱崴',ind:'PCB',sig:'買進',sc:4,note:'軟硬複合板專業廠，車用與工控市場佔比提升中'},
-  {code:'1773',ex:'tse',name:'勝一',ind:'半導體',sig:'買進',sc:4,note:'半導體特殊化學品，先進製程用高純度溶劑需求持續增加'},
-  {code:'4755',ex:'tse',name:'三福化',ind:'半導體',sig:'買進',sc:4,note:'半導體用化學品專業廠，先進封裝材料佔比提升中'},
-  {code:'5234',ex:'tse',name:'達興材料',ind:'半導體',sig:'強烈買進',sc:5,note:'光阻劑與顯影液核心廠，先進製程國產化受惠，法人持續布局'},
-  {code:'1727',ex:'tse',name:'中華化',ind:'半導體',sig:'買進',sc:4,note:'半導體製程化學品，濕式蝕刻液與清洗液需求穩定成長'},
-  {code:'4768',ex:'otc',name:'晶呈科技',ind:'半導體',sig:'強烈買進',sc:5,note:'晶圓載具與半導體耗材，先進封裝需求帶動出貨量大增'},
-  {code:'1717',ex:'tse',name:'長興',ind:'半導體',sig:'買進',sc:4,note:'電子化學品與環氧樹脂，半導體封裝材料穩定供應'},
-  {code:'1711',ex:'tse',name:'永光',ind:'半導體',sig:'買進',sc:4,note:'感光材料與光阻相關化學品，半導體與面板雙題材'},
-  {code:'4764',ex:'tse',name:'雙鍵',ind:'半導體',sig:'觀察',sc:3,note:'半導體用特殊氣體與化學品，等待先進製程擴產加速'},
-  {code:'4770',ex:'tse',name:'上品',ind:'半導體',sig:'買進',sc:4,note:'半導體研磨耗材CMP墊片，先進製程滲透率提升'},
-  {code:'5443',ex:'otc',name:'均豪',ind:'半導體',sig:'買進',sc:4,note:'半導體設備維修與改裝，在地化服務需求增加，毛利率高'},
-  {code:'8027',ex:'otc',name:'鈦昇',ind:'半導體',sig:'買進',sc:4,note:'半導體零組件精密加工，先進封裝設備零件需求增加'},
-  {code:'6239',ex:'tse',name:'力成',ind:'半導體',sig:'買進',sc:4,note:'IC封測大廠，HBM與先進封裝需求帶動，AI晶片測試訂單增加'},
-  {code:'6854',ex:'tse',name:'錼創科技-KY',ind:'半導體',sig:'強烈買進',sc:5,note:'Micro LED技術領先，AR/VR顯示核心供應商，蘋果供應鏈受惠'},
-  {code:'3587',ex:'otc',name:'閎康',ind:'半導體',sig:'買進',sc:4,note:'半導體材料分析與失效分析，先進製程良率提升服務需求大'},
-  {code:'3581',ex:'otc',name:'博磊',ind:'半導體',sig:'買進',sc:4,note:'半導體封裝材料，先進封裝用特殊基板材料需求持續成長'},
-  {code:'6438',ex:'tse',name:'迅得',ind:'半導體',sig:'買進',sc:4,note:'半導體搬送設備，晶圓自動化物流需求隨擴產放量'},
-  {code:'2449',ex:'tse',name:'京元電子',ind:'半導體',sig:'買進',sc:4,note:'IC測試產能吃緊，先進封裝測試訂單滿載'},
-  {code:'3264',ex:'otc',name:'欣銓',ind:'半導體',sig:'買進',sc:4,note:'IC測試後段製程需求增，小型封測廠受惠'},
-  {code:'6257',ex:'tse',name:'矽格',ind:'半導體',sig:'買進',sc:4,note:'IC封測專業廠，車用與工控IC封測需求穩定成長'},
-  {code:'3055',ex:'tse',name:'蔚華科',ind:'半導體',sig:'觀察',sc:3,note:'半導體設備代理與維修，等待新設備代理合約落地'},
-  {code:'6829',ex:'otc',name:'千附精密',ind:'半導體',sig:'買進',sc:4,note:'半導體精密零件加工，先進製程設備零組件需求增加'},
-  {code:'6217',ex:'otc',name:'中探針',ind:'半導體',sig:'強烈買進',sc:5,note:'探針卡核心廠商，先進製程測試需求爆發，毛利率持續提升'},
-  {code:'3231',ex:'tse',name:'緯創',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'AI伺服器機架組裝大廠，GB200 NVL72主要供應商，訂單能見度至2026'},
-  {code:'2356',ex:'tse',name:'英業達',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'NVIDIA GB200 NVL72供應商，訂單能見度高，低股價高CP值'},
-  {code:'3706',ex:'tse',name:'神達',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器與邊緣運算設備，企業AI導入加速受惠'},
-  {code:'2324',ex:'tse',name:'仁寶',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器ODM出貨量提升，NB業務回溫雙引擎驅動'},
-  {code:'2376',ex:'tse',name:'技嘉',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'GPU伺服器主機板龍頭，NVIDIA合作夥伴，AI伺服器直接受惠'},
-  {code:'2329',ex:'tse',name:'華泰',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器電源管理IC，AI伺服器用高效率電源需求增加'},
-  {code:'2421',ex:'tse',name:'建準',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'散熱風扇龍頭，AI伺服器散熱需求爆發，毛利率持續提升'},
-  {code:'6230',ex:'tse',name:'尼得科超眾',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'AI伺服器散熱模組，液冷與氣冷雙方案供應，訂單滿載'},
-  {code:'6591',ex:'tse',name:'動力-KY',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器電源供應器，AI伺服器高瓦數電源需求大幅增加'},
-  {code:'2301',ex:'tse',name:'光寶科',ind:'AI伺服器',sig:'買進',sc:4,note:'電源供應器AI伺服器佔比提升，股利政策穩健'},
-  {code:'6282',ex:'tse',name:'康舒',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器電源供應器，高功率產品線出貨持續放量'},
-  {code:'3013',ex:'tse',name:'晟銘電',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器機殼與散熱結構件，AI伺服器組裝需求帶動'},
-  {code:'6117',ex:'tse',name:'迎廣',ind:'AI伺服器',sig:'買進',sc:4,note:'高效能電源供應器，AI伺服器與工作站用高瓦數產品受惠'},
-  {code:'6231',ex:'otc',name:'系微',ind:'AI伺服器',sig:'買進',sc:4,note:'BIOS韌體IP授權，AI伺服器平台導入帶動授權收入成長'},
-  {code:'4919',ex:'tse',name:'新唐',ind:'AI伺服器',sig:'買進',sc:4,note:'微控制器與安全晶片，AI伺服器BMC管理晶片需求增加'},
-  {code:'6290',ex:'otc',name:'良維',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器線材與連接器組裝，高速傳輸線束訂單持續成長'},
+  {code:'6285',ex:'tse',name:'啟碁',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'Starlink地面終端設備供應商，訂單能見度至2026Q2，法人連買',buy:'',sell:'',stop:''},
+  {code:'2485',ex:'tse',name:'兆赫',ind:'低軌衛星',sig:'買進',sc:4,note:'射頻元件供應商，低軌衛星通訊模組受惠，客戶涵蓋歐美系統廠',buy:'',sell:'',stop:''},
+  {code:'4906',ex:'tse',name:'正文',ind:'低軌衛星',sig:'買進',sc:4,note:'網通設備與天線模組製造，衛星地面設備需求成長受惠',buy:'',sell:'',stop:''},
+  {code:'2313',ex:'tse',name:'華通',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'高層PCB打入衛星通訊供應鏈，NVIDIA & SpaceX間接受惠',buy:'',sell:'',stop:''},
+  {code:'2367',ex:'tse',name:'燿華',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星天線用高頻PCB需求增加，毛利率提升中',buy:'',sell:'',stop:''},
+  {code:'6672',ex:'tse',name:'騰輝電子-KY',ind:'低軌衛星',sig:'買進',sc:4,note:'高頻低損耗銅箔基板，低軌衛星通訊設備核心材料',buy:'',sell:'',stop:''},
+  {code:'4909',ex:'otc',name:'新復興',ind:'低軌衛星',sig:'觀察',sc:3,note:'衛星通訊連接器與線材，訂單能見度逐步改善中',buy:'',sell:'',stop:''},
+  {code:'6190',ex:'otc',name:'萬泰科',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星頻段射頻模組設計，小型化產品切入低軌衛星市場',buy:'',sell:'',stop:''},
+  {code:'6821',ex:'otc',name:'聯寶',ind:'低軌衛星',sig:'觀察',sc:3,note:'衛星地面設備組裝代工，觀察訂單放量時機',buy:'',sell:'',stop:''},
+  {code:'3305',ex:'tse',name:'昇貿',ind:'低軌衛星',sig:'買進',sc:4,note:'射頻同軸連接器專業廠，低軌衛星天線連接器需求增加',buy:'',sell:'',stop:''},
+  {code:'2419',ex:'tse',name:'仲琦',ind:'低軌衛星',sig:'買進',sc:4,note:'衛星網通設備製造，Starlink地面設備間接受惠',buy:'',sell:'',stop:''},
+  {code:'3138',ex:'tse',name:'耀登',ind:'低軌衛星',sig:'買進',sc:4,note:'天線與射頻模組，低軌衛星地面終端天線供應鏈布局',buy:'',sell:'',stop:''},
+  {code:'2355',ex:'tse',name:'敬鵬',ind:'低軌衛星',sig:'買進',sc:4,note:'高階PCB製造，衛星通訊設備用高頻板需求增加',buy:'',sell:'',stop:''},
+  {code:'6271',ex:'tse',name:'同欣電',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'衛星通訊用陶瓷封裝元件，低軌衛星核心零件供應商',buy:'',sell:'',stop:''},
+  {code:'3380',ex:'tse',name:'明泰',ind:'低軌衛星',sig:'觀察',sc:3,note:'網通設備廠，Starlink用戶終端設備間接受惠',buy:'',sell:'',stop:''},
+  {code:'6282',ex:'tse',name:'康舒',ind:'低軌衛星',sig:'買進',sc:4,note:'電源供應器，衛星地面站設備電源模組需求成長',buy:'',sell:'',stop:''},
+  {code:'1582',ex:'tse',name:'信錦',ind:'低軌衛星',sig:'買進',sc:4,note:'精密機構件，衛星相控陣天線支架與外殼結構件',buy:'',sell:'',stop:''},
+  {code:'5243',ex:'otc',name:'乙盛-KY',ind:'低軌衛星',sig:'買進',sc:4,note:'鋁合金精密壓鑄，衛星地面終端機殼供應商',buy:'',sell:'',stop:''},
+  {code:'3152',ex:'otc',name:'璟德',ind:'低軌衛星',sig:'強烈買進',sc:5,note:'RF微波元件專業廠，低軌衛星通訊射頻模組核心供應',buy:'',sell:'',stop:''},
+  {code:'4977',ex:'otc',name:'眾達-KY',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光模組散熱解決方案，CPO趨勢下散熱需求爆發，毛利率提升',buy:'',sell:'',stop:''},
+  {code:'4908',ex:'tse',name:'前鼎',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光收發模組組裝代工，800G產品線出貨放量中',buy:'',sell:'',stop:''},
+  {code:'3234',ex:'tse',name:'光環',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光纖環形器核心廠商，CPO與矽光子需求大幅拉升',buy:'',sell:'',stop:''},
+  {code:'6426',ex:'otc',name:'統新',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊被動元件，400G/800G升級帶動訂單成長',buy:'',sell:'',stop:''},
+  {code:'5388',ex:'tse',name:'中磊',ind:'矽光子/CPO',sig:'買進',sc:4,note:'網通設備受惠AI資料中心建置，CPO間接題材',buy:'',sell:'',stop:''},
+  {code:'3596',ex:'tse',name:'智易',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'網通ODM廠，AI資料中心交換器需求帶動出貨成長',buy:'',sell:'',stop:''},
+  {code:'3380',ex:'tse',name:'明泰',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'網通設備廠，等待800G光模組滲透率提升受惠',buy:'',sell:'',stop:''},
+  {code:'2455',ex:'tse',name:'全新',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵磊晶片，光通訊與低軌衛星雙題材加持',buy:'',sell:'',stop:''},
+  {code:'8086',ex:'otc',name:'宏捷科',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵PA與光通訊元件，CPO光引擎核心供應商',buy:'',sell:'',stop:''},
+  {code:'6530',ex:'otc',name:'創威',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光模組測試設備，800G升級帶動測試需求增加',buy:'',sell:'',stop:''},
+  {code:'2426',ex:'tse',name:'鼎元',ind:'矽光子/CPO',sig:'買進',sc:4,note:'LED及光電元件，光通訊應用佔比逐步提升',buy:'',sell:'',stop:''},
+  {code:'8111',ex:'otc',name:'立碁',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'光通訊模組相關，等待訂單能見度進一步明朗',buy:'',sell:'',stop:''},
+  {code:'2413',ex:'tse',name:'環科',ind:'矽光子/CPO',sig:'買進',sc:4,note:'高頻基板材料，矽光子封裝用特殊基板需求增加',buy:'',sell:'',stop:''},
+  {code:'3498',ex:'tse',name:'陽程',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光學鏡頭與精密機構件，CPO封裝設備間接受惠',buy:'',sell:'',stop:''},
+  {code:'3714',ex:'tse',name:'富采',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'磊晶與光電元件，矽光子光源核心供應，法人積極布局',buy:'',sell:'',stop:''},
+  {code:'3701',ex:'tse',name:'大眾控',ind:'矽光子/CPO',sig:'買進',sc:4,note:'網通與光通訊整合方案，AI資料中心需求受惠',buy:'',sell:'',stop:''},
+  {code:'3138',ex:'tse',name:'耀登',ind:'矽光子/CPO',sig:'買進',sc:4,note:'天線與射頻模組，光通訊週邊連接器布局中',buy:'',sell:'',stop:''},
+  {code:'3339',ex:'otc',name:'泰谷',ind:'矽光子/CPO',sig:'觀察',sc:3,note:'光通訊元件代理與組裝，靜待800G大量出貨',buy:'',sell:'',stop:''},
+  {code:'6425',ex:'otc',name:'易發',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光纖連接器與被動元件，資料中心擴建直接受惠',buy:'',sell:'',stop:''},
+  {code:'6147',ex:'tse',name:'頎邦',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'CoWoS與先進封裝基板龍頭，矽光子晶片封裝核心夥伴，法人大買',buy:'',sell:'',stop:''},
+  {code:'2402',ex:'tse',name:'毅嘉科技',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光通訊模組機構件與精密沖壓，CPO光引擎殼體需求增加',buy:'',sell:'',stop:''},
+  {code:'4991',ex:'otc',name:'環宇-KY',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'氮化鎵功率元件，高速光通訊電源管理核心，法人積極布局',buy:'',sell:'',stop:''},
+  {code:'6205',ex:'otc',name:'詮欣',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光纖連接器與光模組封裝，資料中心800G升級直接受惠',buy:'',sell:'',stop:''},
+  {code:'2466',ex:'tse',name:'冠西電',ind:'矽光子/CPO',sig:'買進',sc:4,note:'光電連接器與線纜組件，高速傳輸模組需求持續成長',buy:'',sell:'',stop:''},
+  {code:'8431',ex:'otc',name:'匯鑽科',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'矽光子晶片測試與量測設備，CPO量產必備關鍵設備廠',buy:'',sell:'',stop:''},
+  {code:'6456',ex:'otc',name:'GIS-KY',ind:'矽光子/CPO',sig:'買進',sc:4,note:'精密光學元件與機構件，CPO光引擎封裝結構受惠',buy:'',sell:'',stop:''},
+  {code:'3450',ex:'otc',name:'聯鈞',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'光收發模組打入超大型資料中心，800G訂單大幅成長',buy:'',sell:'',stop:''},
+  {code:'6278',ex:'tse',name:'台表科',ind:'矽光子/CPO',sig:'買進',sc:4,note:'表面聲波濾波器，光通訊與衛星用高頻元件需求增加',buy:'',sell:'',stop:''},
+  {code:'3105',ex:'tse',name:'穩懋',ind:'矽光子/CPO',sig:'強烈買進',sc:5,note:'砷化鎵晶圓代工龍頭，光通訊PA與矽光子驅動IC核心供應',buy:'',sell:'',stop:''},
+  {code:'3189',ex:'tse',name:'景碩',ind:'PCB',sig:'強烈買進',sc:5,note:'IC載板出貨增加，AI需求帶動高毛利產品比重，法人持續買超',buy:'',sell:'',stop:''},
+  {code:'4958',ex:'tse',name:'臻鼎-KY',ind:'PCB',sig:'強烈買進',sc:5,note:'FPC龍頭，iPhone與AI手機供應鏈，訂單能見度高至Q3',buy:'',sell:'',stop:''},
+  {code:'3715',ex:'tse',name:'定穎投控',ind:'PCB',sig:'買進',sc:4,note:'多層板與HDI受惠AI手機換機潮，稼動率回升',buy:'',sell:'',stop:''},
+  {code:'5439',ex:'otc',name:'高技',ind:'PCB',sig:'買進',sc:4,note:'特殊規格PCB，利基市場毛利率穩定，法人緩步買入',buy:'',sell:'',stop:''},
+  {code:'8155',ex:'otc',name:'博智',ind:'PCB',sig:'買進',sc:4,note:'高頻高速PCB佔比提升，AI伺服器背板需求增加',buy:'',sell:'',stop:''},
+  {code:'2316',ex:'tse',name:'楠梓電',ind:'PCB',sig:'觀察',sc:3,note:'一般PCB為主，等待產品結構升級，注意量能突破',buy:'',sell:'',stop:''},
+  {code:'6213',ex:'tse',name:'聯茂',ind:'PCB',sig:'強烈買進',sc:5,note:'高頻CCL材料龍頭，低軌衛星與AI伺服器雙題材核心',buy:'',sell:'',stop:''},
+  {code:'8358',ex:'otc',name:'金居',ind:'PCB',sig:'買進',sc:4,note:'銅箔基板材料，AI伺服器與汽車電子需求帶動',buy:'',sell:'',stop:''},
+  {code:'4989',ex:'tse',name:'榮科',ind:'PCB',sig:'買進',sc:4,note:'汽車用PCB佔比提升，EV供應鏈切入成效顯現',buy:'',sell:'',stop:''},
+  {code:'8039',ex:'tse',name:'台虹',ind:'PCB',sig:'買進',sc:4,note:'感光乾膜材料，FPC製程關鍵材料，需求隨智慧手機回溫',buy:'',sell:'',stop:''},
+  {code:'4973',ex:'otc',name:'廣穎',ind:'PCB',sig:'買進',sc:4,note:'PCB鑽孔用鑽針專業廠，先進製程細孔徑需求持續增加',buy:'',sell:'',stop:''},
+  {code:'8074',ex:'otc',name:'鉅橡',ind:'PCB',sig:'買進',sc:4,note:'PCB製程用特殊橡膠材料，高階PCB生產耗材需求穩定',buy:'',sell:'',stop:''},
+  {code:'1303',ex:'tse',name:'南亞',ind:'PCB',sig:'買進',sc:4,note:'覆銅板CCL上游材料龍頭，AI伺服器PCB需求帶動銅箔基板出貨',buy:'',sell:'',stop:''},
+  {code:'3354',ex:'otc',name:'律勝',ind:'PCB',sig:'買進',sc:4,note:'軟板基材PI膜，AI手機與摺疊機訂單持續增加',buy:'',sell:'',stop:''},
+  {code:'1815',ex:'otc',name:'富喬',ind:'PCB',sig:'觀察',sc:3,note:'玻璃纖維布供應商，CCL上游材料，靜待景氣回升',buy:'',sell:'',stop:''},
+  {code:'5340',ex:'otc',name:'建榮',ind:'PCB',sig:'買進',sc:4,note:'特殊PCB表面處理，高端規格產品毛利率佳',buy:'',sell:'',stop:''},
+  {code:'1802',ex:'tse',name:'台玻',ind:'PCB',sig:'觀察',sc:3,note:'玻璃纖維布上游，CCL材料間接受惠，估值偏低',buy:'',sell:'',stop:''},
+  {code:'3645',ex:'tse',name:'達邁',ind:'PCB',sig:'買進',sc:4,note:'PI薄膜關鍵材料，FPC與FCCL需求回升，毛利率改善',buy:'',sell:'',stop:''},
+  {code:'8021',ex:'tse',name:'尖點',ind:'PCB',sig:'買進',sc:4,note:'連接器與PCB週邊，AI手機與穿戴裝置需求帶動出貨',buy:'',sell:'',stop:''},
+  {code:'5498',ex:'otc',name:'凱崴',ind:'PCB',sig:'買進',sc:4,note:'軟硬複合板專業廠，車用與工控市場佔比提升中',buy:'',sell:'',stop:''},
+  {code:'1773',ex:'tse',name:'勝一',ind:'半導體',sig:'買進',sc:4,note:'半導體特殊化學品，先進製程用高純度溶劑需求持續增加',buy:'',sell:'',stop:''},
+  {code:'4755',ex:'tse',name:'三福化',ind:'半導體',sig:'買進',sc:4,note:'半導體用化學品專業廠，先進封裝材料佔比提升中',buy:'',sell:'',stop:''},
+  {code:'5234',ex:'tse',name:'達興材料',ind:'半導體',sig:'強烈買進',sc:5,note:'光阻劑與顯影液核心廠，先進製程國產化受惠，法人持續布局',buy:'',sell:'',stop:''},
+  {code:'1727',ex:'tse',name:'中華化',ind:'半導體',sig:'買進',sc:4,note:'半導體製程化學品，濕式蝕刻液與清洗液需求穩定成長',buy:'',sell:'',stop:''},
+  {code:'4768',ex:'otc',name:'晶呈科技',ind:'半導體',sig:'強烈買進',sc:5,note:'晶圓載具與半導體耗材，先進封裝需求帶動出貨量大增',buy:'',sell:'',stop:''},
+  {code:'1717',ex:'tse',name:'長興',ind:'半導體',sig:'買進',sc:4,note:'電子化學品與環氧樹脂，半導體封裝材料穩定供應',buy:'',sell:'',stop:''},
+  {code:'1711',ex:'tse',name:'永光',ind:'半導體',sig:'買進',sc:4,note:'感光材料與光阻相關化學品，半導體與面板雙題材',buy:'',sell:'',stop:''},
+  {code:'4764',ex:'tse',name:'雙鍵',ind:'半導體',sig:'觀察',sc:3,note:'半導體用特殊氣體與化學品，等待先進製程擴產加速',buy:'',sell:'',stop:''},
+  {code:'4770',ex:'tse',name:'上品',ind:'半導體',sig:'買進',sc:4,note:'半導體研磨耗材CMP墊片，先進製程滲透率提升',buy:'',sell:'',stop:''},
+  {code:'5443',ex:'otc',name:'均豪',ind:'半導體',sig:'買進',sc:4,note:'半導體設備維修與改裝，在地化服務需求增加，毛利率高',buy:'',sell:'',stop:''},
+  {code:'8027',ex:'otc',name:'鈦昇',ind:'半導體',sig:'買進',sc:4,note:'半導體零組件精密加工，先進封裝設備零件需求增加',buy:'',sell:'',stop:''},
+  {code:'6239',ex:'tse',name:'力成',ind:'半導體',sig:'買進',sc:4,note:'IC封測大廠，HBM與先進封裝需求帶動，AI晶片測試訂單增加',buy:'',sell:'',stop:''},
+  {code:'6854',ex:'tse',name:'錼創科技-KY',ind:'半導體',sig:'強烈買進',sc:5,note:'Micro LED技術領先，AR/VR顯示核心供應商，蘋果供應鏈受惠',buy:'',sell:'',stop:''},
+  {code:'3587',ex:'otc',name:'閎康',ind:'半導體',sig:'買進',sc:4,note:'半導體材料分析與失效分析，先進製程良率提升服務需求大',buy:'',sell:'',stop:''},
+  {code:'3581',ex:'otc',name:'博磊',ind:'半導體',sig:'買進',sc:4,note:'半導體封裝材料，先進封裝用特殊基板材料需求持續成長',buy:'',sell:'',stop:''},
+  {code:'6438',ex:'tse',name:'迅得',ind:'半導體',sig:'買進',sc:4,note:'半導體搬送設備，晶圓自動化物流需求隨擴產放量',buy:'',sell:'',stop:''},
+  {code:'2449',ex:'tse',name:'京元電子',ind:'半導體',sig:'買進',sc:4,note:'IC測試產能吃緊，先進封裝測試訂單滿載',buy:'',sell:'',stop:''},
+  {code:'3264',ex:'otc',name:'欣銓',ind:'半導體',sig:'買進',sc:4,note:'IC測試後段製程需求增，小型封測廠受惠',buy:'',sell:'',stop:''},
+  {code:'6257',ex:'tse',name:'矽格',ind:'半導體',sig:'買進',sc:4,note:'IC封測專業廠，車用與工控IC封測需求穩定成長',buy:'',sell:'',stop:''},
+  {code:'3055',ex:'tse',name:'蔚華科',ind:'半導體',sig:'觀察',sc:3,note:'半導體設備代理與維修，等待新設備代理合約落地',buy:'',sell:'',stop:''},
+  {code:'6829',ex:'otc',name:'千附精密',ind:'半導體',sig:'買進',sc:4,note:'半導體精密零件加工，先進製程設備零組件需求增加',buy:'',sell:'',stop:''},
+  {code:'6217',ex:'otc',name:'中探針',ind:'半導體',sig:'強烈買進',sc:5,note:'探針卡核心廠商，先進製程測試需求爆發，毛利率持續提升',buy:'',sell:'',stop:''},
+  {code:'3231',ex:'tse',name:'緯創',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'AI伺服器機架組裝大廠，GB200 NVL72主要供應商，訂單能見度至2026',buy:'',sell:'',stop:''},
+  {code:'2356',ex:'tse',name:'英業達',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'NVIDIA GB200 NVL72供應商，訂單能見度高，低股價高CP值',buy:'',sell:'',stop:''},
+  {code:'3706',ex:'tse',name:'神達',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器與邊緣運算設備，企業AI導入加速受惠',buy:'',sell:'',stop:''},
+  {code:'2324',ex:'tse',name:'仁寶',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器ODM出貨量提升，NB業務回溫雙引擎驅動',buy:'',sell:'',stop:''},
+  {code:'2376',ex:'tse',name:'技嘉',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'GPU伺服器主機板龍頭，NVIDIA合作夥伴，AI伺服器直接受惠',buy:'',sell:'',stop:''},
+  {code:'2329',ex:'tse',name:'華泰',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器電源管理IC，AI伺服器用高效率電源需求增加',buy:'',sell:'',stop:''},
+  {code:'2421',ex:'tse',name:'建準',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'散熱風扇龍頭，AI伺服器散熱需求爆發，毛利率持續提升',buy:'',sell:'',stop:''},
+  {code:'6230',ex:'tse',name:'尼得科超眾',ind:'AI伺服器',sig:'強烈買進',sc:5,note:'AI伺服器散熱模組，液冷與氣冷雙方案供應，訂單滿載',buy:'',sell:'',stop:''},
+  {code:'6591',ex:'tse',name:'動力-KY',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器電源供應器，AI伺服器高瓦數電源需求大幅增加',buy:'',sell:'',stop:''},
+  {code:'2301',ex:'tse',name:'光寶科',ind:'AI伺服器',sig:'買進',sc:4,note:'電源供應器AI伺服器佔比提升，股利政策穩健',buy:'',sell:'',stop:''},
+  {code:'6282',ex:'tse',name:'康舒',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器電源供應器，高功率產品線出貨持續放量',buy:'',sell:'',stop:''},
+  {code:'3013',ex:'tse',name:'晟銘電',ind:'AI伺服器',sig:'買進',sc:4,note:'伺服器機殼與散熱結構件，AI伺服器組裝需求帶動',buy:'',sell:'',stop:''},
+  {code:'6117',ex:'tse',name:'迎廣',ind:'AI伺服器',sig:'買進',sc:4,note:'高效能電源供應器，AI伺服器與工作站用高瓦數產品受惠',buy:'',sell:'',stop:''},
+  {code:'6231',ex:'otc',name:'系微',ind:'AI伺服器',sig:'買進',sc:4,note:'BIOS韌體IP授權，AI伺服器平台導入帶動授權收入成長',buy:'',sell:'',stop:''},
+  {code:'4919',ex:'tse',name:'新唐',ind:'AI伺服器',sig:'買進',sc:4,note:'微控制器與安全晶片，AI伺服器BMC管理晶片需求增加',buy:'',sell:'',stop:''},
+  {code:'6290',ex:'otc',name:'良維',ind:'AI伺服器',sig:'買進',sc:4,note:'AI伺服器線材與連接器組裝，高速傳輸線束訂單持續成長',buy:'',sell:'',stop:''},
 
 
 
@@ -528,6 +557,7 @@ function calcMACD(closes){
 // ── 狀態 ───────────────────────────────────────────────────────
 const CF_PROXY = 'https://cool-limit-f6a0twse-proxy.kan04130013.workers.dev';
 let PD={}, HIST={}, IND={}, DISP=new Set();
+// 目標價直接寫在 STOCKS 陣列的 buy/sell/stop 欄位
 let rtTimer = null;   // 盤中自動更新 timer
 let isTrading = false; // 是否盤中
 
@@ -709,6 +739,8 @@ async function loadAll(){
   setSt('ld','取得上市收盤價...');
   setProg(5);
   let loaded=0;
+
+
 
   // 使用 Cloudflare Worker proxy（全球IP，不被TWSE封鎖）
   const fetchTSE = async () => {
@@ -1180,25 +1212,27 @@ function calcTargets(code, close){
 }
 
 function ptCell(code, close){
-  const w = watchList.find(x=>x.code===code);
-  // 優先使用手動設定，否則自動計算
-  const auto = calcTargets(code, close);
-  const buy  = w?.buy  || auto?.buy  || '';
-  const sell = w?.sell || auto?.sell || '';
-  const stop = w?.stop || auto?.stop || '';
+  const s     = STOCKS.find(x=>x.code===code);  // 直接從 STOCKS 陣列讀取
+  const w     = watchList.find(x=>x.code===code); // 手動次之
+  const auto  = calcTargets(code, close); // 自動計算最後
+
+  const buy  = s?.buy  || w?.buy  || auto?.buy  || '';
+  const sell = s?.sell || w?.sell || auto?.sell || '';
+  const stop = s?.stop || w?.stop || auto?.stop || '';
 
   if(!buy && !sell && !stop) return `<span style="font-size:11px;color:#cbd5e0">—</span>`;
 
   const lines=[];
   const fmt=(val,cls,label)=>{
     if(!val) return;
-    const hit=cls==='pt-buy'?close<=parseFloat(val):cls==='pt-stop'?close<=parseFloat(val):close>=parseFloat(val);
+    const hit=cls==='pt-buy'?close>=parseFloat(val):cls==='pt-stop'?close<=parseFloat(val):close>=parseFloat(val);
     lines.push(`<span class="pt ${cls}${hit?' pt-hit':''}">${label}${val}</span>`);
   };
   fmt(buy, 'pt-buy','買↑');
   fmt(sell,'pt-sell','賣↑');
   fmt(stop,'pt-stop','損↓');
-  return `<div class="price-targets">${lines.join('')}</div>`;
+  const src = s?.buy ? '📋' : w?.buy ? '✏️' : '🤖';
+  return `<div class="price-targets">${lines.join('')}<span style="font-size:9px;color:#94a3b8;margin-left:2px">${src}</span></div>`;
 }
 
 // ── KD 徽章 ───────────────────────────────────────────────────
@@ -1313,10 +1347,65 @@ async function openDet(code){
   }
 
   document.getElementById('det-note').textContent=s.note;
+
+  // 目標價格區塊
+  if(p && p.close){
+    const auto = calcTargets(s.code, p.close);
+    const w = watchList.find(x=>x.code===s.code);
+    document.getElementById('det-targets').style.display='';
+    document.getElementById('det-targets').dataset.code = s.code;
+    // 填入手動值（若有），否則留空讓 placeholder 顯示自動值
+    document.getElementById('tp-buy').value  = w?.buy  || '';
+    document.getElementById('tp-sell').value = w?.sell || '';
+    document.getElementById('tp-stop').value = w?.stop || '';
+    // 顯示自動計算參考值
+    document.getElementById('tp-buy-auto').textContent  = auto ? `自動: ${auto.buy}` : '';
+    document.getElementById('tp-sell-auto').textContent = auto ? `自動: ${auto.sell}` : '';
+    document.getElementById('tp-stop-auto').textContent = auto ? `自動: ${auto.stop}` : '';
+    document.getElementById('tp-saved').style.display='none';
+  } else {
+    document.getElementById('det-targets').style.display='none';
+  }
+
   document.getElementById('det').className='det on';
   loadChart(s,p);
 }
 function closeDet(){document.getElementById('det').className='det';if(detChart){detChart.destroy();detChart=null}}
+
+function saveTargets(){
+  const code = document.getElementById('det-targets').dataset.code;
+  if(!code) return;
+  const buy  = document.getElementById('tp-buy').value.trim();
+  const sell = document.getElementById('tp-sell').value.trim();
+  const stop = document.getElementById('tp-stop').value.trim();
+  let w = watchList.find(x=>x.code===code);
+  if(!w){ w={code}; watchList.push(w); }
+  if(buy)  w.buy=buy;  else delete w.buy;
+  if(sell) w.sell=sell; else delete w.sell;
+  if(stop) w.stop=stop; else delete w.stop;
+  localStorage.setItem('wl', JSON.stringify(watchList));
+  const saved = document.getElementById('tp-saved');
+  saved.style.display='';
+  setTimeout(()=>saved.style.display='none', 2000);
+  applyFilt();
+}
+
+function clearTargets(){
+  const code = document.getElementById('det-targets').dataset.code;
+  if(!code) return;
+  const idx = watchList.findIndex(x=>x.code===code);
+  if(idx>=0){
+    delete watchList[idx].buy;
+    delete watchList[idx].sell;
+    delete watchList[idx].stop;
+    if(!watchList[idx].alert) watchList.splice(idx,1);
+    localStorage.setItem('wl', JSON.stringify(watchList));
+  }
+  document.getElementById('tp-buy').value='';
+  document.getElementById('tp-sell').value='';
+  document.getElementById('tp-stop').value='';
+  applyFilt();
+}
 
 async function loadChart(s,p){
   if(detChart){detChart.destroy();detChart=null}
