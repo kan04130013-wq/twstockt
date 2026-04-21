@@ -761,43 +761,24 @@ async function loadAll(){
 
   setSt('ld','取得上櫃收盤價...');
   try{
-    let rows=null;
-    // 方法1: Cloudflare Worker proxy（最可靠）
-    try{
-      const r=await fetch(`${CF_PROXY}?type=otc`);
-      if(r.ok){ const d=await r.json(); if(!d.error&&Array.isArray(d)) rows=d; }
-    }catch(e){}
-    // 方法2: Vercel proxy
-    if(!rows){
-      try{
-        const r=await fetch('/api/stock?type=otc');
-        if(r.ok){ const d=await r.json(); if(!d.error&&Array.isArray(d)) rows=d; }
-      }catch(e){}
-    }
-    // 方法3: 直接呼叫 TPEx
-    if(!rows){
-      try{
-        const r=await fetch('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes',{
-          headers:{'Accept':'application/json'}
-        });
-        if(r.ok){ const d=await r.json(); if(Array.isArray(d)) rows=d; }
-      }catch(e){}
-    }
-    if(rows){
-      const map={}; rows.forEach(row=>map[row.SecuritiesCompanyCode]=row);
-      STOCKS.filter(s=>s.ex==='otc').forEach(s=>{
-        const row=map[s.code]; if(!row) return;
-        const close=parseFloat(row.Close)||0;
-        const chg=parseFloat(row.Change)||0;
-        const prev=close-chg;
-        PD[s.code]={close,chg,chgPct:prev?chg/prev*100:0,
-          vol:parseInt((row.TradeVolume||'0').replace(/,/g,''))/1000,
-          open:parseFloat(row.Open)||0,high:parseFloat(row.High)||0,low:parseFloat(row.Low)||0,
-          date:row.Date||'',src:'TPEx'};
+    // TPEx 封鎖外部IP，改用 MIS API 抓上櫃股票（同樣支援 otc_ 前綴）
+    const otcCodes = STOCKS.filter(s=>s.ex==='otc').map(s=>`otc_${s.code}.tw`).join(',');
+    const r = await fetch(`${CF_PROXY}?type=realtime&codes=${encodeURIComponent(otcCodes)}`);
+    if(r.ok){
+      const data = await r.json();
+      (data.stocks||[]).forEach(s=>{
+        if(!s.code||!s.close) return;
+        PD[s.code]={
+          close:s.close, chg:s.chg, chgPct:s.chgPct,
+          open:s.open, high:s.high, low:s.low,
+          vol:Math.round(s.vol/1000),
+          date:s.time?'盤中即時':'收盤後', src:'TPEx',
+          isRT: checkTradingHours()
+        };
         loaded++;
       });
     }
-  }catch(e){console.warn('OTC:',e.message)}
+  }catch(e){console.warn('OTC MIS:',e.message)}
 
   // 計算技術指標（用現有收盤價模擬近期走勢）
   STOCKS.forEach(s=>{
