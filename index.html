@@ -1150,18 +1150,54 @@ function applyFilt(){
 }
 
 // ── 目標價格顯示 ───────────────────────────────────────────────
+function calcTargets(code, close){
+  if(!close) return null;
+  const ind = IND[code];
+  const kd = ind?.kd?.k ?? 50;
+  const macdBull = ind?.macd?.bull ?? false;
+
+  // 根據 KD 與 MACD 動態調整目標幅度
+  let buyPct, sellPct, stopPct;
+  if(kd < 20){
+    // 超賣：買進目標較小（已接近低點），停損較緊
+    buyPct  = 1.06; sellPct = 1.15; stopPct = 0.94;
+  } else if(kd > 80){
+    // 超買：買進目標較大（強勢），停損較寬
+    buyPct  = 1.10; sellPct = 1.20; stopPct = 0.92;
+  } else {
+    // 中性
+    buyPct  = 1.08; sellPct = 1.15; stopPct = 0.93;
+  }
+  // MACD 多頭時目標略上調
+  if(macdBull){ sellPct += 0.03; }
+
+  const fmt = v => (Math.round(v * 10) / 10).toFixed(1);
+  return {
+    buy:  fmt(close * buyPct),
+    sell: fmt(close * sellPct),
+    stop: fmt(close * stopPct),
+  };
+}
+
 function ptCell(code, close){
-  const w=watchList.find(x=>x.code===code);
-  if(!w) return `<span style="font-size:10px;color:#3f567a">—</span>`;
+  const w = watchList.find(x=>x.code===code);
+  // 優先使用手動設定，否則自動計算
+  const auto = calcTargets(code, close);
+  const buy  = w?.buy  || auto?.buy  || '';
+  const sell = w?.sell || auto?.sell || '';
+  const stop = w?.stop || auto?.stop || '';
+
+  if(!buy && !sell && !stop) return `<span style="font-size:11px;color:#cbd5e0">—</span>`;
+
   const lines=[];
   const fmt=(val,cls,label)=>{
     if(!val) return;
     const hit=cls==='pt-buy'?close<=parseFloat(val):cls==='pt-stop'?close<=parseFloat(val):close>=parseFloat(val);
     lines.push(`<span class="pt ${cls}${hit?' pt-hit':''}">${label}${val}</span>`);
   };
-  fmt(w.buy,'pt-buy','買↓');
-  fmt(w.sell,'pt-sell','賣↑');
-  fmt(w.stop,'pt-stop','損↓');
+  fmt(buy, 'pt-buy','買↑');
+  fmt(sell,'pt-sell','賣↑');
+  fmt(stop,'pt-stop','損↓');
   return `<div class="price-targets">${lines.join('')}</div>`;
 }
 
