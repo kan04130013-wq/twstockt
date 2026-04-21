@@ -526,6 +526,7 @@ function calcMACD(closes){
 }
 
 // ── 狀態 ───────────────────────────────────────────────────────
+const CF_PROXY = 'https://cool-limit-f6a0twse-proxy.kan04130013.workers.dev';
 let PD={}, HIST={}, IND={}, DISP=new Set();
 let rtTimer = null;   // 盤中自動更新 timer
 let isTrading = false; // 是否盤中
@@ -710,8 +711,6 @@ async function loadAll(){
   let loaded=0;
 
   // 使用 Cloudflare Worker proxy（全球IP，不被TWSE封鎖）
-  const CF_PROXY = 'https://cool-limit-f6a0twse-proxy.kan04130013.workers.dev';
-
   const fetchTSE = async () => {
     // 方法1: Cloudflare Worker proxy
     try{
