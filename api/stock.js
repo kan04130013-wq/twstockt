@@ -50,6 +50,7 @@ export default async function handler(req, res) {
     revenue_tse: `https://www.twse.com.tw/rwd/zh/cgData/t21sc04?date=${date||twDate}&response=json`,
     chip_tse:    `https://www.twse.com.tw/rwd/zh/fund/T86?date=${date||twDate}&selectType=ALL&response=json`,
     chip_otc:    'https://www.tpex.org.tw/openapi/v1/tpex_mainboard_3major_investors_daily',
+    quarterly:   `https://www.twse.com.tw/rwd/zh/finance/t163sb05?year=${req.query.year||new Date().getFullYear()}&season=${req.query.q||1}&response=json`,
   };
   const referers = {
     tse:'https://www.twse.com.tw/', otc:'https://www.tpex.org.tw/',
