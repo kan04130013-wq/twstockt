@@ -236,6 +236,7 @@ tr:last-child td{border-bottom:none}
         <span class="det-c" id="det-c">—</span>
         <span class="det-meta" id="det-meta"></span>
       </div>
+      <div id="det-disp" style="display:none;margin-bottom:10px"></div>
       <div class="det-mg" id="det-mg"></div>
       <div class="ind-grid" id="det-ind"></div>
       <!-- 目標價格區塊 -->
@@ -1278,8 +1279,10 @@ function renderTbl(){
     const dtCell=p?`<span style="font-size:10px;color:#3f567a">${p.date}</span>`:'—';
     return `<tr class="drow" onclick="openDet('${s.code}')" style="${DISP.has(s.code)?'background:#fff5f5':''}">
       <td class="code">${s.code}</td>
-      <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
+      <td style="font-weight:500">${s.name}</td>
       <td>${ib(s.ind)}</td>
+      <td><span style="font-size:11px;padding:2px 7px;border-radius:4px;font-weight:600;${s.ex==='tse'?'background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe':'background:#f0fdf4;color:#16a34a;border:1px solid #86efac'}">${s.ex==='tse'?'上市':'上櫃'}</span></td>
+      <td>${dispCell(s.code)}</td>
       <td>${pCell}</td>
       <td>${cCell}</td>
       <td>${ptCell(s.code, p?.close||0)}</td>
@@ -1326,6 +1329,18 @@ async function openDet(code){
   document.getElementById('det-c').textContent=p?(p.chg>=0?'+':'')+p.chgPct.toFixed(2)+'%':'—';
   document.getElementById('det-c').className='det-c '+(p?cc(p.chg):'');
   document.getElementById('det-meta').textContent=p?`(${p.src} · ${p.date})`:'';
+  // 處置股顯示
+  const dispEl = document.getElementById('det-disp');
+  if(dispEl){
+    if(DISP.has(code)){
+      const info = DISP_INFO[code]||{};
+      const dateStr = info.startDate && info.endDate ? `${info.startDate}～${info.endDate}` : '處置中';
+      dispEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;font-size:13px;font-weight:600">⛔ 處置股　${dateStr}　交易受限，請注意風險</span>`;
+      dispEl.style.display='';
+    } else {
+      dispEl.style.display='none';
+    }
+  }
   document.getElementById('det-mg').innerHTML=[
     {l:'開盤',v:p?p.open.toFixed(2):'—'},
     {l:'最高',v:p?p.high.toFixed(2):'—',c:'up'},
