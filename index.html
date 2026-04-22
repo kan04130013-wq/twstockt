@@ -200,6 +200,7 @@ tr:last-child td{border-bottom:none}
     <div class="page-tab on" onclick="switchPage('market',this)">市場總覽</div>
     <div class="page-tab" onclick="switchPage('watchlist',this)">自選雷達</div>
     <div class="page-tab" onclick="switchPage('revenue',this)">月營收</div>
+    <div class="page-tab" onclick="switchPage('quarterly',this)">季營收</div>
     <div class="page-tab" onclick="switchPage('chip',this)">籌碼追蹤</div>
     <div class="page-tab" onclick="switchPage('radar',this)">飆股雷達</div>
   </div>
@@ -347,6 +348,37 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
     <div style="font-size:11px;color:#3f567a;margin-top:6px">※ 自選股資料儲存於本機瀏覽器，清除瀏覽器資料後會消失</div>
+  </div>
+
+  <!-- 季營收頁 -->
+  <div id="page-quarterly" style="display:none">
+    <div class="watchlist-toolbar">
+      <button class="wl-btn" onclick="loadQuarterly()">↻ 載入最新季營收</button>
+      <select id="qtr-sort" style="padding:6px 10px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#1a202c;font-size:14px;outline:none">
+        <option value="yoy-d">季增率 ▼（最高優先）</option>
+        <option value="yoy-a">季增率 ▲（最低優先）</option>
+        <option value="qoq-d">季增率QoQ ▼</option>
+        <option value="rev-d">單季營收 ▼</option>
+      </select>
+      <span class="wl-note" id="qtr-status">點擊載入按鈕取得最新季營收資料</span>
+    </div>
+    <div class="tbl-card">
+      <div class="tbl-sc">
+        <table>
+          <thead><tr>
+            <th>代號</th><th>名稱</th><th>產業</th><th>市場</th>
+            <th>最新季別</th>
+            <th>單季營收(千)</th>
+            <th>季增率%（YoY）</th>
+            <th>季增率%（QoQ）</th>
+            <th>前季營收(千)</th>
+            <th>前前季營收(千)</th>
+            <th>現價</th><th>漲跌%</th>
+          </tr></thead>
+          <tbody id="qtr-tbl"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- 月營收頁 -->
@@ -902,7 +934,7 @@ async function loadAll(){
 function switchPage(name, el){
   document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
-  ['market','watchlist','revenue','chip','radar'].forEach(p=>{
+  ['market','watchlist','revenue','quarterly','chip','radar'].forEach(p=>{
     const el=document.getElementById('page-'+p);
     if(el) el.style.display=p===name?'':'none';
   });
@@ -996,6 +1028,117 @@ function renderRevenue(){
   }).join('');
 }
 document.getElementById('rev-sort').addEventListener('change', renderRevenue);
+
+// ── 季營收 ────────────────────────────────────────────────────
+let quarterlyData = {}; // {code: {q1:{rev,yoy,qoq,label}, q2:..., q3:...}}
+
+async function loadQuarterly(){
+  document.getElementById('qtr-status').textContent = '載入中...';
+  quarterlyData = {};
+
+  // TWSE 季財報 API: 抓最近 3 季
+  // 計算近 3 季的年季
+  const quarters = [];
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1;
+  // 目前季別
+  let q = month <= 3 ? 4 : month <= 6 ? 1 : month <= 9 ? 2 : 3;
+  let qYear = month <= 3 ? year - 1 : year;
+  // 若在季初可能還未公布，往前退一季
+  for(let i = 0; i < 4; i++){
+    quarters.push({ year: qYear, q });
+    q--;
+    if(q === 0){ q = 4; qYear--; }
+  }
+
+  let loaded = false;
+  for(const qt of quarters){
+    try{
+      const url = `/api/stock?type=quarterly&year=${qt.year}&q=${qt.q}`;
+      const r = await fetch(url);
+      if(!r.ok) continue;
+      const data = await r.json();
+      if(!data.data || !data.data.length) continue;
+
+      const label = `${qt.year}Q${qt.q}`;
+      data.data.forEach(row => {
+        const code = row[0]?.trim();
+        if(!code) return;
+        const rev = parseInt((row[2]||'0').replace(/,/g,'')) || 0;
+        const yoy = parseFloat(row[4]||0);
+        if(!quarterlyData[code]) quarterlyData[code] = { quarters: [] };
+        quarterlyData[code].quarters.push({ label, rev, yoy });
+      });
+      loaded = true;
+      document.getElementById('qtr-status').textContent =
+        `已載入最新季別：${label}，共 ${Object.keys(quarterlyData).length} 筆`;
+      break;
+    }catch(e){ console.warn('quarterly error', e); }
+  }
+
+  if(!loaded){
+    // 嘗試用月營收累計推算
+    if(Object.keys(revenueData).length > 0){
+      document.getElementById('qtr-status').textContent = '季財報暫無法取得，顯示月累計推算值';
+    } else {
+      document.getElementById('qtr-status').textContent = '季營收資料暫無法取得，請先載入月營收';
+    }
+  }
+  renderQuarterly();
+}
+
+function renderQuarterly(){
+  const sortMode = document.getElementById('qtr-sort').value;
+  let list = STOCKS.map(s => {
+    const qd = quarterlyData[s.code];
+    const rv = revenueData[s.code];
+    const p = PD[s.code];
+    // 若有季財報用季財報，否則用月累計推算
+    let q1=null, q2=null, q3=null;
+    if(qd && qd.quarters.length > 0){
+      q1 = qd.quarters[0];
+      q2 = qd.quarters[1] || null;
+      q3 = qd.quarters[2] || null;
+    } else if(rv){
+      // 用當年累計推算
+      q1 = { label:'累計推算', rev: rv.cumRev, yoy: rv.cumYoy };
+    }
+    const qoq = (q1 && q2 && q2.rev) ? ((q1.rev - q2.rev) / q2.rev * 100) : null;
+    return { ...s, p, q1, q2, q3, qoq };
+  }).filter(s => s.q1);
+
+  list.sort((a,b) => {
+    if(sortMode==='yoy-d') return (b.q1?.yoy||0)-(a.q1?.yoy||0);
+    if(sortMode==='yoy-a') return (a.q1?.yoy||0)-(b.q1?.yoy||0);
+    if(sortMode==='qoq-d') return (b.qoq||0)-(a.qoq||0);
+    if(sortMode==='rev-d') return (b.q1?.rev||0)-(a.q1?.rev||0);
+    return 0;
+  });
+
+  const cc2 = v => v > 0 ? 'up' : v < 0 ? 'dn' : 'fl';
+  const pctCell = v => v!=null ? `<span class="${cc2(v)}">${v>=0?'+':''}${v.toFixed(1)}%</span>` : '—';
+  const numCell = v => v ? v.toLocaleString() : '—';
+
+  document.getElementById('qtr-tbl').innerHTML = list.map(s => {
+    const p = s.p;
+    return `<tr class="drow" onclick="openDet('${s.code}')">
+      <td class="code">${s.code}</td>
+      <td style="font-weight:500">${s.name}</td>
+      <td>${ib(s.ind)}</td>
+      <td><span style="font-size:11px;padding:2px 7px;border-radius:4px;font-weight:600;${s.ex==='tse'?'background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe':'background:#f0fdf4;color:#16a34a;border:1px solid #86efac'}">${s.ex==='tse'?'上市':'上櫃'}</span></td>
+      <td style="font-size:12px;color:#64748b">${s.q1?.label||'—'}</td>
+      <td class="mono" style="font-size:13px;font-weight:600">${numCell(s.q1?.rev)}</td>
+      <td>${pctCell(s.q1?.yoy)}</td>
+      <td>${pctCell(s.qoq)}</td>
+      <td class="mono" style="font-size:12px;color:#64748b">${numCell(s.q2?.rev)}</td>
+      <td class="mono" style="font-size:12px;color:#94a3b8">${numCell(s.q3?.rev)}</td>
+      <td>${p ? `<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>` : '—'}</td>
+      <td>${p ? `<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>` : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+document.getElementById('qtr-sort').addEventListener('change', renderQuarterly);
 
 // ── 籌碼追蹤 ──────────────────────────────────────────────────
 let chipData = {};
