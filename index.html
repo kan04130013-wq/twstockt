@@ -275,7 +275,7 @@ tr:last-child td{border-bottom:none}
       <div class="tbl-sc">
         <table>
           <thead><tr>
-            <th>代號</th><th>名稱</th><th>產業</th><th>市場</th>
+            <th>代號</th><th>名稱</th><th>產業</th><th>市場</th><th>處置</th>
             <th onclick="srt('p')">收盤價 ↕</th>
             <th onclick="srt('chg')">漲跌% ↕</th>
             <th>目標價格</th>
@@ -714,36 +714,22 @@ async function fetchDisposition(){
   }catch(e){ console.warn('disposition:', e.message); }
 
   if(DISP.size > 0){
-    STOCKS.forEach(s=>{
-      if(DISP.has(s.code)){
-        const info = DISP_INFO[s.code]||{};
-        const dateStr = info.startDate && info.endDate
-          ? `${info.startDate} ~ ${info.endDate}`
-          : info.startDate || '日期未知';
-        const key = `disp-${s.code}-${new Date().toDateString()}`;
-        if(!alertsFired.has(key)){
-          alertsFired.add(key);
-          const box = document.getElementById('alertsBox');
-          const el = document.createElement('div');
-          el.className = 'alert-item alert-sell';
-          el.innerHTML = `<span class="alert-icon">⛔</span><span><b>${s.name}(${s.code})</b> 為<b>處置股</b>　處置期間：${dateStr}　交易受限，請注意風險！</span><span class="alert-close" onclick="this.parentElement.remove()">✕</span>`;
-          box.insertBefore(el, box.firstChild);
-        }
-      }
-    });
+    // 不再顯示頂部警報，改在表格內行內顯示
   }
   applyFilt();
 }
 
-// 處置標籤 HTML
-function dispBadge(code){
-  if(!DISP.has(code)) return '';
+// 處置標籤 HTML（表格欄位用）
+function dispCell(code){
+  if(!DISP.has(code)) return '<span style="color:#e2e8f0">—</span>';
   const info = DISP_INFO[code]||{};
   const tip = info.startDate && info.endDate
-    ? `處置期間：${info.startDate}～${info.endDate}`
+    ? `${info.startDate}～${info.endDate}`
     : '處置中';
-  return `<span title="${tip}" style="margin-left:4px;font-size:10px;padding:1px 6px;border-radius:3px;background:rgba(232,64,64,.2);color:#f87171;border:1px solid rgba(232,64,64,.4);cursor:help">⛔處置 ${info.startDate?info.startDate:''}</span>`;
+  return `<span title="處置期間：${tip}" style="display:inline-flex;align-items:center;gap:3px;font-size:11px;padding:3px 8px;border-radius:5px;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;font-weight:700;cursor:help;white-space:nowrap">⛔ ${tip}</span>`;
 }
+
+function dispBadge(code){ return ''; } // 舊函式保留為空，不再使用
 
 function checkAlerts(){
   // 檢查自選股警報
@@ -967,6 +953,7 @@ function renderRevenue(){
       <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
       <td>${ib(s.ind)}</td>
       <td><span style="font-size:11px;padding:2px 7px;border-radius:4px;font-weight:600;${s.ex==='tse'?'background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe':'background:#f0fdf4;color:#16a34a;border:1px solid #86efac'}">${s.ex==='tse'?'上市':'上櫃'}</span></td>
+      <td>${dispCell(s.code)}</td>
       <td class="mono" style="font-size:12px">${revCell}</td>
       <td>${momCell}</td><td>${yoyCell}</td>
       <td class="mono" style="font-size:12px">${cumCell}</td>
@@ -1289,7 +1276,7 @@ function renderTbl(){
     const pCell=p?`<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>`:`<span class="pld">—</span>`;
     const cCell=p?`<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>`:'—';
     const dtCell=p?`<span style="font-size:10px;color:#3f567a">${p.date}</span>`:'—';
-    return `<tr class="drow" onclick="openDet('${s.code}')" style="${DISP.has(s.code)?'background:rgba(232,64,64,.06)':''}">
+    return `<tr class="drow" onclick="openDet('${s.code}')" style="${DISP.has(s.code)?'background:#fff5f5':''}">
       <td class="code">${s.code}</td>
       <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
       <td>${ib(s.ind)}</td>
