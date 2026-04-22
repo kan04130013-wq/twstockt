@@ -154,6 +154,11 @@ tr:last-child td{border-bottom:none}
 .wl-btn:hover{background:#dbeafe}
 .wl-note{font-size:12px;color:#94a3b8}
 
+/* 個股分頁 */
+.det-tab{padding:8px 18px;font-size:14px;font-weight:500;cursor:pointer;color:#64748b;border:none;background:transparent;border-bottom:3px solid transparent;transition:all .15s;margin-bottom:-2px}
+.det-tab.on{color:#2563eb;border-bottom-color:#2563eb;font-weight:700}
+.det-tab:hover{color:#2563eb}
+
 /* 頁尾 */
 .foot{text-align:center;font-size:12px;color:#94a3b8;padding:14px 0;border-top:1px solid #e2e8f0;margin-top:8px;line-height:2}
 </style>
@@ -223,22 +228,50 @@ tr:last-child td{border-bottom:none}
     </div>
 
     <div class="det" id="det">
+      <!-- 個股標題 -->
       <div class="det-hdr">
-        <div>
-          <span class="code" style="font-size:15px" id="det-code"></span>
-          <span style="font-size:14px;font-weight:600;margin-left:6px" id="det-nm"></span>
-          <span id="det-ib" style="margin-left:6px"></span>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="code" style="font-size:18px" id="det-code"></span>
+          <span style="font-size:17px;font-weight:700" id="det-nm"></span>
+          <span id="det-ib" style="margin-left:2px"></span>
         </div>
         <div class="xbtn" onclick="closeDet()">&#x2715;</div>
       </div>
+      <!-- 股價列 -->
       <div class="det-pr">
         <span class="det-p" id="det-p">—</span>
         <span class="det-c" id="det-c">—</span>
         <span class="det-meta" id="det-meta"></span>
       </div>
       <div id="det-disp" style="display:none;margin-bottom:10px"></div>
+      <!-- 基本數據 -->
       <div class="det-mg" id="det-mg"></div>
-      <div class="ind-grid" id="det-ind"></div>
+      <!-- 分頁切換 -->
+      <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:14px">
+        <button class="det-tab on" onclick="switchDetTab('chart',this)">📈 走勢圖</button>
+        <button class="det-tab" onclick="switchDetTab('tech',this)">📊 技術分析</button>
+        <button class="det-tab" onclick="switchDetTab('chip',this)">🏦 籌碼</button>
+        <button class="det-tab" onclick="switchDetTab('target',this)">🎯 目標價</button>
+      </div>
+      <!-- 走勢圖分頁 -->
+      <div id="det-tab-chart">
+        <div class="chart-box" style="height:220px"><canvas id="det-chart" role="img" aria-label="個股走勢"></canvas></div>
+        <div id="det-note" class="det-note" style="margin-top:10px"></div>
+      </div>
+      <!-- 技術分析分頁 -->
+      <div id="det-tab-tech" style="display:none">
+        <div class="ind-grid" id="det-ind"></div>
+        <div id="det-tech-extra" style="margin-top:10px"></div>
+        <div id="det-note-tech" class="det-note" style="margin-top:10px"></div>
+      </div>
+      <!-- 籌碼分頁 -->
+      <div id="det-tab-chip" style="display:none">
+        <div id="det-chip-content" style="min-height:120px;display:flex;align-items:center;justify-content:center">
+          <span style="color:#94a3b8">載入中...</span>
+        </div>
+      </div>
+      <!-- 目標價分頁 -->
+      <div id="det-tab-target" style="display:none">
       <!-- 目標價格區塊 -->
       <div id="det-targets" style="display:none;margin-bottom:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px">
         <div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📊 目標價格（法人參考）</div>
@@ -268,9 +301,8 @@ tr:last-child td{border-bottom:none}
           <span id="tp-saved" style="font-size:12px;color:#16a34a;display:none">✓ 已儲存</span>
         </div>
       </div>
-      <div class="chart-box"><canvas id="det-chart" role="img" aria-label="個股走勢">走勢圖</canvas></div>
-      <div class="det-note" id="det-note"></div>
-    </div>
+      </div><!-- end det-tab-target -->
+    </div><!-- end det -->
 
     <div class="tbl-card">
       <div class="tbl-sc">
@@ -1374,7 +1406,8 @@ async function openDet(code){
     document.getElementById('det-ind').innerHTML='';
   }
 
-  document.getElementById('det-note').textContent=s.note;
+  const detNote = document.getElementById('det-note');
+  if(detNote) detNote.textContent = s.note || '';
 
   // 目標價格區塊
   if(p && p.close){
@@ -1396,8 +1429,108 @@ async function openDet(code){
   }
 
   document.getElementById('det').className='det on';
+  document.getElementById('det').dataset.code = code;
+  // 重置到走勢圖分頁
+  switchDetTab('chart', document.querySelector('.det-tab'));
+  // 技術分析分頁也填入備注
+  const noteT = document.getElementById('det-note-tech');
+  if(noteT) noteT.textContent = s.note || '';
   loadChart(s,p);
 }
+function switchDetTab(tab, btn){
+  ['chart','tech','chip','target'].forEach(t=>{
+    const el=document.getElementById(`det-tab-${t}`);
+    if(el) el.style.display=t===tab?'':'none';
+  });
+  document.querySelectorAll('.det-tab').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  if(tab==='chip') loadChipDet(document.getElementById('det').dataset.code);
+}
+
+async function loadChipDet(code){
+  const el=document.getElementById('det-chip-content');
+  if(!el||!code) return;
+  el.innerHTML='<span style="color:#94a3b8;font-size:14px">載入中...</span>';
+  try{
+    const s=STOCKS.find(x=>x.code===code);
+    let foreign=0,invest=0,dealer=0,foreignCum=0,investCum=0,dealerCum=0,dateStr='';
+    if(s?.ex==='tse'){
+      const r=await fetch('/api/stock?type=chip_tse');
+      if(r.ok){
+        const d=await r.json();
+        dateStr=d.date||'';
+        if(d.data){
+          const found=d.data.find(r=>r[0]===code);
+          if(found){
+            foreign=parseInt((found[4]||'0').replace(/,/g,''))||0;
+            invest=parseInt((found[7]||'0').replace(/,/g,''))||0;
+            dealer=parseInt((found[10]||'0').replace(/,/g,''))||0;
+            foreignCum=parseInt((found[5]||'0').replace(/,/g,''))||0;
+            investCum=parseInt((found[8]||'0').replace(/,/g,''))||0;
+            dealerCum=parseInt((found[11]||'0').replace(/,/g,''))||0;
+          }
+        }
+      }
+    } else {
+      const r=await fetch('/api/stock?type=chip_otc');
+      if(r.ok){
+        const d=await r.json();
+        if(Array.isArray(d)){
+          dateStr=d[0]?.Date||'';
+          const found=d.find(r=>r.SecuritiesCompanyCode===code);
+          if(found){
+            const bi=v=>parseInt((v||'0').replace(/,/g,''))||0;
+            foreign=bi(found.ForeignInvestmentBuyShares)-bi(found.ForeignInvestmentSellShares);
+            invest=bi(found.InvestmentTrustBuyShares)-bi(found.InvestmentTrustSellShares);
+            dealer=bi(found.DealersBuyShares)-bi(found.DealersSellShares);
+          }
+        }
+      }
+    }
+    const total=foreign+invest+dealer;
+    const fmt=v=>{
+      if(!v) return '<span style="color:#94a3b8;font-weight:700">0</span>';
+      const col=v>0?'#dc2626':'#16a34a';
+      return `<span style="color:${col};font-weight:700">${v>0?'+':''}${v.toLocaleString()}</span>`;
+    };
+    const bar=v=>{
+      const mx=Math.max(Math.abs(foreign),Math.abs(invest),Math.abs(dealer),1);
+      const pct=Math.round(Math.abs(v)/mx*100);
+      const col=v>0?'#dc2626':'#16a34a';
+      return `<div style="height:8px;border-radius:4px;background:#f1f5f9;overflow:hidden;margin-top:5px"><div style="height:100%;width:${pct}%;background:${col};border-radius:4px"></div></div>`;
+    };
+    el.innerHTML=`
+      <div style="font-size:13px;color:#94a3b8;margin-bottom:12px">📅 資料日期：${dateStr||'最新一日'}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+        <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
+          <div style="font-size:13px;color:#64748b;margin-bottom:8px;font-weight:600">🌍 外資</div>
+          <div style="font-size:20px;font-family:monospace">${fmt(foreign)} 張</div>
+          ${bar(foreign)}
+          ${foreignCum?`<div style="font-size:12px;color:#94a3b8;margin-top:5px">近期累計 ${foreignCum>0?'+':''}${foreignCum.toLocaleString()} 張</div>`:''}
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
+          <div style="font-size:13px;color:#64748b;margin-bottom:8px;font-weight:600">🏦 投信</div>
+          <div style="font-size:20px;font-family:monospace">${fmt(invest)} 張</div>
+          ${bar(invest)}
+          ${investCum?`<div style="font-size:12px;color:#94a3b8;margin-top:5px">近期累計 ${investCum>0?'+':''}${investCum.toLocaleString()} 張</div>`:''}
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
+          <div style="font-size:13px;color:#64748b;margin-bottom:8px;font-weight:600">🏢 自營商</div>
+          <div style="font-size:20px;font-family:monospace">${fmt(dealer)} 張</div>
+          ${bar(dealer)}
+          ${dealerCum?`<div style="font-size:12px;color:#94a3b8;margin-top:5px">近期累計 ${dealerCum>0?'+':''}${dealerCum.toLocaleString()} 張</div>`:''}
+        </div>
+      </div>
+      <div style="padding:12px 16px;border-radius:8px;background:${total>0?'#fef2f2':total<0?'#f0fdf4':'#f8fafc'};border:1px solid ${total>0?'#fca5a5':total<0?'#86efac':'#e2e8f0'}">
+        <span style="font-size:14px;font-weight:700;color:${total>0?'#dc2626':total<0?'#16a34a':'#64748b'}">
+          三大法人合計：${total>0?'+':''}${total.toLocaleString()} 張　${total>0?'📈 法人偏多買超':total<0?'📉 法人偏空賣超':'➡️ 法人持平'}
+        </span>
+      </div>`;
+  }catch(e){
+    el.innerHTML=`<span style="color:#94a3b8;font-size:13px">籌碼資料暫無法取得</span>`;
+  }
+}
+
 function closeDet(){document.getElementById('det').className='det';if(detChart){detChart.destroy();detChart=null}}
 
 function saveTargets(){
@@ -1459,14 +1592,14 @@ async function loadChart(s,p){
   if(!closes.length)return;
   if(p&&closes.length)closes[closes.length-1]=p.close;
   const isUp=closes[closes.length-1]>=closes[0];
-  const col=isUp?'#e84040':'#22c97a';
+  const col=isUp?'#dc2626':'#16a34a';
   detChart=new Chart(document.getElementById('det-chart').getContext('2d'),{
     type:'line',
-    data:{labels,datasets:[{data:closes,borderColor:col,backgroundColor:col+'15',borderWidth:1.5,tension:.3,fill:true,pointRadius:2}]},
+    data:{labels,datasets:[{data:closes,borderColor:col,backgroundColor:col+'18',borderWidth:2,tension:.3,fill:true,pointRadius:2,pointHoverRadius:5}]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(2)} 元`}}},
-      scales:{x:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a5e80',font:{size:9},maxTicksLimit:8,maxRotation:40}},
-              y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{color:'#4a5e80',font:{size:9}}}}}
+      scales:{x:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:11},maxTicksLimit:8,maxRotation:40}},
+              y:{grid:{color:'#f1f5f9'},ticks:{color:'#94a3b8',font:{size:11}}}}}}
   });
 }
 
