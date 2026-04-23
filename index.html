@@ -154,6 +154,11 @@ tr:last-child td{border-bottom:none}
 .wl-btn:hover{background:#dbeafe}
 .wl-note{font-size:12px;color:#94a3b8}
 
+/* 個股子分頁 */
+.det-sub-tab{padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;color:#64748b;border:none;background:transparent;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
+.det-sub-tab.on{color:#2563eb;border-bottom-color:#2563eb;font-weight:700}
+.det-sub-tab:hover{color:#2563eb}
+
 /* 個股分頁 */
 .det-tab{padding:8px 18px;font-size:14px;font-weight:500;cursor:pointer;color:#64748b;border:none;background:transparent;border-bottom:3px solid transparent;transition:all .15s;margin-bottom:-2px}
 .det-tab.on{color:#2563eb;border-bottom-color:#2563eb;font-weight:700}
@@ -256,7 +261,28 @@ tr:last-child td{border-bottom:none}
       </div>
       <!-- 走勢圖分頁 -->
       <div id="det-tab-chart">
-        <div class="chart-box" style="height:220px"><canvas id="det-chart" role="img" aria-label="個股走勢"></canvas></div>
+        <!-- 子頁籤 -->
+        <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid #e2e8f0">
+          <button class="det-sub-tab on" onclick="switchDetSub('price',this)">📈 股價走勢</button>
+          <button class="det-sub-tab" onclick="switchDetSub('rev',this)">💰 月營收</button>
+          <button class="det-sub-tab" onclick="switchDetSub('qrev',this)">📊 季營收</button>
+        </div>
+        <!-- 股價走勢 -->
+        <div id="det-sub-price">
+          <div class="chart-box" style="height:220px"><canvas id="det-chart" role="img" aria-label="個股走勢"></canvas></div>
+        </div>
+        <!-- 月營收 -->
+        <div id="det-sub-rev" style="display:none">
+          <div id="det-rev-content" style="min-height:160px;display:flex;align-items:center;justify-content:center">
+            <span style="color:#94a3b8;font-size:14px">載入中...</span>
+          </div>
+        </div>
+        <!-- 季營收 -->
+        <div id="det-sub-qrev" style="display:none">
+          <div id="det-qrev-content" style="min-height:160px;display:flex;align-items:center;justify-content:center">
+            <span style="color:#94a3b8;font-size:14px">載入中...</span>
+          </div>
+        </div>
         <div id="det-note" class="det-note" style="margin-top:10px"></div>
       </div>
       <!-- 技術分析分頁 -->
@@ -1618,11 +1644,154 @@ async function openDet(code){
   document.getElementById('det').dataset.code = code;
   // 重置到走勢圖分頁
   switchDetTab('chart', document.querySelector('.det-tab'));
+  // 重置子分頁到股價走勢，清除快取
+  switchDetSub('price', document.querySelector('.det-sub-tab'));
+  document.getElementById('det-rev-content').dataset.loaded='';
+  document.getElementById('det-qrev-content').dataset.loaded='';
   // 技術分析分頁也填入備注
   const noteT = document.getElementById('det-note-tech');
   if(noteT) noteT.textContent = s.note || '';
   loadChart(s,p);
 }
+function switchDetSub(sub, btn){
+  ['price','rev','qrev'].forEach(t=>{
+    const el=document.getElementById(`det-sub-${t}`);
+    if(el) el.style.display=t===sub?'':'none';
+  });
+  document.querySelectorAll('.det-sub-tab').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  const code = document.getElementById('det').dataset.code;
+  if(sub==='rev')  loadDetRev(code);
+  if(sub==='qrev') loadDetQrev(code);
+}
+
+async function loadDetRev(code){
+  const el = document.getElementById('det-rev-content');
+  if(!el||!code) return;
+  if(el.dataset.loaded===code) return; // 避免重複載入
+  el.innerHTML='<span style="color:#94a3b8;font-size:14px">載入月營收中...</span>';
+
+  const s = STOCKS.find(x=>x.code===code);
+  const months = [];
+  const now = new Date();
+  // 抓近12個月
+  for(let i=11; i>=0; i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}01`);
+  }
+
+  const revRows = [];
+  // 批次抓最近幾個月（一次最多抓當月）
+  try{
+    // 用市場月營收 API 抓近期
+    const recentMonths = months.slice(-3); // 最近3個月
+    for(const ym of recentMonths){
+      const apiType = s?.ex==='tse' ? 'revenue_tse' : 'revenue_tse';
+      const r = await fetch(`/api/stock?type=${apiType}&date=${ym}`);
+      if(!r.ok) continue;
+      const data = await r.json();
+      if(!data.data) continue;
+      const row = data.data.find(d=>d[0]===code);
+      if(!row) continue;
+      const rev = parseInt((row[2]||'0').replace(/,/g,''))||0;
+      const yoy = parseFloat(row[4])||0;
+      const mom = parseFloat(row[3])||0;
+      revRows.push({ month: ym.slice(0,6), rev, yoy, mom });
+    }
+  }catch(e){}
+
+  if(!revRows.length){
+    el.innerHTML='<span style="color:#94a3b8;font-size:13px">月營收資料暫無法取得</span>';
+    return;
+  }
+
+  const maxRev = Math.max(...revRows.map(r=>r.rev));
+  const fmt = v => v>=1000000 ? `${(v/1000000).toFixed(1)}B` : v>=1000 ? `${(v/1000).toFixed(0)}M` : v.toLocaleString();
+  const pct = v => `<span style="color:${v>=0?'#dc2626':'#16a34a'};font-weight:700">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
+
+  el.innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">近期月營收（千元）</div>
+      ${revRows.map(r=>{
+        const barW = maxRev ? Math.round(r.rev/maxRev*100) : 0;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="font-size:12px;color:#64748b;width:55px;flex-shrink:0">${r.month.slice(0,4)}/${r.month.slice(4,6)}</div>
+          <div style="flex:1;background:#f1f5f9;border-radius:4px;height:22px;overflow:hidden">
+            <div style="height:100%;width:${barW}%;background:#3b82f6;border-radius:4px;display:flex;align-items:center;padding-left:6px">
+              <span style="font-size:11px;color:#fff;font-weight:600;white-space:nowrap">${fmt(r.rev)}</span>
+            </div>
+          </div>
+          <div style="font-size:12px;width:65px;text-align:right;flex-shrink:0">YoY ${pct(r.yoy)}</div>
+          <div style="font-size:12px;width:65px;text-align:right;flex-shrink:0">MoM ${pct(r.mom)}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  el.dataset.loaded = code;
+}
+
+async function loadDetQrev(code){
+  const el = document.getElementById('det-qrev-content');
+  if(!el||!code) return;
+  if(el.dataset.loaded===code) return;
+  el.innerHTML='<span style="color:#94a3b8;font-size:14px">載入季營收中...</span>';
+
+  // 抓近5季（含1年前比較）
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth()+1;
+  let q = month<=3?4:month<=6?1:month<=9?2:3;
+  let qYear = month<=3?year-1:year;
+
+  const quarters = [];
+  for(let i=0;i<5;i++){
+    quarters.push({year:qYear, q});
+    q--; if(q===0){q=4;qYear--;}
+  }
+
+  const qRows = [];
+  for(const qt of quarters){
+    try{
+      const r = await fetch(`/api/stock?type=quarterly&year=${qt.year}&q=${qt.q}`);
+      if(!r.ok) continue;
+      const data = await r.json();
+      if(!data.data) continue;
+      const row = data.data.find(d=>d[0]===code);
+      if(!row) continue;
+      const rev = parseInt((row[2]||'0').replace(/,/g,''))||0;
+      const yoy = parseFloat(row[4])||0;
+      if(rev>0) qRows.push({ label:`${qt.year}Q${qt.q}`, rev, yoy });
+    }catch(e){}
+  }
+
+  if(!qRows.length){
+    el.innerHTML='<span style="color:#94a3b8;font-size:13px">季營收資料暫無法取得</span>';
+    return;
+  }
+
+  const maxRev = Math.max(...qRows.map(r=>r.rev));
+  const fmt = v => v>=1000000?`${(v/1000000).toFixed(1)}B`:v>=1000?`${(v/1000).toFixed(0)}M`:v.toLocaleString();
+  const pct = v=>`<span style="color:${v>=0?'#dc2626':'#16a34a'};font-weight:700">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
+
+  el.innerHTML=`
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">近5季營收（千元）含1年前比較</div>
+      ${qRows.map((r,i)=>{
+        const barW = maxRev?Math.round(r.rev/maxRev*100):0;
+        const isOld = i>=4;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px${isOld?';opacity:.6':''}">
+          <div style="font-size:12px;color:${isOld?'#94a3b8':'#64748b'};width:60px;flex-shrink:0;font-weight:${isOld?'400':'500'}">${r.label}</div>
+          <div style="flex:1;background:#f1f5f9;border-radius:4px;height:22px;overflow:hidden">
+            <div style="height:100%;width:${barW}%;background:${isOld?'#94a3b8':'#8b5cf6'};border-radius:4px;display:flex;align-items:center;padding-left:6px">
+              <span style="font-size:11px;color:#fff;font-weight:600;white-space:nowrap">${fmt(r.rev)}</span>
+            </div>
+          </div>
+          <div style="font-size:12px;width:65px;text-align:right;flex-shrink:0">YoY ${pct(r.yoy)}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  el.dataset.loaded = code;
+}
+
 function switchDetTab(tab, btn){
   ['chart','tech','chip','target'].forEach(t=>{
     const el=document.getElementById(`det-tab-${t}`);
