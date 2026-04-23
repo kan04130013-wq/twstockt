@@ -302,6 +302,27 @@ tr:last-child td{border-bottom:none}
           <span id="tp-saved" style="font-size:12px;color:#16a34a;display:none">✓ 已儲存</span>
         </div>
       </div>
+
+      <!-- 手動標記處置股 -->
+      <div style="margin-top:12px;background:#fff5f5;border:1px solid #fecaca;border-radius:10px;padding:12px 14px">
+        <div style="font-size:12px;font-weight:700;color:#dc2626;margin-bottom:10px">⛔ 手動標記處置股（上櫃用）</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">處置開始日期</div>
+            <input id="disp-start" type="date" style="width:100%;padding:6px 8px;border:1px solid #fca5a5;border-radius:6px;font-size:13px;outline:none;background:#fff">
+          </div>
+          <div>
+            <div style="font-size:11px;color:#64748b;margin-bottom:4px">處置結束日期</div>
+            <input id="disp-end" type="date" style="width:100%;padding:6px 8px;border:1px solid #fca5a5;border-radius:6px;font-size:13px;outline:none;background:#fff">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button onclick="saveDisp()" style="padding:6px 16px;border-radius:6px;border:none;background:#dc2626;color:#fff;font-size:13px;font-weight:600;cursor:pointer">標記為處置股</button>
+          <button onclick="clearDisp()" style="padding:6px 14px;border-radius:6px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;cursor:pointer">取消標記</button>
+          <span id="disp-saved" style="font-size:12px;color:#dc2626;display:none">✓ 已標記</span>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:6px">用於手動標記 TPEx 上櫃處置股（系統無法自動取得）</div>
+      </div>
       </div><!-- end det-tab-target -->
     </div><!-- end det -->
 
@@ -1584,6 +1605,11 @@ async function openDet(code){
     document.getElementById('tp-sell-auto').textContent = auto ? `自動: ${auto.sell}` : '';
     document.getElementById('tp-stop-auto').textContent = auto ? `自動: ${auto.stop}` : '';
     document.getElementById('tp-saved').style.display='none';
+    // 填入處置股日期
+    const dispInfo = DISP_INFO[s.code];
+    document.getElementById('disp-start').value = dispInfo?.startDate?.replace(/\//g,'-') || '';
+    document.getElementById('disp-end').value   = dispInfo?.endDate?.replace(/\//g,'-') || '';
+    document.getElementById('disp-saved').style.display='none';
   } else {
     document.getElementById('det-targets').style.display='none';
   }
@@ -1692,6 +1718,56 @@ async function loadChipDet(code){
 }
 
 function closeDet(){document.getElementById('det').className='det';if(detChart){detChart.destroy();detChart=null}}
+
+function saveDisp(){
+  const code = document.getElementById('det-targets').dataset.code;
+  if(!code) return;
+  const start = document.getElementById('disp-start').value;
+  const end   = document.getElementById('disp-end').value;
+  if(!start) return;
+  // 格式轉換 yyyy-mm-dd -> yyyy/mm/dd
+  const fmt = s => s.replace(/-/g,'/');
+  DISP.add(code);
+  DISP_INFO[code] = { startDate: fmt(start), endDate: fmt(end), market: 'otc', manual: true };
+  // 存到 localStorage
+  const manual = JSON.parse(localStorage.getItem('manualDisp')||'{}');
+  manual[code] = { startDate: fmt(start), endDate: fmt(end) };
+  localStorage.setItem('manualDisp', JSON.stringify(manual));
+  document.getElementById('disp-saved').style.display='';
+  setTimeout(()=>document.getElementById('disp-saved').style.display='none', 2000);
+  applyFilt();
+}
+
+function clearDisp(){
+  const code = document.getElementById('det-targets').dataset.code;
+  if(!code) return;
+  DISP.delete(code);
+  delete DISP_INFO[code];
+  const manual = JSON.parse(localStorage.getItem('manualDisp')||'{}');
+  delete manual[code];
+  localStorage.setItem('manualDisp', JSON.stringify(manual));
+  document.getElementById('disp-start').value='';
+  document.getElementById('disp-end').value='';
+  applyFilt();
+}
+
+// 載入手動處置股（從 localStorage）
+function loadManualDisp(){
+  const manual = JSON.parse(localStorage.getItem('manualDisp')||'{}');
+  const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
+  Object.entries(manual).forEach(([code, info]) => {
+    // 只載入尚未過期的
+    if(!info.endDate || info.endDate.replace(/-/g,'/') >= today){
+      DISP.add(code);
+      DISP_INFO[code] = { ...info, market: 'otc', manual: true };
+    } else {
+      // 已過期自動清除
+      const m = JSON.parse(localStorage.getItem('manualDisp')||'{}');
+      delete m[code];
+      localStorage.setItem('manualDisp', JSON.stringify(m));
+    }
+  });
+}
 
 function saveTargets(){
   const code = document.getElementById('det-targets').dataset.code;
@@ -1824,7 +1900,7 @@ function renderWatchlist(){
   }).join('');
 }
 
-buildTabs(); applyFilt(); loadAll();
+buildTabs(); applyFilt(); loadManualDisp(); loadAll();
 </script>
 </body>
 </html>
