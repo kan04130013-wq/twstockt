@@ -763,24 +763,36 @@ async function fetchDisposition(){
   DISP.clear();
   DISP_INFO = {};
   try{
-    const r = await fetch('/api/stock?type=disposition');
-    if(!r.ok) return;
-    const data = await r.json();
-    (data.stocks||[]).forEach(d=>{
-      const code = String(d.code||'').trim();
-      if(!code) return;
-      DISP.add(code);
-      DISP_INFO[code] = {
-        startDate: d.startDate||'',
-        endDate:   d.endDate||'',
-        market:    d.market||''
-      };
-    });
+    // 上市處置股（Vercel proxy）
+    const r1 = fetch('/api/stock?type=disposition');
+    // 上櫃處置股（Cloudflare Worker）
+    const r2 = fetch(`${CF_PROXY}?type=disp_otc`);
+
+    const [res1, res2] = await Promise.allSettled([r1, r2]);
+
+    const addStocks = (stocks) => {
+      (stocks||[]).forEach(d=>{
+        const code = String(d.code||'').trim();
+        if(!code) return;
+        DISP.add(code);
+        DISP_INFO[code] = {
+          startDate: d.startDate||'',
+          endDate:   d.endDate||'',
+          market:    d.market||''
+        };
+      });
+    };
+
+    if(res1.status==='fulfilled' && res1.value.ok){
+      const data = await res1.value.json();
+      addStocks(data.stocks||[]);
+    }
+    if(res2.status==='fulfilled' && res2.value.ok){
+      const data = await res2.value.json();
+      addStocks(data.stocks||[]);
+    }
   }catch(e){ console.warn('disposition:', e.message); }
 
-  if(DISP.size > 0){
-    // 不再顯示頂部警報，改在表格內行內顯示
-  }
   applyFilt();
 }
 
