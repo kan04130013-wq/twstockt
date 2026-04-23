@@ -1020,7 +1020,7 @@ async function loadRevenue(){
   let loaded = false;
   for(const date of tryDates){
     try{
-      const r = await fetch(`/api/stock?type=revenue_tse&date=${date}`);
+      const r = await fetch(`${CF_PROXY}?type=revenue&market=tse&date=${date}`);
       if(!r.ok) continue;
       const data = await r.json();
       if(data.stat === 'OK' && data.data && data.data.length > 0){
@@ -1119,7 +1119,7 @@ async function loadQuarterly(){
   let loaded = false;
   for(const qt of quarters){
     try{
-      const url = `/api/stock?type=quarterly&year=${qt.year}&q=${qt.q}`;
+      const url = `${CF_PROXY}?type=quarterly&year=${qt.year}&q=${qt.q}`;
       const r = await fetch(url);
       if(!r.ok) continue;
       const data = await r.json();
@@ -1677,7 +1677,7 @@ async function loadDetRev(code){
   // 抓近12個月
   for(let i=11; i>=0; i--){
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}01`);
+    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}10`);
   }
 
   const revRows = [];
@@ -1686,17 +1686,17 @@ async function loadDetRev(code){
     // 用市場月營收 API 抓近期
     const recentMonths = months.slice(-3); // 最近3個月
     for(const ym of recentMonths){
-      const apiType = s?.ex==='tse' ? 'revenue_tse' : 'revenue_tse';
-      const r = await fetch(`/api/stock?type=${apiType}&date=${ym}`);
+      const mkt = s?.ex||'tse';
+      const r = await fetch(`${CF_PROXY}?type=revenue&market=${mkt}&date=${ym}`);
       if(!r.ok) continue;
       const data = await r.json();
       if(!data.data) continue;
       const row = data.data.find(d=>d[0]===code);
       if(!row) continue;
       const rev = parseInt((row[2]||'0').replace(/,/g,''))||0;
-      const yoy = parseFloat(row[4])||0;
-      const mom = parseFloat(row[3])||0;
-      revRows.push({ month: ym.slice(0,6), rev, yoy, mom });
+      const mom = parseFloat(row[3])||0;   // 當月比上月增減%
+      const yoy = parseFloat(row[5])||0;   // 當月比去年同月增減%
+      if(rev>0) revRows.push({ month: ym.slice(0,6), rev, yoy, mom });
     }
   }catch(e){}
 
@@ -1751,7 +1751,7 @@ async function loadDetQrev(code){
   const qRows = [];
   for(const qt of quarters){
     try{
-      const r = await fetch(`/api/stock?type=quarterly&year=${qt.year}&q=${qt.q}`);
+      const r = await fetch(`${CF_PROXY}?type=quarterly&year=${qt.year}&q=${qt.q}`);
       if(!r.ok) continue;
       const data = await r.json();
       if(!data.data) continue;
