@@ -690,6 +690,11 @@ async function fetchRealtime(){
         vol:Math.round(s.vol/1000),
         date:'盤中即時', src:'MIS即時', isRT:true
       };
+      // MIS 回傳 disp=true 表示處置股（上市+上櫃都適用）
+      if(s.disp && !DISP.has(s.code)){
+        DISP.add(s.code);
+        if(!DISP_INFO[s.code]) DISP_INFO[s.code]={ startDate:'', endDate:'', market:s.code.length===4?'tse':'otc' };
+      }
       updated++;
     });
   }catch(e){ console.warn('RT error:', e.message); }
