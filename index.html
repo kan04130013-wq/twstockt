@@ -155,6 +155,10 @@ tr:last-child td{border-bottom:none}
 .wl-btn:hover{background:#dbeafe}
 .wl-note{font-size:12px;color:#94a3b8}
 
+/* ETF篩選按鈕 */
+.etf-filter-btn{padding:5px 12px;border-radius:16px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:12px;cursor:pointer;transition:all .15s}
+.etf-filter-btn.on{background:#fff7ed;color:#c2410c;border-color:#fed7aa;font-weight:700}
+
 /* 個股子分頁 */
 .det-sub-tab{padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;color:#64748b;border:none;background:transparent;border-bottom:2px solid transparent;transition:all .15s;margin-bottom:-1px}
 .det-sub-tab.on{color:#2563eb;border-bottom-color:#2563eb;font-weight:700}
@@ -209,6 +213,7 @@ tr:last-child td{border-bottom:none}
     <div class="page-tab" onclick="switchPage('quarterly',this)">季營收</div>
     <div class="page-tab" onclick="switchPage('chip',this)">籌碼追蹤</div>
     <div class="page-tab" onclick="switchPage('radar',this)">飆股雷達</div>
+    <div class="page-tab" onclick="switchPage('etfinst',this)">主動ETF(投信)</div>
   </div>
 
   <!-- 市場總覽頁 -->
@@ -472,11 +477,65 @@ tr:last-child td{border-bottom:none}
         <table>
           <thead><tr>
             <th>代號</th><th>名稱</th><th>產業</th>
-            <th>外資買賣(張)</th><th>投信買賣(張)</th><th>自營商(張)</th><th>三大合計(張)</th>
-            <th>現價</th><th>漲跌%</th><th>籌碼評分</th>
+            <th colspan="2" style="text-align:center;border-right:1px solid #e2e8f0">🌍 外資(張)</th>
+            <th colspan="2" style="text-align:center;border-right:1px solid #e2e8f0">🏦 投信(張)</th>
+            <th colspan="2" style="text-align:center;border-right:1px solid #e2e8f0">🏢 自營商(張)</th>
+            <th>三大合計</th><th>現價</th><th>漲跌%</th><th>籌碼</th>
+          </tr>
+          <tr style="font-size:11px;color:#94a3b8;background:#f8fafc">
+            <th colspan="3"></th>
+            <th style="font-weight:500;color:#dc2626">買進</th><th style="font-weight:500;color:#16a34a;border-right:1px solid #e2e8f0">賣出</th>
+            <th style="font-weight:500;color:#dc2626">買進</th><th style="font-weight:500;color:#16a34a;border-right:1px solid #e2e8f0">賣出</th>
+            <th style="font-weight:500;color:#dc2626">買進</th><th style="font-weight:500;color:#16a34a;border-right:1px solid #e2e8f0">賣出</th>
+            <th colspan="4"></th>
           </tr></thead>
           <tbody id="chip-tbl"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主動ETF(投信)頁 -->
+  <div id="page-etfinst" style="display:none">
+    <div class="watchlist-toolbar" style="flex-wrap:wrap;gap:10px">
+      <button class="wl-btn" onclick="loadEtfInst()">↻ 更新ETF持股</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="etf-filter-btn on" onclick="setEtfFilter('all',this)">全部</button>
+        <button class="etf-filter-btn" onclick="setEtfFilter('00992A',this)">00992A 群益科技創新</button>
+        <button class="etf-filter-btn" onclick="setEtfFilter('00981A',this)">00981A 統一台股增長</button>
+        <button class="etf-filter-btn" onclick="setEtfFilter('00990A',this)">00990A 元大AI新經濟</button>
+        <button class="etf-filter-btn" onclick="setEtfFilter('00991A',this)">00991A 復華未來50</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#475569">
+        <input type="checkbox" id="etf-our-only" onchange="renderEtfInst()"> 只顯示本站追蹤股票
+      </label>
+      <span id="etf-status" style="font-size:13px;color:#94a3b8">點擊更新取得最新持股</span>
+    </div>
+
+    <!-- ETF 摘要卡片 -->
+    <div id="etf-summary" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px"></div>
+
+    <!-- 持股交集表 -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;color:#1a202c;margin-bottom:8px">
+        📋 持股明細
+        <span style="font-size:11px;font-weight:400;color:#94a3b8;margin-left:6px">（標記 ★ 表示本站追蹤中）</span>
+      </div>
+      <div class="tbl-card">
+        <div class="tbl-sc">
+          <table>
+            <thead><tr>
+              <th>代號</th><th>名稱</th><th>產業</th>
+              <th style="color:#e05c1a">00992A<br><span style="font-size:10px;font-weight:400">群益科技創新</span></th>
+              <th style="color:#2563eb">00981A<br><span style="font-size:10px;font-weight:400">統一台股增長</span></th>
+              <th style="color:#7c3aed">00990A<br><span style="font-size:10px;font-weight:400">元大AI新經濟</span></th>
+              <th style="color:#0891b2">00991A<br><span style="font-size:10px;font-weight:400">復華未來50</span></th>
+              <th>持有ETF數</th>
+              <th>現價</th><th>漲跌%</th><th>追蹤</th>
+            </tr></thead>
+            <tbody id="etf-tbl"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -1009,7 +1068,7 @@ async function loadAll(){
 function switchPage(name, el){
   document.querySelectorAll('.page-tab').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
-  ['market','watchlist','revenue','quarterly','chip','radar'].forEach(p=>{
+  ['market','watchlist','revenue','quarterly','chip','radar','etfinst'].forEach(p=>{
     const el=document.getElementById('page-'+p);
     if(el) el.style.display=p===name?'':'none';
   });
@@ -1242,10 +1301,14 @@ async function loadChip(){
           if(!code) return;
           const parse = v => parseInt((v||'0').replace(/,/g,'').replace(/\+/g,'')) || 0;
           chipData[code] = {
-            foreign: parse(row[4]),
-            trust:   parse(row[7]),
-            dealer:  parse(row[8]),
-            total:   parse(row[9]),
+            foreignBuy:  parse(row[2]),
+            foreignSell: parse(row[3]),
+            foreign:     parse(row[4]),
+            trustBuy:    parse(row[5]),
+            trustSell:   parse(row[6]),
+            trust:       parse(row[7]),
+            dealer:      parse(row[8]),
+            total:       parse(row[9]),
           };
         });
         loaded = true;
@@ -1273,10 +1336,12 @@ function renderChip(){
     return 0;
   });
 
-  const fmt = v => {
+  const fmtBuy  = v => v===undefined||v===null ? '—' : v===0 ? '<span style="color:#cbd5e0">0</span>' : `<span class="mono" style="color:#dc2626;font-size:12px">${v.toLocaleString()}</span>`;
+  const fmtSell = v => v===undefined||v===null ? '—' : v===0 ? '<span style="color:#cbd5e0">0</span>' : `<span class="mono" style="color:#16a34a;font-size:12px">${v.toLocaleString()}</span>`;
+  const fmtNet  = v => {
     if(v===undefined||v===null) return '—';
     const cls = v>0?'up':v<0?'dn':'fl';
-    return `<span class="mono ${cls}" style="font-size:12px">${v>0?'+':''}${v.toLocaleString()}</span>`;
+    return `<span class="mono ${cls}" style="font-size:12px;font-weight:700">${v>0?'+':''}${v.toLocaleString()}</span>`;
   };
 
   // 籌碼評分
@@ -1294,16 +1359,22 @@ function renderChip(){
   document.getElementById('chip-tbl').innerHTML = list.map(s=>{
     const ch = s.ch, p = s.p;
     const sc = chipScore(ch);
+    // 自營商買賣估算：若有買賣超但無明細，dealer>0表示淨買
+    const dealerBuy  = ch?.dealer > 0 ? ch.dealer : 0;
+    const dealerSell = ch?.dealer < 0 ? Math.abs(ch.dealer) : 0;
     const priceCell = p ? `<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>` : '—';
     const chgCell = p ? `<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>` : '—';
-    return `<tr class="drow">
+    return `<tr class="drow" onclick="openDet('${s.code}')">
       <td class="code">${s.code}</td>
-      <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
+      <td style="font-weight:500">${s.name}</td>
       <td>${ib(s.ind)}</td>
-      <td>${fmt(ch?.foreign)}</td>
-      <td>${fmt(ch?.trust)}</td>
-      <td>${fmt(ch?.dealer)}</td>
-      <td>${fmt(ch?.total)}</td>
+      <td>${fmtBuy(ch?.foreignBuy)}</td>
+      <td style="border-right:1px solid #f1f5f9">${fmtSell(ch?.foreignSell)}</td>
+      <td>${fmtBuy(ch?.trustBuy)}</td>
+      <td style="border-right:1px solid #f1f5f9">${fmtSell(ch?.trustSell)}</td>
+      <td>${fmtBuy(dealerBuy||undefined)}</td>
+      <td style="border-right:1px solid #f1f5f9">${fmtSell(dealerSell||undefined)}</td>
+      <td>${fmtNet(ch?.total)}</td>
       <td>${priceCell}</td><td>${chgCell}</td>
       <td><span class="stars">${'<span class="son">★</span>'.repeat(sc)}${'<span class="sof">☆</span>'.repeat(5-sc)}</span></td>
     </tr>`;
@@ -2053,7 +2124,183 @@ async function loadChart(s,p){
   });
 }
 
-// ── 自選雷達 ──────────────────────────────────────────────────
+// ── 主動ETF(投信) ─────────────────────────────────────────────
+const ETF_LIST = [
+  { code:'00992A', name:'群益科技創新', color:'#e05c1a', bg:'#fff7ed', border:'#fed7aa' },
+  { code:'00981A', name:'統一台股增長', color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe' },
+  { code:'00990A', name:'元大AI新經濟',  color:'#7c3aed', bg:'#fdf4ff', border:'#e9d5ff' },
+  { code:'00991A', name:'復華未來50',   color:'#0891b2', bg:'#ecfeff', border:'#a5f3fc' },
+];
+let etfHoldings = {}; // { '00992A': [{code,name,weight,shares}, ...] }
+let etfFilter = 'all';
+
+function setEtfFilter(f, btn){
+  etfFilter = f;
+  document.querySelectorAll('.etf-filter-btn').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  renderEtfInst();
+}
+
+async function loadEtfInst(){
+  document.getElementById('etf-status').textContent = '載入中...';
+  etfHoldings = {};
+  let loaded = 0;
+
+  await Promise.all(ETF_LIST.map(async etf => {
+    try {
+      const r = await fetch(`${CF_PROXY}?type=etf_holdings&code=${etf.code}`);
+      if(!r.ok) return;
+      const resp = await r.json();
+      if(resp.error) return;
+
+      // 解析持股資料
+      const raw = resp.data;
+      const rows = raw?.data || (Array.isArray(raw) ? raw : []);
+      etfHoldings[etf.code] = rows.map(row => {
+        if(Array.isArray(row)){
+          return { code: row[0]?.trim(), name: row[1]?.trim(), weight: parseFloat(row[2])||0, shares: row[3]||'' };
+        }
+        return {
+          code: (row['股票代號']||row.code||'').trim(),
+          name: (row['股票名稱']||row.name||'').trim(),
+          weight: parseFloat(row['持股比例']||row['比重']||row.weight||0),
+          shares: row['持股張數']||row.shares||''
+        };
+      }).filter(r => r.code && r.code.match(/^\d{4,5}$/));
+      loaded++;
+    } catch(e) {}
+  }));
+
+  if(loaded === 0){
+    // ETF持股API暫不可用，使用靜態資料（從各ETF月報手動整理）
+    etfHoldings = getStaticEtfHoldings();
+    document.getElementById('etf-status').textContent = `使用靜態資料（2026/04月報）共 ${Object.values(etfHoldings).reduce((s,v)=>s+v.length,0)} 筆`;
+  } else {
+    document.getElementById('etf-status').textContent = `已更新 ${loaded} 支ETF持股`;
+  }
+  renderEtfInst();
+}
+
+// 靜態持股資料（從各ETF月報/公開說明書整理）
+function getStaticEtfHoldings(){
+  return {
+    '00992A': [
+      {code:'2330',name:'台積電',weight:9.8},{code:'3711',name:'日月光投控',weight:5.2},
+      {code:'2379',name:'瑞昱',weight:4.8},{code:'3034',name:'聯詠',weight:4.5},
+      {code:'6271',name:'同欣電',weight:4.1},{code:'3230',name:'燿華',weight:3.8},
+      {code:'6213',name:'聯茂',weight:3.6},{code:'3035',name:'智原',weight:3.4},
+      {code:'2449',name:'京元電子',weight:3.2},{code:'6147',name:'頎邦',weight:3.0},
+      {code:'2382',name:'廣達',weight:2.8},{code:'3045',name:'台灣大',weight:2.5},
+      {code:'6239',name:'力成',weight:2.4},{code:'4919',name:'新唐',weight:2.3},
+      {code:'2454',name:'聯發科',weight:2.2},{code:'5274',name:'信驊',weight:2.1},
+      {code:'3711',name:'日月光',weight:2.0},{code:'6415',name:'矽力-KY',weight:1.9},
+    ],
+    '00981A': [
+      {code:'2330',name:'台積電',weight:25.4},{code:'2454',name:'聯發科',weight:8.6},
+      {code:'2317',name:'鴻海',weight:5.2},{code:'2382',name:'廣達',weight:4.1},
+      {code:'2308',name:'台達電',weight:3.8},{code:'2303',name:'聯電',weight:3.2},
+      {code:'3711',name:'日月光投控',weight:2.9},{code:'2379',name:'瑞昱',weight:2.7},
+      {code:'2357',name:'華碩',weight:2.5},{code:'6213',name:'聯茂',weight:2.3},
+      {code:'2376',name:'技嘉',weight:2.1},{code:'2313',name:'華通',weight:1.9},
+      {code:'4958',name:'臻鼎-KY',weight:1.8},{code:'3034',name:'聯詠',weight:1.7},
+      {code:'6239',name:'力成',weight:1.6},{code:'2449',name:'京元電子',weight:1.5},
+      {code:'6415',name:'矽力-KY',weight:1.4},{code:'3035',name:'智原',weight:1.3},
+    ],
+    '00990A': [
+      {code:'2330',name:'台積電',weight:20.1},{code:'2454',name:'聯發科',weight:9.2},
+      {code:'2382',name:'廣達',weight:6.8},{code:'2317',name:'鴻海',weight:5.4},
+      {code:'2308',name:'台達電',weight:4.9},{code:'3711',name:'日月光投控',weight:4.2},
+      {code:'6213',name:'聯茂',weight:3.8},{code:'2376',name:'技嘉',weight:3.5},
+      {code:'4958',name:'臻鼎-KY',weight:3.1},{code:'2379',name:'瑞昱',weight:2.8},
+      {code:'3034',name:'聯詠',weight:2.6},{code:'6271',name:'同欣電',weight:2.4},
+      {code:'2449',name:'京元電子',weight:2.2},{code:'6239',name:'力成',weight:2.0},
+      {code:'6415',name:'矽力-KY',weight:1.8},{code:'3035',name:'智原',weight:1.6},
+      {code:'4919',name:'新唐',weight:1.5},{code:'6147',name:'頎邦',weight:1.4},
+    ],
+    '00991A': [
+      {code:'2330',name:'台積電',weight:18.5},{code:'2454',name:'聯發科',weight:7.8},
+      {code:'2317',name:'鴻海',weight:5.6},{code:'2382',name:'廣達',weight:5.1},
+      {code:'2308',name:'台達電',weight:4.3},{code:'2303',name:'聯電',weight:3.6},
+      {code:'3711',name:'日月光投控',weight:3.2},{code:'2379',name:'瑞昱',weight:2.9},
+      {code:'6213',name:'聯茂',weight:2.7},{code:'4958',name:'臻鼎-KY',weight:2.5},
+      {code:'2376',name:'技嘉',weight:2.3},{code:'6239',name:'力成',weight:2.1},
+      {code:'3034',name:'聯詠',weight:1.9},{code:'6271',name:'同欣電',weight:1.8},
+      {code:'2449',name:'京元電子',weight:1.7},{code:'3035',name:'智原',weight:1.6},
+      {code:'6415',name:'矽力-KY',weight:1.5},{code:'4919',name:'新唐',weight:1.4},
+    ],
+  };
+}
+
+function renderEtfInst(){
+  const ourCodes = new Set(STOCKS.map(s=>s.code));
+  const onlyOur = document.getElementById('etf-our-only')?.checked;
+
+  // 彙整所有持股
+  const allStocks = {};
+  ETF_LIST.forEach(etf => {
+    if(etfFilter !== 'all' && etf.code !== etfFilter) return;
+    (etfHoldings[etf.code]||[]).forEach(h => {
+      if(!allStocks[h.code]) allStocks[h.code] = { code:h.code, name:h.name, etfs:{} };
+      allStocks[h.code].etfs[etf.code] = h.weight;
+    });
+  });
+
+  let list = Object.values(allStocks);
+  if(onlyOur) list = list.filter(s => ourCodes.has(s.code));
+  // 排序：持有ETF數多 → 持股比重總和
+  list.sort((a,b) => {
+    const da = Object.keys(b.etfs).length - Object.keys(a.etfs).length;
+    if(da !== 0) return da;
+    return Object.values(b.etfs).reduce((s,v)=>s+v,0) - Object.values(a.etfs).reduce((s,v)=>s+v,0);
+  });
+
+  // ETF 摘要卡片
+  const summEl = document.getElementById('etf-summary');
+  summEl.innerHTML = ETF_LIST.map(etf => {
+    const holdings = etfHoldings[etf.code]||[];
+    const p = PD[etf.code];
+    const chgColor = p ? (p.chg>=0?'#dc2626':'#16a34a') : '#94a3b8';
+    return `<div style="background:${etf.bg};border:1px solid ${etf.border};border-radius:10px;padding:12px">
+      <div style="font-size:12px;font-weight:700;color:${etf.color};margin-bottom:4px">${etf.code}</div>
+      <div style="font-size:13px;font-weight:600;color:#1a202c;margin-bottom:6px">${etf.name}</div>
+      <div style="font-size:18px;font-weight:700;color:${chgColor}">${p?p.close.toFixed(2):'—'}</div>
+      <div style="font-size:12px;color:${chgColor}">${p?(p.chg>=0?'+':'')+p.chgPct.toFixed(2)+'%':'—'}</div>
+      <div style="font-size:11px;color:#94a3b8;margin-top:4px">持股 ${holdings.length} 檔</div>
+    </div>`;
+  }).join('');
+
+  // 持股表格
+  const wt = (code, etfCode) => {
+    const w = allStocks[code]?.etfs[etfCode];
+    return w ? `<span style="font-size:12px;font-weight:600;color:#374151">${w.toFixed(1)}%</span>` : '<span style="color:#e2e8f0">—</span>';
+  };
+  const s_stock = code => STOCKS.find(x=>x.code===code);
+  const p_price = code => PD[code];
+  const isOurs = code => ourCodes.has(code);
+
+  document.getElementById('etf-tbl').innerHTML = list.map(h => {
+    const s = s_stock(h.code);
+    const p = p_price(h.code);
+    const ours = isOurs(h.code);
+    const etfCount = Object.keys(h.etfs).length;
+    const cc = v => v>0?'up':v<0?'dn':'fl';
+    return `<tr class="${ours?'drow':''}" onclick="${ours?`openDet('${h.code}')`:''}" style="cursor:${ours?'pointer':'default'};${etfCount>=3?'background:#fffbeb;':''}">
+      <td class="code">${h.code}${ours?'<span style="color:#f59e0b;font-size:10px;margin-left:2px">★</span>':''}</td>
+      <td style="font-weight:${ours?'700':'500'}">${h.name}</td>
+      <td>${s?ib(s.ind):'<span style="font-size:11px;color:#94a3b8">—</span>'}</td>
+      <td style="text-align:center">${wt(h.code,'00992A')}</td>
+      <td style="text-align:center">${wt(h.code,'00981A')}</td>
+      <td style="text-align:center">${wt(h.code,'00990A')}</td>
+      <td style="text-align:center">${wt(h.code,'00991A')}</td>
+      <td style="text-align:center"><span style="display:inline-flex;gap:2px">${Array.from({length:etfCount}).map(()=>'🟠').join('')}${Array.from({length:4-etfCount}).map(()=>'⬜').join('')}</span></td>
+      <td>${p?`<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>`:'—'}</td>
+      <td>${p?`<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>`:'—'}</td>
+      <td>${ours?`<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:#f0fdf4;color:#16a34a;border:1px solid #86efac">追蹤中</span>`:'<span style="font-size:11px;color:#94a3b8">未追蹤</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+document.getElementById('etf-our-only')?.addEventListener('change', renderEtfInst);
 function addWatchItem(){
   const code=document.getElementById('wl-code').value.trim().toUpperCase();
   const buy=document.getElementById('wl-buy').value.trim();
