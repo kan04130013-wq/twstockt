@@ -83,6 +83,7 @@ tr:last-child td{border-bottom:none}
 .ib-ai{background:#f5f3ff;border-color:#ddd6fe;color:#6d28d9}
 .ib-pass{background:#f8fafc;border-color:#e2e8f0;color:#475569}
 .ib-ic{background:#fdf4ff;border-color:#e9d5ff;color:#7e22ce}
+.ib-etf{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
 .sb{display:inline-flex;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid;white-space:nowrap}
 .sb-sb{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
 .sb-b{background:#fffbeb;color:#d97706;border-color:#fde68a}
@@ -655,6 +656,16 @@ const STOCKS=[
   {code:'4952',ex:'tse',name:'凌通',ind:'IC設計',sig:'觀察',sc:3,note:'語音辨識與MCU，IoT智慧家庭應用持續滲透',buy:'',sell:'',stop:''},
   {code:'6202',ex:'tse',name:'盛群',ind:'IC設計',sig:'買進',sc:4,note:'MCU微控制器，工業自動化與家電控制需求穩定',buy:'',sell:'',stop:''},
   {code:'5471',ex:'tse',name:'松翰',ind:'IC設計',sig:'觀察',sc:3,note:'視訊處理IC，安控與視訊監控市場持續擴大',buy:'',sell:'',stop:''},
+  {code:'00992A',ex:'tse',name:'群益科技創新',ind:'主動ETF',sig:'強烈買進',sc:5,note:'聚焦科技次產業（散熱、測試介面），持股差異化，攻擊性極強。2026 YTD報酬率63.57%（績效冠軍）',buy:'',sell:'',stop:''},
+  {code:'00981A',ex:'tse',name:'統一台股增長',ind:'主動ETF',sig:'強烈買進',sc:5,note:'以AI核心權值（台積電、聯發科）為主，搭配高速傳輸與PCB，規模近2千億，市場最大主動ETF。2026 YTD 62.64%',buy:'',sell:'',stop:''},
+  {code:'00990A',ex:'tse',name:'元大AI新經濟',ind:'主動ETF',sig:'強烈買進',sc:5,note:'純度極高的AI供應鏈精選，經理人主動加碼強勢輪動族群。2026 YTD報酬率50.73%',buy:'',sell:'',stop:''},
+  {code:'00991A',ex:'tse',name:'復華未來50',ind:'主動ETF',sig:'強烈買進',sc:5,note:'佈局未來具備爆發潛力的前50大高成長型企業。2026 YTD報酬率50.43%',buy:'',sell:'',stop:''},
+  {code:'00982A',ex:'tse',name:'群益台灣強棒',ind:'主動ETF',sig:'買進',sc:4,note:'動態捕捉台股各產業強勢龍頭，跟隨大盤趨勢加碼。2026 YTD報酬率46.50%',buy:'',sell:'',stop:''},
+  {code:'00400A',ex:'tse',name:'國泰動能高息',ind:'主動ETF',sig:'買進',sc:4,note:'結合產業高成長與高配息，目標是在領息同時不犧牲資本利得',buy:'',sell:'',stop:''},
+  {code:'00980A',ex:'tse',name:'野村臺灣優選',ind:'主動ETF',sig:'買進',sc:4,note:'台灣首檔掛牌主動ETF，以台積電與台達電為基底，結合量化與質化選股',buy:'',sell:'',stop:''},
+  {code:'00984A',ex:'tse',name:'安聯台灣高息',ind:'主動ETF',sig:'買進',sc:4,note:'外資投信操盤，專注於挖掘台股深具潛力的高殖利率標的',buy:'',sell:'',stop:''},
+  {code:'00401A',ex:'tse',name:'摩根台灣鑫收',ind:'主動ETF',sig:'觀察',sc:3,note:'除股票股息外，賣出買權賺取權利金（Covered Call策略）以提升配息率',buy:'',sell:'',stop:''},
+  {code:'00995A',ex:'tse',name:'中信台灣卓越',ind:'主動ETF',sig:'買進',sc:4,note:'挑選財務體質強健、能穩定配息的卓越企業，攻守兼備',buy:'',sell:'',stop:''},
 
 
 
@@ -764,7 +775,7 @@ let alertsFired=new Set();
 // ── helpers ───────────────────────────────────────────────────
 const cc=c=>c>0?'up':c<0?'dn':'fl';
 const fv=v=>!v||isNaN(v)?'—':v>=10000?(v/10000).toFixed(1)+'萬':Math.round(v).toLocaleString();
-const IBC={'低軌衛星':'sat','矽光子/CPO':'cpo','PCB':'pcb','半導體':'semi','AI伺服器':'ai','IC設計':'ic','被動元件':'pass'};
+const IBC={'低軌衛星':'sat','矽光子/CPO':'cpo','PCB':'pcb','半導體':'semi','AI伺服器':'ai','IC設計':'ic','主動ETF':'etf','被動元件':'pass'};
 const ib=i=>`<span class="ib ib-${IBC[i]||'pass'}">${i}</span>`;
 const SBC={'強烈買進':'sb','買進':'b','觀察':'w','持有':'h'};
 const sb=s=>`<span class="sb sb-${SBC[s]||'h'}">${s}</span>`;
