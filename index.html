@@ -1022,6 +1022,37 @@ async function loadAll(){
     }
   }catch(e){console.warn('OTC MIS:',e.message)}
 
+  // 補抓：用 Yahoo Finance 補齊沒有資料的股票（備援）
+  const missing = STOCKS.filter(s => !PD[s.code] || !PD[s.code].close);
+  if(missing.length > 0){
+    setSt('ld', `Yahoo 補抓 ${missing.length} 檔...`);
+    try{
+      // 批次每20檔
+      for(let i=0; i<missing.length; i+=20){
+        const batch = missing.slice(i, i+20);
+        const syms = batch.map(s => s.code + (s.ex==='tse'?'.TW':'.TWO')).join(',');
+        const r = await fetch(`${CF_PROXY}?type=yahoo&codes=${encodeURIComponent(syms)}`);
+        if(!r.ok) continue;
+        const data = await r.json();
+        (data.stocks||[]).forEach(s=>{
+          if(!s.code||!s.close) return;
+          PD[s.code]={
+            close:  s.close,
+            chg:    s.chg,
+            chgPct: s.chgPct,
+            open:   s.open,
+            high:   s.high,
+            low:    s.low,
+            vol:    Math.round(s.vol/1000),
+            date:   'Yahoo',
+            src:    'Yahoo'
+          };
+          loaded++;
+        });
+      }
+    }catch(e){ console.warn('Yahoo fallback:', e.message); }
+  }
+
   // 計算技術指標（用現有收盤價模擬近期走勢）
   STOCKS.forEach(s=>{
     const p=PD[s.code];
@@ -1649,8 +1680,8 @@ async function openDet(code){
   document.getElementById('det-p').className='det-p '+(p?cc(p.chg):'');
   document.getElementById('det-c').textContent=p?(p.chg>=0?'+':'')+p.chgPct.toFixed(2)+'%':'—';
   document.getElementById('det-c').className='det-c '+(p?cc(p.chg):'');
-  document.getElementById('det-meta').textContent=p?`(${p.src} · ${p.date})`:'';
-  // 處置股顯示
+  const srcLabel = p?.src==='Yahoo' ? 'Yahoo Finance' : p?.src==='MIS即時' ? 'MIS即時' : p?.src||'TWSE';
+  document.getElementById('det-meta').textContent = p ? `(${srcLabel} · ${p.date||''})` : '';
   const dispEl = document.getElementById('det-disp');
   if(dispEl){
     if(DISP.has(code)){
