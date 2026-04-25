@@ -801,6 +801,7 @@ async function fetchRealtime(){
     const data = await r.json();
     (data.stocks||[]).forEach(s=>{
       if(!s.code||!s.close) return;
+      const fmtDate = d => d && d.length===8 ? `${d.slice(0,4)}/${d.slice(4,6)}/${d.slice(6,8)}` : '盤中即時';
       PD[s.code]={
         close:s.close, chg:s.chg, chgPct:s.chgPct,
         open:s.open, high:s.high, low:s.low,
@@ -1010,12 +1011,26 @@ async function loadAll(){
       const data = await r.json();
       (data.stocks||[]).forEach(s=>{
         if(!s.code||!s.close) return;
+        const isRT = checkTradingHours();
+        // MIS 回傳的 d 欄位為交易日期（yyyyMMdd），t 為最後成交時間
+        const rawDate = s.date || ''; // 從 Worker 傳過來的日期
+        let dateStr = '';
+        if(isRT){
+          dateStr = '盤中即時';
+        } else if(rawDate && rawDate.length===8){
+          dateStr = `${rawDate.slice(0,4)}/${rawDate.slice(4,6)}/${rawDate.slice(6,8)}`;
+        } else {
+          // 用昨個交易日
+          const tw = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+          dateStr = `${tw.getFullYear()}/${String(tw.getMonth()+1).padStart(2,'0')}/${String(tw.getDate()).padStart(2,'0')}`;
+        }
         PD[s.code]={
           close:s.close, chg:s.chg, chgPct:s.chgPct,
           open:s.open, high:s.high, low:s.low,
           vol:Math.round(s.vol/1000),
-          date:s.time?'盤中即時':'收盤後', src:'TPEx',
-          isRT: checkTradingHours()
+          date: dateStr,
+          src:'TPEx',
+          isRT
         };
         loaded++;
       });
