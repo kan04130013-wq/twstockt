@@ -1389,7 +1389,7 @@ async function loadChip(){
   }
   // 同時抓上櫃三大法人，補入 chipData
   try{
-    const rotc = await fetch('/api/stock?type=chip_otc');
+    const rotc = await fetch(`${CF_PROXY}?type=chip_otc`);
     if(rotc.ok){
       const dotc = await rotc.json();
       if(Array.isArray(dotc)){
@@ -2045,7 +2045,7 @@ async function loadChipDet(code){
         }
       }
     } else {
-      const r=await fetch('/api/stock?type=chip_otc');
+      const r=await fetch(`${CF_PROXY}?type=chip_otc`);
       if(r.ok){
         const d=await r.json();
         if(Array.isArray(d)){
