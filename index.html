@@ -1044,8 +1044,8 @@ async function loadAll(){
             high:   s.high,
             low:    s.low,
             vol:    Math.round(s.vol/1000),
-            date:   'Yahoo',
-            src:    'Yahoo'
+            date:   'MIS備援',
+            src:    'MIS'
           };
           loaded++;
         });
@@ -1680,7 +1680,7 @@ async function openDet(code){
   document.getElementById('det-p').className='det-p '+(p?cc(p.chg):'');
   document.getElementById('det-c').textContent=p?(p.chg>=0?'+':'')+p.chgPct.toFixed(2)+'%':'—';
   document.getElementById('det-c').className='det-c '+(p?cc(p.chg):'');
-  const srcLabel = p?.src==='Yahoo' ? 'Yahoo Finance' : p?.src==='MIS即時' ? 'MIS即時' : p?.src||'TWSE';
+  const srcLabel = p?.src==='MIS' ? 'MIS備援' : p?.src==='MIS即時' ? 'MIS即時' : p?.src||'TWSE';
   document.getElementById('det-meta').textContent = p ? `(${srcLabel} · ${p.date||''})` : '';
   const dispEl = document.getElementById('det-disp');
   if(dispEl){
