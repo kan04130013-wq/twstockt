@@ -883,29 +883,34 @@ function fireAlert(type, code, name, price, target){
 let DISP_INFO = {};
 
 async function fetchDisposition(){
+  // 先保留手動標記
+  const manual = JSON.parse(localStorage.getItem('manualDisp')||'{}');
+
   DISP.clear();
   DISP_INFO = {};
+
+  // 重新載入手動標記（先還原）
+  const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
+  Object.entries(manual).forEach(([code, info]) => {
+    if(!info.endDate || info.endDate.replace(/-/g,'/') >= today){
+      DISP.add(code);
+      DISP_INFO[code] = { ...info, market:'otc', manual:true };
+    }
+  });
+
+  // 再抓自動（上市）
   try{
-    // 上市處置股（Vercel proxy）
     const r1 = fetch('/api/stock?type=disposition');
-    // 上櫃處置股（Cloudflare Worker）
     const r2 = fetch(`${CF_PROXY}?type=disp_otc`);
-
     const [res1, res2] = await Promise.allSettled([r1, r2]);
-
     const addStocks = (stocks) => {
       (stocks||[]).forEach(d=>{
         const code = String(d.code||'').trim();
-        if(!code) return;
+        if(!code || DISP_INFO[code]?.manual) return; // 手動標記優先，不覆蓋
         DISP.add(code);
-        DISP_INFO[code] = {
-          startDate: d.startDate||'',
-          endDate:   d.endDate||'',
-          market:    d.market||''
-        };
+        DISP_INFO[code] = { startDate:d.startDate||'', endDate:d.endDate||'', market:d.market||'' };
       });
     };
-
     if(res1.status==='fulfilled' && res1.value.ok){
       const data = await res1.value.json();
       addStocks(data.stocks||[]);
@@ -2082,15 +2087,14 @@ function clearDisp(){
   applyFilt();
 }
 
-// 載入手動處置股（從 localStorage）
+// 載入手動處置股（從 localStorage）- 初始載入用
 function loadManualDisp(){
   const manual = JSON.parse(localStorage.getItem('manualDisp')||'{}');
   const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
   Object.entries(manual).forEach(([code, info]) => {
-    // 只載入尚未過期的
     if(!info.endDate || info.endDate.replace(/-/g,'/') >= today){
       DISP.add(code);
-      DISP_INFO[code] = { ...info, market: 'otc', manual: true };
+      DISP_INFO[code] = { ...info, market:'otc', manual:true };
     } else {
       // 已過期自動清除
       const m = JSON.parse(localStorage.getItem('manualDisp')||'{}');
