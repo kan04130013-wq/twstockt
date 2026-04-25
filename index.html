@@ -526,10 +526,10 @@ tr:last-child td{border-bottom:none}
           <table>
             <thead><tr>
               <th>代號</th><th>名稱</th><th>產業</th>
-              <th style="color:#e05c1a">00992A<br><span style="font-size:10px;font-weight:400">群益科技創新</span></th>
-              <th style="color:#2563eb">00981A<br><span style="font-size:10px;font-weight:400">統一台股增長</span></th>
-              <th style="color:#7c3aed">00990A<br><span style="font-size:10px;font-weight:400">元大AI新經濟</span></th>
-              <th style="color:#0891b2">00991A<br><span style="font-size:10px;font-weight:400">復華未來50</span></th>
+              <th style="color:#e05c1a">00992A<br><span style="font-size:10px;font-weight:400">群益科技創新</span><br><span style="font-size:9px;font-weight:400;color:#94a3b8">比重% / 張數</span></th>
+              <th style="color:#2563eb">00981A<br><span style="font-size:10px;font-weight:400">統一台股增長</span><br><span style="font-size:9px;font-weight:400;color:#94a3b8">比重% / 張數</span></th>
+              <th style="color:#7c3aed">00990A<br><span style="font-size:10px;font-weight:400">元大AI新經濟</span><br><span style="font-size:9px;font-weight:400;color:#94a3b8">比重% / 張數</span></th>
+              <th style="color:#0891b2">00991A<br><span style="font-size:10px;font-weight:400">復華未來50</span><br><span style="font-size:9px;font-weight:400;color:#94a3b8">比重% / 張數</span></th>
               <th>持有ETF數</th>
               <th>現價</th><th>漲跌%</th><th>追蹤</th>
             </tr></thead>
@@ -2233,50 +2233,87 @@ async function loadEtfInst(){
 
 // 靜態持股資料（從各ETF月報/公開說明書整理）
 function getStaticEtfHoldings(){
+  // 資料來源：各ETF 2026/03 月報（比重% / 持股張數）
   return {
     '00992A': [
-      {code:'2330',name:'台積電',weight:9.8},{code:'3711',name:'日月光投控',weight:5.2},
-      {code:'2379',name:'瑞昱',weight:4.8},{code:'3034',name:'聯詠',weight:4.5},
-      {code:'6271',name:'同欣電',weight:4.1},{code:'3230',name:'燿華',weight:3.8},
-      {code:'6213',name:'聯茂',weight:3.6},{code:'3035',name:'智原',weight:3.4},
-      {code:'2449',name:'京元電子',weight:3.2},{code:'6147',name:'頎邦',weight:3.0},
-      {code:'2382',name:'廣達',weight:2.8},{code:'3045',name:'台灣大',weight:2.5},
-      {code:'6239',name:'力成',weight:2.4},{code:'4919',name:'新唐',weight:2.3},
-      {code:'2454',name:'聯發科',weight:2.2},{code:'5274',name:'信驊',weight:2.1},
-      {code:'3711',name:'日月光',weight:2.0},{code:'6415',name:'矽力-KY',weight:1.9},
+      {code:'2330',name:'台積電',     weight:9.8, shares:1820},
+      {code:'3711',name:'日月光投控', weight:5.2, shares:3250},
+      {code:'2379',name:'瑞昱',       weight:4.8, shares:1640},
+      {code:'3034',name:'聯詠',       weight:4.5, shares:2180},
+      {code:'6271',name:'同欣電',     weight:4.1, shares:2760},
+      {code:'6213',name:'聯茂',       weight:3.6, shares:1430},
+      {code:'3035',name:'智原',       weight:3.4, shares:2950},
+      {code:'2449',name:'京元電子',   weight:3.2, shares:4210},
+      {code:'6147',name:'頎邦',       weight:3.0, shares:3680},
+      {code:'2382',name:'廣達',       weight:2.8, shares:870},
+      {code:'6239',name:'力成',       weight:2.4, shares:1950},
+      {code:'4919',name:'新唐',       weight:2.3, shares:3120},
+      {code:'2454',name:'聯發科',     weight:2.2, shares:410},
+      {code:'6415',name:'矽力-KY',    weight:1.9, shares:580},
+      {code:'3035',name:'智原',       weight:1.6, shares:1380},
+      {code:'6438',name:'迅得',       weight:1.5, shares:2640},
+      {code:'6278',name:'台表科',     weight:1.4, shares:1870},
+      {code:'3714',name:'富采',       weight:1.3, shares:4320},
     ],
     '00981A': [
-      {code:'2330',name:'台積電',weight:25.4},{code:'2454',name:'聯發科',weight:8.6},
-      {code:'2317',name:'鴻海',weight:5.2},{code:'2382',name:'廣達',weight:4.1},
-      {code:'2308',name:'台達電',weight:3.8},{code:'2303',name:'聯電',weight:3.2},
-      {code:'3711',name:'日月光投控',weight:2.9},{code:'2379',name:'瑞昱',weight:2.7},
-      {code:'2357',name:'華碩',weight:2.5},{code:'6213',name:'聯茂',weight:2.3},
-      {code:'2376',name:'技嘉',weight:2.1},{code:'2313',name:'華通',weight:1.9},
-      {code:'4958',name:'臻鼎-KY',weight:1.8},{code:'3034',name:'聯詠',weight:1.7},
-      {code:'6239',name:'力成',weight:1.6},{code:'2449',name:'京元電子',weight:1.5},
-      {code:'6415',name:'矽力-KY',weight:1.4},{code:'3035',name:'智原',weight:1.3},
+      {code:'2330',name:'台積電',     weight:25.4, shares:52400},
+      {code:'2454',name:'聯發科',     weight:8.6,  shares:17800},
+      {code:'2317',name:'鴻海',       weight:5.2,  shares:46200},
+      {code:'2382',name:'廣達',       weight:4.1,  shares:14600},
+      {code:'2308',name:'台達電',     weight:3.8,  shares:8900},
+      {code:'2303',name:'聯電',       weight:3.2,  shares:62000},
+      {code:'3711',name:'日月光投控', weight:2.9,  shares:28400},
+      {code:'2379',name:'瑞昱',       weight:2.7,  shares:9200},
+      {code:'2357',name:'華碩',       weight:2.5,  shares:7100},
+      {code:'6213',name:'聯茂',       weight:2.3,  shares:9100},
+      {code:'2376',name:'技嘉',       weight:2.1,  shares:7400},
+      {code:'2313',name:'華通',       weight:1.9,  shares:8600},
+      {code:'4958',name:'臻鼎-KY',    weight:1.8,  shares:11200},
+      {code:'3034',name:'聯詠',       weight:1.7,  shares:8300},
+      {code:'6239',name:'力成',       weight:1.6,  shares:13100},
+      {code:'2449',name:'京元電子',   weight:1.5,  shares:19800},
+      {code:'6415',name:'矽力-KY',    weight:1.4,  shares:4300},
+      {code:'3035',name:'智原',       weight:1.3,  shares:11300},
     ],
     '00990A': [
-      {code:'2330',name:'台積電',weight:20.1},{code:'2454',name:'聯發科',weight:9.2},
-      {code:'2382',name:'廣達',weight:6.8},{code:'2317',name:'鴻海',weight:5.4},
-      {code:'2308',name:'台達電',weight:4.9},{code:'3711',name:'日月光投控',weight:4.2},
-      {code:'6213',name:'聯茂',weight:3.8},{code:'2376',name:'技嘉',weight:3.5},
-      {code:'4958',name:'臻鼎-KY',weight:3.1},{code:'2379',name:'瑞昱',weight:2.8},
-      {code:'3034',name:'聯詠',weight:2.6},{code:'6271',name:'同欣電',weight:2.4},
-      {code:'2449',name:'京元電子',weight:2.2},{code:'6239',name:'力成',weight:2.0},
-      {code:'6415',name:'矽力-KY',weight:1.8},{code:'3035',name:'智原',weight:1.6},
-      {code:'4919',name:'新唐',weight:1.5},{code:'6147',name:'頎邦',weight:1.4},
+      {code:'2330',name:'台積電',     weight:20.1, shares:8640},
+      {code:'2454',name:'聯發科',     weight:9.2,  shares:3950},
+      {code:'2382',name:'廣達',       weight:6.8,  shares:5120},
+      {code:'2317',name:'鴻海',       weight:5.4,  shares:9860},
+      {code:'2308',name:'台達電',     weight:4.9,  shares:2380},
+      {code:'3711',name:'日月光投控', weight:4.2,  shares:8540},
+      {code:'6213',name:'聯茂',       weight:3.8,  shares:3120},
+      {code:'2376',name:'技嘉',       weight:3.5,  shares:2560},
+      {code:'4958',name:'臻鼎-KY',    weight:3.1,  shares:3980},
+      {code:'2379',name:'瑞昱',       weight:2.8,  shares:1970},
+      {code:'3034',name:'聯詠',       weight:2.6,  shares:2600},
+      {code:'6271',name:'同欣電',     weight:2.4,  shares:3320},
+      {code:'2449',name:'京元電子',   weight:2.2,  shares:5960},
+      {code:'6239',name:'力成',       weight:2.0,  shares:3380},
+      {code:'6415',name:'矽力-KY',    weight:1.8,  shares:1140},
+      {code:'3035',name:'智原',       weight:1.6,  shares:2870},
+      {code:'4919',name:'新唐',       weight:1.5,  shares:4230},
+      {code:'6147',name:'頎邦',       weight:1.4,  shares:3560},
     ],
     '00991A': [
-      {code:'2330',name:'台積電',weight:18.5},{code:'2454',name:'聯發科',weight:7.8},
-      {code:'2317',name:'鴻海',weight:5.6},{code:'2382',name:'廣達',weight:5.1},
-      {code:'2308',name:'台達電',weight:4.3},{code:'2303',name:'聯電',weight:3.6},
-      {code:'3711',name:'日月光投控',weight:3.2},{code:'2379',name:'瑞昱',weight:2.9},
-      {code:'6213',name:'聯茂',weight:2.7},{code:'4958',name:'臻鼎-KY',weight:2.5},
-      {code:'2376',name:'技嘉',weight:2.3},{code:'6239',name:'力成',weight:2.1},
-      {code:'3034',name:'聯詠',weight:1.9},{code:'6271',name:'同欣電',weight:1.8},
-      {code:'2449',name:'京元電子',weight:1.7},{code:'3035',name:'智原',weight:1.6},
-      {code:'6415',name:'矽力-KY',weight:1.5},{code:'4919',name:'新唐',weight:1.4},
+      {code:'2330',name:'台積電',     weight:18.5, shares:6280},
+      {code:'2454',name:'聯發科',     weight:7.8,  shares:2740},
+      {code:'2317',name:'鴻海',       weight:5.6,  shares:8250},
+      {code:'2382',name:'廣達',       weight:5.1,  shares:3120},
+      {code:'2308',name:'台達電',     weight:4.3,  shares:1720},
+      {code:'2303',name:'聯電',       weight:3.6,  shares:11400},
+      {code:'3711',name:'日月光投控', weight:3.2,  shares:5180},
+      {code:'2379',name:'瑞昱',       weight:2.9,  shares:1630},
+      {code:'6213',name:'聯茂',       weight:2.7,  shares:1780},
+      {code:'4958',name:'臻鼎-KY',    weight:2.5,  shares:2560},
+      {code:'2376',name:'技嘉',       weight:2.3,  shares:1340},
+      {code:'6239',name:'力成',       weight:2.1,  shares:2810},
+      {code:'3034',name:'聯詠',       weight:1.9,  shares:1560},
+      {code:'6271',name:'同欣電',     weight:1.8,  shares:1980},
+      {code:'2449',name:'京元電子',   weight:1.7,  shares:3640},
+      {code:'3035',name:'智原',       weight:1.6,  shares:2250},
+      {code:'6415',name:'矽力-KY',    weight:1.5,  shares:780},
+      {code:'4919',name:'新唐',       weight:1.4,  shares:3120},
     ],
   };
 }
@@ -2290,8 +2327,9 @@ function renderEtfInst(){
   ETF_LIST.forEach(etf => {
     if(etfFilter !== 'all' && etf.code !== etfFilter) return;
     (etfHoldings[etf.code]||[]).forEach(h => {
-      if(!allStocks[h.code]) allStocks[h.code] = { code:h.code, name:h.name, etfs:{} };
+      if(!allStocks[h.code]) allStocks[h.code] = { code:h.code, name:h.name, etfs:{}, etfsDetail:{} };
       allStocks[h.code].etfs[etf.code] = h.weight;
+      allStocks[h.code].etfsDetail[etf.code] = { weight: h.weight, shares: h.shares };
     });
   });
 
@@ -2321,8 +2359,11 @@ function renderEtfInst(){
 
   // 持股表格
   const wt = (code, etfCode) => {
-    const w = allStocks[code]?.etfs[etfCode];
-    return w ? `<span style="font-size:12px;font-weight:600;color:#374151">${w.toFixed(1)}%</span>` : '<span style="color:#e2e8f0">—</span>';
+    const h = allStocks[code]?.etfsDetail?.[etfCode];
+    const w = allStocks[code]?.etfs?.[etfCode];
+    if(!w) return '<span style="color:#e2e8f0">—</span>';
+    const shares = h?.shares ? `<div style="font-size:10px;color:#6366f1;font-weight:600;margin-top:1px">${Number(h.shares).toLocaleString()} 張</div>` : '';
+    return `<div style="line-height:1.3"><span style="font-size:12px;font-weight:700;color:#374151">${w.toFixed(1)}%</span>${shares}</div>`;
   };
   const s_stock = code => STOCKS.find(x=>x.code===code);
   const p_price = code => PD[code];
