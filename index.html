@@ -1438,8 +1438,14 @@ function renderChip(){
     return 0;
   });
 
-  const fmtBuy  = v => v===undefined||v===null ? '—' : v===0 ? '<span style="color:#cbd5e0">0</span>' : `<span class="mono" style="color:#dc2626;font-size:12px">${v.toLocaleString()}</span>`;
-  const fmtSell = v => v===undefined||v===null ? '—' : v===0 ? '<span style="color:#cbd5e0">0</span>' : `<span class="mono" style="color:#16a34a;font-size:12px">${v.toLocaleString()}</span>`;
+  const fmtBuy  = (v, isOtc) => {
+    if(isOtc) return '<span style="font-size:10px;color:#cbd5e0">上櫃</span>';
+    return v===undefined||v===null ? '—' : v===0 ? '<span style="color:#cbd5e0">0</span>' : `<span class="mono" style="color:#dc2626;font-size:12px">${v.toLocaleString()}</span>`;
+  };
+  const fmtSell = (v, isOtc) => {
+    if(isOtc) return '<span style="font-size:10px;color:#cbd5e0">封鎖</span>';
+    return v===undefined||v===null ? '—' : v===0 ? '<span style="color:#cbd5e0">0</span>' : `<span class="mono" style="color:#16a34a;font-size:12px">${v.toLocaleString()}</span>`;
+  };
   const fmtNet  = v => {
     if(v===undefined||v===null) return '—';
     const cls = v>0?'up':v<0?'dn':'fl';
@@ -1460,8 +1466,7 @@ function renderChip(){
 
   document.getElementById('chip-tbl').innerHTML = list.map(s=>{
     const ch = s.ch, p = s.p;
-    const sc = chipScore(ch);
-    // 自營商買賣估算：若有買賣超但無明細，dealer>0表示淨買
+    const isOtc = s.ex === 'otc';
     const dealerBuy  = ch?.dealer > 0 ? ch.dealer : 0;
     const dealerSell = ch?.dealer < 0 ? Math.abs(ch.dealer) : 0;
     const priceCell = p ? `<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>` : '—';
@@ -1470,12 +1475,12 @@ function renderChip(){
       <td class="code">${s.code}</td>
       <td style="font-weight:500">${s.name}</td>
       <td>${ib(s.ind)}</td>
-      <td>${fmtBuy(ch?.foreignBuy)}</td>
-      <td style="border-right:1px solid #f1f5f9">${fmtSell(ch?.foreignSell)}</td>
-      <td>${fmtBuy(ch?.trustBuy)}</td>
-      <td style="border-right:1px solid #f1f5f9">${fmtSell(ch?.trustSell)}</td>
-      <td>${fmtBuy(dealerBuy||undefined)}</td>
-      <td style="border-right:1px solid #f1f5f9">${fmtSell(dealerSell||undefined)}</td>
+      <td>${fmtBuy(ch?.foreignBuy, isOtc && !ch)}</td>
+      <td style="border-right:1px solid #f1f5f9">${fmtSell(ch?.foreignSell, isOtc && !ch)}</td>
+      <td>${fmtBuy(ch?.trustBuy, isOtc && !ch)}</td>
+      <td style="border-right:1px solid #f1f5f9">${fmtSell(ch?.trustSell, isOtc && !ch)}</td>
+      <td>${fmtBuy(dealerBuy||undefined, isOtc && !ch)}</td>
+      <td style="border-right:1px solid #f1f5f9">${fmtSell(dealerSell||undefined, isOtc && !ch)}</td>
       <td>${fmtNet(ch?.total)}</td>
       <td>${priceCell}</td><td>${chgCell}</td>
       <td><span class="stars">${'<span class="son">★</span>'.repeat(sc)}${'<span class="sof">☆</span>'.repeat(5-sc)}</span></td>
