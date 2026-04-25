@@ -1387,7 +1387,7 @@ async function loadChip(){
   if(!loaded){
     document.getElementById('chip-status').textContent = '法人資料暫無法取得（今日可能尚未更新）';
   }
-  // 同時抓上櫃三大法人，補入 chipData
+  // 同時抓上櫃三大法人（透過 CF Worker → TWSE 全市場版）
   try{
     const rotc = await fetch(`${CF_PROXY}?type=chip_otc`);
     if(rotc.ok){
@@ -1396,13 +1396,13 @@ async function loadChip(){
         const bi = v => parseInt((v||'0').replace(/,/g,'').replace(/\+/g,''))||0;
         dotc.forEach(row=>{
           const code = (row.SecuritiesCompanyCode||'').trim();
-          if(!code) return;
+          if(!code || chipData[code]) return; // 上市已有資料則跳過
           const fBuy  = bi(row.ForeignInvestmentBuyShares);
           const fSell = bi(row.ForeignInvestmentSellShares);
           const tBuy  = bi(row.InvestmentTrustBuyShares);
           const tSell = bi(row.InvestmentTrustSellShares);
-          const dBuy  = bi(row.DealersBuyShares);
-          const dSell = bi(row.DealersSellShares);
+          const dealer= bi(row.DealerNetBuySell || '0');
+          const total = bi(row.Total || '0');
           chipData[code] = {
             foreignBuy:  fBuy,
             foreignSell: fSell,
@@ -1410,15 +1410,12 @@ async function loadChip(){
             trustBuy:    tBuy,
             trustSell:   tSell,
             trust:       tBuy - tSell,
-            dealer:      dBuy - dSell,
-            total:       (fBuy-fSell) + (tBuy-tSell) + (dBuy-dSell),
+            dealer:      dealer,
+            total:       total,
           };
         });
-        if(!loaded){
-          const dateOtc = dotc[0]?.Date||'';
-          document.getElementById('chip-status').textContent =
-            `已載入 ${Object.keys(chipData).length} 筆法人資料（含上櫃）· ${dateOtc}`;
-        }
+        document.getElementById('chip-status').textContent =
+          `已載入 ${Object.keys(chipData).length} 筆法人資料（上市+上櫃）`;
       }
     }
   }catch(e){ console.warn('OTC chip error', e); }
