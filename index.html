@@ -1387,6 +1387,42 @@ async function loadChip(){
   if(!loaded){
     document.getElementById('chip-status').textContent = '法人資料暫無法取得（今日可能尚未更新）';
   }
+  // 同時抓上櫃三大法人，補入 chipData
+  try{
+    const rotc = await fetch('/api/stock?type=chip_otc');
+    if(rotc.ok){
+      const dotc = await rotc.json();
+      if(Array.isArray(dotc)){
+        const bi = v => parseInt((v||'0').replace(/,/g,'').replace(/\+/g,''))||0;
+        dotc.forEach(row=>{
+          const code = (row.SecuritiesCompanyCode||'').trim();
+          if(!code) return;
+          const fBuy  = bi(row.ForeignInvestmentBuyShares);
+          const fSell = bi(row.ForeignInvestmentSellShares);
+          const tBuy  = bi(row.InvestmentTrustBuyShares);
+          const tSell = bi(row.InvestmentTrustSellShares);
+          const dBuy  = bi(row.DealersBuyShares);
+          const dSell = bi(row.DealersSellShares);
+          chipData[code] = {
+            foreignBuy:  fBuy,
+            foreignSell: fSell,
+            foreign:     fBuy - fSell,
+            trustBuy:    tBuy,
+            trustSell:   tSell,
+            trust:       tBuy - tSell,
+            dealer:      dBuy - dSell,
+            total:       (fBuy-fSell) + (tBuy-tSell) + (dBuy-dSell),
+          };
+        });
+        if(!loaded){
+          const dateOtc = dotc[0]?.Date||'';
+          document.getElementById('chip-status').textContent =
+            `已載入 ${Object.keys(chipData).length} 筆法人資料（含上櫃）· ${dateOtc}`;
+        }
+      }
+    }
+  }catch(e){ console.warn('OTC chip error', e); }
+
   renderChip();
 }
 
