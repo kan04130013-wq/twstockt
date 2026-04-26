@@ -1347,34 +1347,39 @@ async function loadChip(){
   document.getElementById('chip-status').textContent = '載入中...';
   chipData = {};
 
-  // 先用 FinMind 抓全部股票（上市+上櫃）
+  // 用 FinMind 抓全部股票（上市+上櫃），每批30檔送 Worker，Worker 內部並行
   try{
-    const allCodes = STOCKS.filter(s=>!s.code.includes('A')).map(s=>s.code); // 排除ETF
-    // 分批：每批 30 檔
-    document.getElementById('chip-status').textContent = `FinMind 載入中...（共 ${allCodes.length} 檔）`;
+    const allCodes = STOCKS.filter(s=>!s.code.includes('A')).map(s=>s.code);
+    document.getElementById('chip-status').textContent = `FinMind 載入中...（${allCodes.length} 檔）`;
     let done = 0;
-    for(let i=0; i<allCodes.length; i+=30){
-      const batch = allCodes.slice(i, i+30);
-      try{
-        const r = await fetch(`${CF_PROXY}?type=chip_finmind&codes=${batch.join(',')}`);
-        if(!r.ok) continue;
-        const data = await r.json();
-        (data.stocks||[]).forEach(row=>{
-          if(!row.code) return;
-          chipData[row.code] = {
-            foreignBuy:  row.foreignBuy  || 0,
-            foreignSell: row.foreignSell || 0,
-            foreign:     row.foreign     || 0,
-            trustBuy:    row.trustBuy    || 0,
-            trustSell:   row.trustSell   || 0,
-            trust:       row.trust       || 0,
-            dealer:      row.dealer      || 0,
-            total:       row.total       || 0,
-          };
-          done++;
-        });
-      }catch(e){}
-    }
+
+    // 每批 30 檔，Worker 內部並行查詢
+    const batches = [];
+    for(let i=0; i<allCodes.length; i+=30) batches.push(allCodes.slice(i,i+30));
+
+    // 並行送出所有批次
+    const batchResults = await Promise.all(batches.map(batch =>
+      fetch(`${CF_PROXY}?type=chip_finmind&codes=${batch.join(',')}`)
+        .then(r=>r.ok?r.json():null).catch(()=>null)
+    ));
+
+    batchResults.forEach(data=>{
+      (data?.stocks||[]).forEach(row=>{
+        if(!row.code) return;
+        chipData[row.code] = {
+          foreignBuy:  row.foreignBuy  || 0,
+          foreignSell: row.foreignSell || 0,
+          foreign:     row.foreign     || 0,
+          trustBuy:    row.trustBuy    || 0,
+          trustSell:   row.trustSell   || 0,
+          trust:       row.trust       || 0,
+          dealer:      row.dealer      || 0,
+          total:       row.total       || 0,
+        };
+        done++;
+      });
+    });
+
     if(done > 0){
       document.getElementById('chip-status').textContent =
         `已載入 ${done} 筆法人資料（FinMind · 上市+上櫃）`;
