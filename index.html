@@ -1345,57 +1345,21 @@ let chipData = {};
 
 async function loadChip(){
   document.getElementById('chip-status').textContent = '載入中...';
-  const now = new Date();
-  // 往前找最近交易日
-  const tryDates = [];
-  for(let i=0;i<5;i++){
-    const d = new Date(now); d.setDate(now.getDate()-i);
-    if(d.getDay()===0||d.getDay()===6) continue;
-    tryDates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
-  }
+  chipData = {};
 
-  let loaded = false;
-  for(const date of tryDates){
-    try{
-      const r = await fetch(`/api/stock?type=chip_tse&date=${date}`);
-      if(!r.ok) continue;
-      const data = await r.json();
-      if(data.stat==='OK' && data.data?.length){
-        // fields: 證券代號、證券名稱、外陸資買進、外陸資賣出、外陸資買賣超、投信買進、投信賣出、投信買賣超、自營商買賣超、三大法人買賣超
-        data.data.forEach(row=>{
-          const code = row[0]?.trim();
-          if(!code) return;
-          const parse = v => parseInt((v||'0').replace(/,/g,'').replace(/\+/g,'')) || 0;
-          chipData[code] = {
-            foreignBuy:  parse(row[2]),
-            foreignSell: parse(row[3]),
-            foreign:     parse(row[4]),
-            trustBuy:    parse(row[5]),
-            trustSell:   parse(row[6]),
-            trust:       parse(row[7]),
-            dealer:      parse(row[8]),
-            total:       parse(row[9]),
-          };
-        });
-        loaded = true;
-        document.getElementById('chip-status').textContent =
-          `已載入 ${Object.keys(chipData).length} 筆法人資料 · ${date.slice(0,4)}/${date.slice(4,6)}/${date.slice(6,8)}`;
-        break;
-      }
-    }catch(e){ console.warn('chip error', e); }
-  }
-  if(!loaded){
-    document.getElementById('chip-status').textContent = '法人資料暫無法取得（今日可能尚未更新）';
-  }
-  // 用 FinMind 補抓上櫃三大法人（TWSE T86 selectType=ALL 不含上櫃）
-  const otcStocks = STOCKS.filter(s => s.ex === 'otc' && !chipData[s.code]);
-  if(otcStocks.length > 0){
-    try{
-      const otcCodes = otcStocks.map(s=>s.code).join(',');
-      const rotc = await fetch(`${CF_PROXY}?type=chip_finmind&codes=${encodeURIComponent(otcCodes)}`);
-      if(rotc.ok){
-        const dotc = await rotc.json();
-        (dotc.stocks||[]).forEach(row=>{
+  // 先用 FinMind 抓全部股票（上市+上櫃）
+  try{
+    const allCodes = STOCKS.filter(s=>!s.code.includes('A')).map(s=>s.code); // 排除ETF
+    // 分批：每批 30 檔
+    document.getElementById('chip-status').textContent = `FinMind 載入中...（共 ${allCodes.length} 檔）`;
+    let done = 0;
+    for(let i=0; i<allCodes.length; i+=30){
+      const batch = allCodes.slice(i, i+30);
+      try{
+        const r = await fetch(`${CF_PROXY}?type=chip_finmind&codes=${batch.join(',')}`);
+        if(!r.ok) continue;
+        const data = await r.json();
+        (data.stocks||[]).forEach(row=>{
           if(!row.code) return;
           chipData[row.code] = {
             foreignBuy:  row.foreignBuy  || 0,
@@ -1407,14 +1371,58 @@ async function loadChip(){
             dealer:      row.dealer      || 0,
             total:       row.total       || 0,
           };
+          done++;
         });
-        const total = Object.keys(chipData).length;
-        document.getElementById('chip-status').textContent =
-          `已載入 ${total} 筆法人資料（上市+上櫃 FinMind）`;
-      }
-    }catch(e){ console.warn('FinMind chip error', e); }
+      }catch(e){}
+    }
+    if(done > 0){
+      document.getElementById('chip-status').textContent =
+        `已載入 ${done} 筆法人資料（FinMind · 上市+上櫃）`;
+      renderChip();
+      return;
+    }
+  }catch(e){ console.warn('FinMind batch error', e); }
+
+  // FinMind 失敗時備援：TWSE T86（僅上市）
+  const now = new Date();
+  const tryDates = [];
+  for(let i=0;i<5;i++){
+    const d = new Date(now); d.setDate(now.getDate()-i);
+    if(d.getDay()===0||d.getDay()===6) continue;
+    tryDates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`);
   }
 
+  let loaded = false;
+  for(const date of tryDates){
+    try{
+      const r = await fetch(`${CF_PROXY}?type=chip_otc`); // TWSE ALL（上市）
+      if(!r.ok) continue;
+      const data = await r.json();
+      if(Array.isArray(data) && data.length){
+        const bi = v => parseInt((v||'0').replace(/,/g,'').replace(/\+/g,''))||0;
+        data.forEach(row=>{
+          const code = (row.SecuritiesCompanyCode||'').trim();
+          if(!code) return;
+          const toZhang = v => Math.round(bi(v)/1000);
+          chipData[code] = {
+            foreignBuy:  toZhang(row.ForeignInvestmentBuyShares),
+            foreignSell: toZhang(row.ForeignInvestmentSellShares),
+            foreign:     Math.round(bi(row.ForeignInvestmentNetBuySell)/1000),
+            trustBuy:    toZhang(row.InvestmentTrustBuyShares),
+            trustSell:   toZhang(row.InvestmentTrustSellShares),
+            trust:       Math.round(bi(row.InvestmentTrustNetBuySell)/1000),
+            dealer:      Math.round(bi(row.DealerNetBuySell)/1000),
+            total:       Math.round(bi(row.Total)/1000),
+          };
+        });
+        loaded = true;
+        document.getElementById('chip-status').textContent =
+          `已載入 ${Object.keys(chipData).length} 筆法人資料（TWSE · 僅上市）`;
+        break;
+      }
+    }catch(e){}
+  }
+  if(!loaded) document.getElementById('chip-status').textContent = '法人資料暫無法取得';
   renderChip();
 }
 
