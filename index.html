@@ -844,6 +844,35 @@ async function fetchRealtime(){
 }
 let filtered=[...STOCKS], curInd='', curPage=1, sortMode='', detChart=null;
 const PAGE=15;
+// ── 真實歷史收盤價（FinMind，背景載入）──────────────────────────
+async function loadRealHistory(){
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 90);
+  const fmt = d => d.toISOString().slice(0,10);
+  const stocks = STOCKS.filter(s=>PD[s.code] && !s.code.includes('A'));
+  let updated = 0;
+
+  for(let i=0; i<stocks.length; i+=10){
+    const batch = stocks.slice(i, i+10);
+    await Promise.all(batch.map(async s=>{
+      try{
+        const url = `${CF_PROXY}?type=stock_hist&code=${s.code}&start=${fmt(startDate)}&end=${fmt(endDate)}`;
+        const r = await fetch(url);
+        if(!r.ok) return;
+        const data = await r.json();
+        const closes = (data.closes||[]).filter(v=>v>0);
+        if(closes.length >= 26){
+          HIST[s.code] = closes;
+          IND[s.code] = {kd:calcKD(closes), macd:calcMACD(closes)};
+          updated++;
+        }
+      }catch(e){}
+    }));
+  }
+  if(updated > 0){ applyFilt(); console.log(`技術指標真實歷史更新：${updated} 檔`); }
+}
+
 let watchList=JSON.parse(localStorage.getItem('wl')||'[]');
 let alertsFired=new Set();
 
@@ -1088,18 +1117,21 @@ async function loadAll(){
     }catch(e){ console.warn('Yahoo fallback:', e.message); }
   }
 
-  // 計算技術指標（用現有收盤價模擬近期走勢）
+  // 計算技術指標（用 FinMind 真實歷史收盤價）
+  // 先用模擬資料初始化（確保 KD/MACD 欄位存在）
   STOCKS.forEach(s=>{
     const p=PD[s.code];
-    if(!p) return;
+    if(!p||HIST[s.code]?.length>=26) return;
     const b=p.close;
-    // 產生模擬20日收盤價序列（最後一筆為真實收盤價）
     const closes=[];
-    for(let i=19;i>=0;i--) closes.push(+(b*(0.95+Math.random()*.10)).toFixed(2));
+    for(let i=29;i>=0;i--) closes.push(+(b*(0.95+Math.random()*.10)).toFixed(2));
     closes[closes.length-1]=b;
     HIST[s.code]=closes;
     IND[s.code]={kd:calcKD(closes), macd:calcMACD(closes)};
   });
+
+  // 非同步補抓真實歷史（背景執行，完成後自動更新）
+  loadRealHistory();
 
   setProg(100);
   const date=Object.values(PD).find(p=>p.date)?.date||'';
@@ -2033,86 +2065,73 @@ function switchDetTab(tab, btn){
 async function loadChipDet(code){
   const el=document.getElementById('det-chip-content');
   if(!el||!code) return;
+  if(el.dataset.loaded===code) return;
   el.innerHTML='<span style="color:#94a3b8;font-size:14px">載入中...</span>';
   try{
-    const s=STOCKS.find(x=>x.code===code);
-    let foreign=0,invest=0,dealer=0,foreignCum=0,investCum=0,dealerCum=0,dateStr='';
-    if(s?.ex==='tse'){
-      const r=await fetch('/api/stock?type=chip_tse');
-      if(r.ok){
-        const d=await r.json();
-        dateStr=d.date||'';
-        if(d.data){
-          const found=d.data.find(r=>r[0]===code);
-          if(found){
-            foreign=parseInt((found[4]||'0').replace(/,/g,''))||0;
-            invest=parseInt((found[7]||'0').replace(/,/g,''))||0;
-            dealer=parseInt((found[10]||'0').replace(/,/g,''))||0;
-            foreignCum=parseInt((found[5]||'0').replace(/,/g,''))||0;
-            investCum=parseInt((found[8]||'0').replace(/,/g,''))||0;
-            dealerCum=parseInt((found[11]||'0').replace(/,/g,''))||0;
-          }
-        }
-      }
-    } else {
-      const r=await fetch(`${CF_PROXY}?type=chip_otc`);
-      if(r.ok){
-        const d=await r.json();
-        if(Array.isArray(d)){
-          dateStr=d[0]?.Date||'';
-          const found=d.find(r=>r.SecuritiesCompanyCode===code);
-          if(found){
-            const bi=v=>parseInt((v||'0').replace(/,/g,''))||0;
-            foreign=bi(found.ForeignInvestmentBuyShares)-bi(found.ForeignInvestmentSellShares);
-            invest=bi(found.InvestmentTrustBuyShares)-bi(found.InvestmentTrustSellShares);
-            dealer=bi(found.DealersBuyShares)-bi(found.DealersSellShares);
-          }
-        }
-      }
+    // 用 chipData 已載入的資料（若有）
+    if(chipData[code]){
+      const ch = chipData[code];
+      renderChipDet(el, code, ch.foreignBuy, ch.foreignSell, ch.trustBuy, ch.trustSell, ch.dealer, '（籌碼追蹤資料）');
+      el.dataset.loaded = code;
+      return;
     }
-    const total=foreign+invest+dealer;
-    const fmt=v=>{
-      if(!v) return '<span style="color:#94a3b8;font-weight:700">0</span>';
-      const col=v>0?'#dc2626':'#16a34a';
-      return `<span style="color:${col};font-weight:700">${v>0?'+':''}${v.toLocaleString()}</span>`;
-    };
-    const bar=v=>{
-      const mx=Math.max(Math.abs(foreign),Math.abs(invest),Math.abs(dealer),1);
-      const pct=Math.round(Math.abs(v)/mx*100);
-      const col=v>0?'#dc2626':'#16a34a';
-      return `<div style="height:8px;border-radius:4px;background:#f1f5f9;overflow:hidden;margin-top:5px"><div style="height:100%;width:${pct}%;background:${col};border-radius:4px"></div></div>`;
-    };
-    el.innerHTML=`
-      <div style="font-size:13px;color:#94a3b8;margin-bottom:12px">📅 資料日期：${dateStr||'最新一日'}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
-        <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
-          <div style="font-size:13px;color:#64748b;margin-bottom:8px;font-weight:600">🌍 外資</div>
-          <div style="font-size:20px;font-family:monospace">${fmt(foreign)} 張</div>
-          ${bar(foreign)}
-          ${foreignCum?`<div style="font-size:12px;color:#94a3b8;margin-top:5px">近期累計 ${foreignCum>0?'+':''}${foreignCum.toLocaleString()} 張</div>`:''}
-        </div>
-        <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
-          <div style="font-size:13px;color:#64748b;margin-bottom:8px;font-weight:600">🏦 投信</div>
-          <div style="font-size:20px;font-family:monospace">${fmt(invest)} 張</div>
-          ${bar(invest)}
-          ${investCum?`<div style="font-size:12px;color:#94a3b8;margin-top:5px">近期累計 ${investCum>0?'+':''}${investCum.toLocaleString()} 張</div>`:''}
-        </div>
-        <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
-          <div style="font-size:13px;color:#64748b;margin-bottom:8px;font-weight:600">🏢 自營商</div>
-          <div style="font-size:20px;font-family:monospace">${fmt(dealer)} 張</div>
-          ${bar(dealer)}
-          ${dealerCum?`<div style="font-size:12px;color:#94a3b8;margin-top:5px">近期累計 ${dealerCum>0?'+':''}${dealerCum.toLocaleString()} 張</div>`:''}
-        </div>
-      </div>
-      <div style="padding:12px 16px;border-radius:8px;background:${total>0?'#fef2f2':total<0?'#f0fdf4':'#f8fafc'};border:1px solid ${total>0?'#fca5a5':total<0?'#86efac':'#e2e8f0'}">
-        <span style="font-size:14px;font-weight:700;color:${total>0?'#dc2626':total<0?'#16a34a':'#64748b'}">
-          三大法人合計：${total>0?'+':''}${total.toLocaleString()} 張　${total>0?'📈 法人偏多買超':total<0?'📉 法人偏空賣超':'➡️ 法人持平'}
-        </span>
-      </div>`;
+    // 否則用 FinMind 即時查詢
+    const r = await fetch(`${CF_PROXY}?type=chip_finmind&codes=${code}`);
+    if(!r.ok) throw new Error('API error');
+    const data = await r.json();
+    const row = (data.stocks||[])[0];
+    if(row){
+      renderChipDet(el, code, row.foreignBuy||0, row.foreignSell||0, row.trustBuy||0, row.trustSell||0, row.dealer||0, row.date||'');
+    } else {
+      el.innerHTML='<span style="color:#94a3b8;font-size:13px">籌碼資料暫無法取得</span>';
+    }
+    el.dataset.loaded = code;
   }catch(e){
     el.innerHTML=`<span style="color:#94a3b8;font-size:13px">籌碼資料暫無法取得</span>`;
   }
 }
+
+function renderChipDet(el, code, fBuy, fSell, tBuy, tSell, dealer, dateStr){
+  const foreign = fBuy - fSell;
+  const trust = tBuy - tSell;
+  const total = foreign + trust + dealer;
+  const fmt = v => {
+    if(!v) return '<span style="color:#94a3b8;font-weight:700">0</span>';
+    const col=v>0?'#dc2626':'#16a34a';
+    return `<span style="color:${col};font-weight:700">${v>0?'+':''}${v.toLocaleString()}</span>`;
+  };
+  const bar = v => {
+    const mx=Math.max(Math.abs(foreign),Math.abs(trust),Math.abs(dealer),1);
+    const pct=Math.round(Math.abs(v)/mx*100);
+    const col=v>0?'#dc2626':'#16a34a';
+    return `<div style="height:8px;border-radius:4px;background:#f1f5f9;overflow:hidden;margin-top:5px"><div style="height:100%;width:${pct}%;background:${col};border-radius:4px"></div></div>`;
+  };
+  el.innerHTML=`
+    <div style="font-size:13px;color:#94a3b8;margin-bottom:12px">📅 ${dateStr||'最新一日'}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
+        <div style="font-size:13px;color:#64748b;margin-bottom:6px;font-weight:600">🌍 外資</div>
+        <div style="font-size:18px;font-family:monospace">${fmt(foreign)} 張</div>
+        ${bar(foreign)}
+        <div style="font-size:11px;color:#94a3b8;margin-top:4px">買 ${fBuy.toLocaleString()} / 賣 ${fSell.toLocaleString()}</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
+        <div style="font-size:13px;color:#64748b;margin-bottom:6px;font-weight:600">🏦 投信</div>
+        <div style="font-size:18px;font-family:monospace">${fmt(trust)} 張</div>
+        ${bar(trust)}
+        <div style="font-size:11px;color:#94a3b8;margin-top:4px">買 ${tBuy.toLocaleString()} / 賣 ${tSell.toLocaleString()}</div>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0">
+        <div style="font-size:13px;color:#64748b;margin-bottom:6px;font-weight:600">🏢 自營商</div>
+        <div style="font-size:18px;font-family:monospace">${fmt(dealer)} 張</div>
+        ${bar(dealer)}
+      </div>
+    </div>
+    <div style="padding:12px 16px;border-radius:8px;background:${total>0?'#fef2f2':total<0?'#f0fdf4':'#f8fafc'};border:1px solid ${total>0?'#fca5a5':total<0?'#86efac':'#e2e8f0'}">
+      <span style="font-size:14px;font-weight:700;color:${total>0?'#dc2626':total<0?'#16a34a':'#64748b'}">
+        三大法人合計：${total>0?'+':''}${total.toLocaleString()} 張　${total>0?'📈 法人偏多買超':total<0?'📉 法人偏空賣超':'➡️ 法人持平'}
+      </span>
+    </div>`;
 
 function closeDet(){document.getElementById('det').className='det';if(detChart){detChart.destroy();detChart=null}}
 
