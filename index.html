@@ -2132,6 +2132,7 @@ function renderChipDet(el, code, fBuy, fSell, tBuy, tSell, dealer, dateStr){
         三大法人合計：${total>0?'+':''}${total.toLocaleString()} 張　${total>0?'📈 法人偏多買超':total<0?'📉 法人偏空賣超':'➡️ 法人持平'}
       </span>
     </div>`;
+}
 
 function closeDet(){document.getElementById('det').className='det';if(detChart){detChart.destroy();detChart=null}}
 
