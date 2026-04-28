@@ -85,6 +85,10 @@ tr:last-child td{border-bottom:none}
 .ib-ic{background:#fdf4ff;border-color:#e9d5ff;color:#7e22ce}
 .ib-etf{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
 .ib-mem{background:#f0f9ff;border-color:#bae6fd;color:#0369a1}
+.ib-robot{background:#f0fdf4;border-color:#86efac;color:#15803d}
+.ib-conn{background:#fdf2f8;border-color:#f0abfc;color:#86198f}
+.ib-robot{background:#f0fdf4;border-color:#86efac;color:#15803d}
+.ib-conn{background:#fdf2f8;border-color:#f0abfc;color:#86198f}
 .sb{display:inline-flex;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid;white-space:nowrap}
 .sb-sb{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
 .sb-b{background:#fffbeb;color:#d97706;border-color:#fde68a}
@@ -795,6 +799,36 @@ const STOCKS=[
   {code:'4952',ex:'tse',name:'凌通',ind:'IC設計',sig:'觀察',sc:3,note:'語音辨識與MCU，IoT智慧家庭應用持續滲透',buy:'',sell:'',stop:''},
   {code:'6202',ex:'tse',name:'盛群',ind:'IC設計',sig:'買進',sc:4,note:'MCU微控制器，工業自動化與家電控制需求穩定',buy:'',sell:'',stop:''},
   {code:'5471',ex:'tse',name:'松翰',ind:'IC設計',sig:'觀察',sc:3,note:'視訊處理IC，安控與視訊監控市場持續擴大',buy:'',sell:'',stop:''},
+  {code:'6188',ex:'otc',name:'廣明',ind:'機器人',sig:'強烈買進',sc:5,note:'工業機器人精密零組件，諧波減速機與RV減速機台灣最大廠，人形機器人核心供應商受惠',buy:'',sell:'',stop:''},
+  {code:'2359',ex:'tse',name:'所羅門',ind:'機器人',sig:'強烈買進',sc:5,note:'機器人視覺AI龍頭，3D視覺感測與AI揀貨系統，切入特斯拉Optimus及國際人形機器人供應鏈',buy:'',sell:'',stop:''},
+  {code:'2395',ex:'tse',name:'研華',ind:'機器人',sig:'買進',sc:4,note:'工業電腦與AIoT平台龍頭，機器人控制器與邊緣AI運算模組，工廠自動化核心供應商',buy:'',sell:'',stop:''},
+  {code:'6414',ex:'tse',name:'樺漢',ind:'機器人',sig:'買進',sc:4,note:'工業電腦系統整合廠，機器人控制系統與智慧製造設備，鴻海集團成員',buy:'',sell:'',stop:''},
+  {code:'8234',ex:'otc',name:'新漢',ind:'機器人',sig:'買進',sc:4,note:'工業電腦與機器人控制器，AMR自主移動機器人控制模組，切入協作機器人市場',buy:'',sell:'',stop:''},
+  {code:'5474',ex:'otc',name:'聰泰',ind:'機器人',sig:'買進',sc:4,note:'工業電腦與嵌入式平台，機器人視覺運算平台，AI推論加速模組需求成長',buy:'',sell:'',stop:''},
+  {code:'6166',ex:'tse',name:'凌華',ind:'機器人',sig:'買進',sc:4,note:'機器人控制電腦與視覺系統平台，工業機器人EtherCAT控制解決方案',buy:'',sell:'',stop:''},
+  {code:'2049',ex:'tse',name:'上銀',ind:'機器人',sig:'強烈買進',sc:5,note:'線性滑軌與滾珠螺桿全球前三大，機器人關節模組與醫療機械手臂，人形機器人精密傳動核心',buy:'',sell:'',stop:''},
+  {code:'4576',ex:'otc',name:'大銀微系統',ind:'機器人',sig:'買進',sc:4,note:'精密線性傳動元件，工業機器人與半導體設備精密導軌，切入人形機器人傳動系統',buy:'',sell:'',stop:''},
+  {code:'1597',ex:'tse',name:'直得',ind:'機器人',sig:'買進',sc:4,note:'微型線性滑軌與滾珠螺桿，協作機器人與醫療機器人關節精密傳動件，毛利率50%以上',buy:'',sell:'',stop:''},
+  {code:'8374',ex:'tse',name:'羅昇',ind:'機器人',sig:'買進',sc:4,note:'自動化零組件通路商，代理機器人周邊設備與感測元件，受惠製造業自動化投資潮',buy:'',sell:'',stop:''},
+  {code:'4540',ex:'tse',name:'全球傳動',ind:'機器人',sig:'強烈買進',sc:5,note:'滾珠螺桿台灣第一大廠，人形機器人精密絲桿傳動核心元件，特斯拉Optimus供應商候選',buy:'',sell:'',stop:''},
+  {code:'2354',ex:'tse',name:'鴻準',ind:'機器人',sig:'買進',sc:4,note:'鴻海集團精密機構件，機器人外殼與精密結構件，切入人形機器人機構件供應鏈',buy:'',sell:'',stop:''},
+  {code:'2365',ex:'tse',name:'昆盈',ind:'機器人',sig:'觀察',sc:3,note:'電腦周邊與精密製造，工業自動化輸入裝置，機器人HMI人機介面設備布局',buy:'',sell:'',stop:''},
+  {code:'1536',ex:'tse',name:'和大',ind:'機器人',sig:'買進',sc:4,note:'汽車傳動零件廠，切入人形機器人齒輪箱與減速機，精密齒輪加工技術應用於機器人關節',buy:'',sell:'',stop:''},
+  {code:'7893',ex:'otc',name:'睿信',ind:'連接器',sig:'買進',sc:4,note:'高速連接器設計製造，AI伺服器與資料中心高速訊號連接器，PCIe與高頻連接器產品線持續擴充',buy:'',sell:'',stop:''},
+  {code:'3023',ex:'tse',name:'信邦',ind:'連接器',sig:'強烈買進',sc:5,note:'高速連接器與線束組件，AI伺服器電源與訊號連接器龍頭，客戶涵蓋輝達與超微，800G高速線纜受惠',buy:'',sell:'',stop:''},
+  {code:'3526',ex:'otc',name:'凡甲',ind:'連接器',sig:'強烈買進',sc:5,note:'高速連接器龍頭，AI伺服器PCIe 5.0/6.0與CXL高速連接器，資料中心互連核心供應商',buy:'',sell:'',stop:''},
+  {code:'3217',ex:'otc',name:'優群',ind:'連接器',sig:'買進',sc:4,note:'網路與伺服器連接器，10G/25G/100G高速乙太網路模組連接器，AI伺服器網路升級受惠',buy:'',sell:'',stop:''},
+  {code:'6197',ex:'tse',name:'佳必琪',ind:'連接器',sig:'買進',sc:4,note:'伺服器與車用連接器，AI伺服器電源與訊號連接器需求增加，車用電連接器布局',buy:'',sell:'',stop:''},
+  {code:'6715',ex:'tse',name:'嘉基',ind:'連接器',sig:'買進',sc:4,note:'高頻連接器與線纜組件，5G與AI伺服器高頻訊號傳輸連接器，毫米波應用布局',buy:'',sell:'',stop:''},
+  {code:'3605',ex:'tse',name:'宏致',ind:'連接器',sig:'強烈買進',sc:5,note:'線纜連接器組件大廠，AI伺服器高速訊號線束，400G/800G光纖連接線束核心供應',buy:'',sell:'',stop:''},
+  {code:'3689',ex:'otc',name:'湧德',ind:'連接器',sig:'買進',sc:4,note:'軍規與高可靠度連接器，車用與工控連接器，國防電子需求帶動高毛利特規連接器',buy:'',sell:'',stop:''},
+  {code:'6279',ex:'otc',name:'胡連',ind:'連接器',sig:'買進',sc:4,note:'線束與精密連接器，車用與工業電源連接器，電動車高壓連接需求持續成長',buy:'',sell:'',stop:''},
+  {code:'3003',ex:'tse',name:'健和興',ind:'連接器',sig:'買進',sc:4,note:'端子與連接器製造，車用與家電連接器，電動車充電設備連接器布局受惠',buy:'',sell:'',stop:''},
+  {code:'2328',ex:'tse',name:'廣宇',ind:'連接器',sig:'買進',sc:4,note:'連接器與線束製造，AI伺服器電源連接組件，台灣最大線束廠之一',buy:'',sell:'',stop:''},
+  {code:'2392',ex:'tse',name:'正崴',ind:'連接器',sig:'買進',sc:4,note:'連接器與電源線束，AI伺服器電源供應連接組件，蘋果供應鏈連接器製造',buy:'',sell:'',stop:''},
+  {code:'5457',ex:'tse',name:'宣德',ind:'連接器',sig:'買進',sc:4,note:'高速連接器與板對板連接器，伺服器與通訊設備高速訊號連接，PCIe Gen5受惠',buy:'',sell:'',stop:''},
+  {code:'6126',ex:'otc',name:'信音',ind:'連接器',sig:'觀察',sc:3,note:'電子連接器製造，消費電子與工業連接器，PCB板對板高頻連接器布局中',buy:'',sell:'',stop:''},
+  {code:'8103',ex:'tse',name:'瀚荃',ind:'連接器',sig:'買進',sc:4,note:'FPC軟性電路板連接器，AI伺服器與儲存裝置連接組件，車用FPC需求持續成長',buy:'',sell:'',stop:''},
   {code:'2408',ex:'tse',name:'南亞科',ind:'記憶體',sig:'強烈買進',sc:5,note:'台灣最大DRAM廠，HBM3E及DDR5 AI伺服器記憶體需求爆發，美光系統受益台灣供應鏈',buy:'',sell:'',stop:''},
   {code:'2344',ex:'tse',name:'華邦電',ind:'記憶體',sig:'買進',sc:4,note:'NOR Flash龍頭，利基型記憶體受惠IoT與汽車電子，NAND轉型持續推進',buy:'',sell:'',stop:''},
   {code:'2337',ex:'tse',name:'旺宏',ind:'記憶體',sig:'買進',sc:4,note:'NOR Flash領導廠，車規記憶體及工業用高耐久度NAND訂單能見度佳',buy:'',sell:'',stop:''},
@@ -959,7 +993,7 @@ let alertsFired=new Set();
 // ── helpers ───────────────────────────────────────────────────
 const cc=c=>c>0?'up':c<0?'dn':'fl';
 const fv=v=>!v||isNaN(v)?'—':v>=10000?(v/10000).toFixed(1)+'萬':Math.round(v).toLocaleString();
-const IBC={'低軌衛星':'sat','矽光子/CPO':'cpo','PCB':'pcb','半導體':'semi','AI伺服器':'ai','IC設計':'ic','記憶體':'mem','主動ETF':'etf','被動元件':'pass'};
+const IBC={'低軌衛星':'sat','矽光子/CPO':'cpo','PCB':'pcb','半導體':'semi','AI伺服器':'ai','IC設計':'ic','記憶體':'mem','機器人':'robot','連接器':'conn','主動ETF':'etf','被動元件':'pass'};
 const ib=i=>`<span class="ib ib-${IBC[i]||'pass'}">${i}</span>`;
 const SBC={'強烈買進':'sb','買進':'b','觀察':'w','持有':'h'};
 const sb=s=>`<span class="sb sb-${SBC[s]||'h'}">${s}</span>`;
