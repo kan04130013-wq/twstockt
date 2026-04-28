@@ -84,6 +84,7 @@ tr:last-child td{border-bottom:none}
 .ib-pass{background:#f8fafc;border-color:#e2e8f0;color:#475569}
 .ib-ic{background:#fdf4ff;border-color:#e9d5ff;color:#7e22ce}
 .ib-etf{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+.ib-mem{background:#f0f9ff;border-color:#bae6fd;color:#0369a1}
 .sb{display:inline-flex;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;border:1px solid;white-space:nowrap}
 .sb-sb{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
 .sb-b{background:#fffbeb;color:#d97706;border-color:#fde68a}
@@ -739,6 +740,21 @@ const STOCKS=[
   {code:'00980A',ex:'tse',name:'野村臺灣優選',ind:'主動ETF',sig:'買進',sc:4,note:'台灣首檔掛牌主動ETF，以台積電與台達電為基底，結合量化與質化選股',buy:'',sell:'',stop:''},
   {code:'00984A',ex:'tse',name:'安聯台灣高息',ind:'主動ETF',sig:'買進',sc:4,note:'外資投信操盤，專注於挖掘台股深具潛力的高殖利率標的',buy:'',sell:'',stop:''},
   {code:'00401A',ex:'tse',name:'摩根台灣鑫收',ind:'主動ETF',sig:'觀察',sc:3,note:'除股票股息外，賣出買權賺取權利金（Covered Call策略）以提升配息率',buy:'',sell:'',stop:''},
+  {code:'2408',ex:'tse',name:'南亞科',ind:'記憶體',sig:'強烈買進',sc:5,note:'台灣最大DRAM廠，HBM3E及DDR5 AI伺服器記憶體需求爆發，美光系統受益台灣供應鏈',buy:'',sell:'',stop:''},
+  {code:'2344',ex:'tse',name:'華邦電',ind:'記憶體',sig:'買進',sc:4,note:'NOR Flash龍頭，利基型記憶體受惠IoT與汽車電子，NAND轉型持續推進',buy:'',sell:'',stop:''},
+  {code:'2337',ex:'tse',name:'旺宏',ind:'記憶體',sig:'買進',sc:4,note:'NOR Flash領導廠，車規記憶體及工業用高耐久度NAND訂單能見度佳',buy:'',sell:'',stop:''},
+  {code:'3260',ex:'otc',name:'威剛',ind:'記憶體',sig:'買進',sc:4,note:'DRAM模組與SSD品牌廠，受惠記憶體漲價與AI伺服器DDR5需求，品牌溢價能力強',buy:'',sell:'',stop:''},
+  {code:'4967',ex:'tse',name:'十銓',ind:'記憶體',sig:'買進',sc:4,note:'記憶體模組廠，DDR5與SSD產品線完整，遊戲及電競記憶體市場佔有率提升',buy:'',sell:'',stop:''},
+  {code:'2451',ex:'tse',name:'創見',ind:'記憶體',sig:'買進',sc:4,note:'工業用記憶體品牌廠，工控與醫療嵌入式儲存市場穩健，毛利率優於消費端',buy:'',sell:'',stop:''},
+  {code:'8271',ex:'tse',name:'宇瞻',ind:'記憶體',sig:'觀察',sc:3,note:'記憶體模組與嵌入式儲存，DRAM漲價週期受惠，工業嵌入式市場布局中',buy:'',sell:'',stop:''},
+  {code:'8088',ex:'otc',name:'品安',ind:'記憶體',sig:'買進',sc:4,note:'記憶體測試板（Burn-in Board），AI晶片與HBM封裝測試需求大幅成長，客戶含SK海力士',buy:'',sell:'',stop:''},
+  {code:'6531',ex:'tse',name:'愛普',ind:'記憶體',sig:'強烈買進',sc:5,note:'eMemory嵌入式非揮發性記憶體IP，半導體記憶體IP授權，先進製程滲透率持續提升',buy:'',sell:'',stop:''},
+  {code:'5386',ex:'otc',name:'青雲',ind:'記憶體',sig:'強烈買進',sc:5,note:'DRAM模組品牌廠，切入AI伺服器DDR5記憶體模組供應鏈，HBM相關記憶體模組訂單爆發',buy:'',sell:'',stop:''},
+  {code:'6770',ex:'tse',name:'力積電',ind:'記憶體',sig:'買進',sc:4,note:'晶圓代工廠，DRAM與邏輯混合製程，HBM記憶體堆疊基礎晶圓訂單持續成長',buy:'',sell:'',stop:''},
+  {code:'6485',ex:'otc',name:'點序',ind:'記憶體',sig:'買進',sc:4,note:'記憶體測試設備，DRAM及HBM測試需求爆發，CoWoS先進封裝測試切入',buy:'',sell:'',stop:''},
+  {code:'8150',ex:'tse',name:'南茂',ind:'記憶體',sig:'買進',sc:4,note:'記憶體封測廠，DRAM與Flash封裝測試，AI記憶體需求帶動高階封裝比重提升',buy:'',sell:'',stop:''},
+  {code:'8096',ex:'otc',name:'擎亞',ind:'記憶體',sig:'觀察',sc:3,note:'記憶體通路商，代理DRAM與NAND原廠料，受惠缺貨潮與漲價週期',buy:'',sell:'',stop:''},
+  {code:'3312',ex:'tse',name:'弘憶股',ind:'記憶體',sig:'觀察',sc:3,note:'記憶體通路商，下游客戶涵蓋系統整合與工業電腦廠，庫存管理能力佳',buy:'',sell:'',stop:''},
   {code:'00995A',ex:'tse',name:'中信台灣卓越',ind:'主動ETF',sig:'買進',sc:4,note:'挑選財務體質強健、能穩定配息的卓越企業，攻守兼備',buy:'',sell:'',stop:''},
 
 
@@ -879,7 +895,7 @@ let alertsFired=new Set();
 // ── helpers ───────────────────────────────────────────────────
 const cc=c=>c>0?'up':c<0?'dn':'fl';
 const fv=v=>!v||isNaN(v)?'—':v>=10000?(v/10000).toFixed(1)+'萬':Math.round(v).toLocaleString();
-const IBC={'低軌衛星':'sat','矽光子/CPO':'cpo','PCB':'pcb','半導體':'semi','AI伺服器':'ai','IC設計':'ic','主動ETF':'etf','被動元件':'pass'};
+const IBC={'低軌衛星':'sat','矽光子/CPO':'cpo','PCB':'pcb','半導體':'semi','AI伺服器':'ai','IC設計':'ic','記憶體':'mem','主動ETF':'etf','被動元件':'pass'};
 const ib=i=>`<span class="ib ib-${IBC[i]||'pass'}">${i}</span>`;
 const SBC={'強烈買進':'sb','買進':'b','觀察':'w','持有':'h'};
 const sb=s=>`<span class="sb sb-${SBC[s]||'h'}">${s}</span>`;
