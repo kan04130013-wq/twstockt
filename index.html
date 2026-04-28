@@ -991,6 +991,41 @@ async function loadRealHistory(){
   if(updated > 0){ applyFilt(); console.log(`技術指標真實歷史更新：${updated} 檔`); }
 }
 
+// ── 收盤後自動輪詢（每5分鐘檢查 TWSE 是否更新）────────────────
+let pollTimer = null;
+let lastTradeDate = '';
+
+function startPostMarketPoll(){
+  if(pollTimer) return;
+  const tw = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+  const h = tw.getHours(), m = tw.getMinutes();
+  // 收盤後（13:30）到 17:00 之間才輪詢
+  if(h < 13 || (h===13 && m < 30) || h >= 17) return;
+  console.log('📡 啟動收盤後輪詢偵測...');
+  setSt('ld','📡 收盤後偵測中，每5分鐘自動檢查 TWSE 是否更新...');
+
+  pollTimer = setInterval(async ()=>{
+    const tw2 = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+    if(tw2.getHours() >= 17){ clearInterval(pollTimer); pollTimer=null; return; }
+    try{
+      const r = await fetch(`${CF_PROXY}?type=tse`);
+      if(!r.ok) return;
+      const data = await r.json();
+      if(!Array.isArray(data)||!data.length) return;
+      // 取最新交易日期（TWSE 格式：yyyy/mm/dd 或 yyyymmdd）
+      const raw = data[0]?.Date || data[0]?.['日期'] || '';
+      const newDate = raw.replace(/\//g,'-');
+      // 取台灣今日日期
+      const today = tw2.toISOString().slice(0,10);
+      if(newDate && newDate.includes(today.slice(5))){ // 月日吻合即視為已更新
+        clearInterval(pollTimer); pollTimer=null;
+        setSt('ok',`✅ 偵測到 TWSE 已更新（${newDate}），自動重新載入...`);
+        setTimeout(()=> loadAll(), 1500);
+      }
+    }catch(e){ console.warn('輪詢失敗:', e.message); }
+  }, 5*60*1000); // 每5分鐘
+}
+
 let watchList=JSON.parse(localStorage.getItem('wl')||'[]');
 let alertsFired=new Set();
 
@@ -1207,17 +1242,19 @@ async function loadAll(){
   // 補抓：用 Yahoo Finance 補齊沒有資料的股票（備援）
   const missing = STOCKS.filter(s => !PD[s.code] || !PD[s.code].close);
   if(missing.length > 0){
-    setSt('ld', `Yahoo 補抓 ${missing.length} 檔...`);
+    setSt('ld', `FinMind 補抓 ${missing.length} 檔...`);
     try{
-      // 批次每20檔
-      for(let i=0; i<missing.length; i+=20){
-        const batch = missing.slice(i, i+20);
-        const syms = batch.map(s => s.code + (s.ex==='tse'?'.TW':'.TWO')).join(',');
-        const r = await fetch(`${CF_PROXY}?type=yahoo&codes=${encodeURIComponent(syms)}`);
-        if(!r.ok) continue;
-        const data = await r.json();
-        (data.stocks||[]).forEach(s=>{
+      // 批次每10檔，FinMind TaiwanStockPrice（上市+上櫃）
+      const batches = [];
+      for(let i=0; i<missing.length; i+=10) batches.push(missing.slice(i,i+10));
+      const results = await Promise.all(batches.map(batch =>
+        fetch(`${CF_PROXY}?type=price_finmind&codes=${batch.map(s=>s.code).join(',')}`)
+          .then(r=>r.ok?r.json():null).catch(()=>null)
+      ));
+      results.forEach(data=>{
+        (data?.stocks||[]).forEach(s=>{
           if(!s.code||!s.close) return;
+          const dateStr = s.date || 'FinMind';
           PD[s.code]={
             close:  s.close,
             chg:    s.chg,
@@ -1225,14 +1262,38 @@ async function loadAll(){
             open:   s.open,
             high:   s.high,
             low:    s.low,
-            vol:    Math.round(s.vol/1000),
-            date:   'MIS備援',
-            src:    'MIS'
+            vol:    s.vol,
+            date:   dateStr,
+            src:    'FinMind'
           };
           loaded++;
         });
-      }
-    }catch(e){ console.warn('Yahoo fallback:', e.message); }
+      });
+    }catch(e){ console.warn('FinMind price fallback:', e.message); }
+
+    // FinMind 仍有漏網 → MIS 最終備援
+    const stillMissing = STOCKS.filter(s => !PD[s.code] || !PD[s.code].close);
+    if(stillMissing.length > 0){
+      setSt('ld', `MIS 最終備援 ${stillMissing.length} 檔...`);
+      try{
+        for(let i=0; i<stillMissing.length; i+=20){
+          const batch = stillMissing.slice(i, i+20);
+          const syms = batch.map(s => s.code + (s.ex==='tse'?'.TW':'.TWO')).join(',');
+          const r = await fetch(`${CF_PROXY}?type=yahoo&codes=${encodeURIComponent(syms)}`);
+          if(!r.ok) continue;
+          const data = await r.json();
+          (data.stocks||[]).forEach(s=>{
+            if(!s.code||!s.close) return;
+            PD[s.code]={
+              close:s.close, chg:s.chg, chgPct:s.chgPct,
+              open:s.open, high:s.high, low:s.low,
+              vol:Math.round(s.vol/1000), date:'MIS備援', src:'MIS'
+            };
+            loaded++;
+          });
+        }
+      }catch(e){ console.warn('MIS fallback:', e.message); }
+    }
   }
 
   // 計算技術指標（用 FinMind 真實歷史收盤價）
@@ -1254,10 +1315,13 @@ async function loadAll(){
   setProg(100);
   const date=Object.values(PD).find(p=>p.date)?.date||'';
   document.getElementById('s-date').textContent=date;
+  lastTradeDate = date; // 記錄最新交易日供輪詢比對
   setSt(loaded>0?'ok':'err',loaded>0?`已載入 ${loaded} 檔 · ${date}`:'無法取得股價');
   document.getElementById('rfBtn').disabled=false;
   document.getElementById('rfBtn').textContent='↻ 更新股價';
   checkAlerts();
+  // 收盤後啟動輪詢（13:30-17:00 自動偵測 TWSE 更新）
+  startPostMarketPoll();
   fetchDisposition();
   applyFilt();
   updateSum();
