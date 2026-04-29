@@ -1214,7 +1214,7 @@ async function loadAll(){
       setSt('ld','TWSE 暫無資料，改用 MIS 補抓上市股票...');
       const tseCodes = STOCKS.filter(s=>s.ex==='tse').map(s=>`tse_${s.code}.tw`);
       for(let i=0; i<tseCodes.length; i+=20){
-        const batch = tseCodes.slice(i,i+20).join('|');
+        const batch = tseCodes.slice(i,i+20).join(',');  // Worker 內部再轉成 |
         try{
           const r = await fetch(`${CF_PROXY}?type=realtime&codes=${encodeURIComponent(batch)}`);
           if(!r.ok) continue;
@@ -1225,6 +1225,10 @@ async function loadAll(){
             const dateStr = rawDate.length===8
               ? `${rawDate.slice(0,4)}/${rawDate.slice(4,6)}/${rawDate.slice(6,8)}`
               : '盤中即時';
+            // 只有今日資料才更新（避免蓋掉正確的昨日資料）
+            const tw = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+            const todayStr = `${tw.getFullYear()}${String(tw.getMonth()+1).padStart(2,'0')}${String(tw.getDate()).padStart(2,'0')}`;
+            if(rawDate && rawDate !== todayStr && !checkTradingHours()) return;
             PD[s.code]={close:s.close,chg:s.chg,chgPct:s.chgPct,
               open:s.open,high:s.high,low:s.low,
               vol:Math.round(s.vol/1000),
