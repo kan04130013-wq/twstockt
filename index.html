@@ -1195,6 +1195,20 @@ async function loadAll(){
     const rows = await fetchTSE();
     if(rows && rows.length > 0){
       const map={}; rows.forEach(row=>map[row.Code]=row);
+
+      // 判斷 TWSE 資料日期（民國年 yyymmdd → 西元）
+      const sampleDate = rows[0]?.Date||'';
+      const twseYear = sampleDate.length===7 ? parseInt(sampleDate.slice(0,3))+1911 : 0;
+      const twseMonth = sampleDate.length===7 ? sampleDate.slice(3,5) : '';
+      const twseDay   = sampleDate.length===7 ? sampleDate.slice(5,7) : '';
+      const twseDateStr = twseYear ? `${twseYear}${twseMonth}${twseDay}` : '';
+
+      // 今日台灣日期
+      const tw = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+      const todayStr = `${tw.getFullYear()}${String(tw.getMonth()+1).padStart(2,'0')}${String(tw.getDate()).padStart(2,'0')}`;
+
+      const isToday = twseDateStr === todayStr;
+
       STOCKS.filter(s=>s.ex==='tse').forEach(s=>{
         const row=map[s.code]; if(!row) return;
         const close=parseFloat(row.ClosingPrice)||0;
@@ -1205,16 +1219,41 @@ async function loadAll(){
           open:parseFloat(row.OpeningPrice)||0,
           high:parseFloat(row.HighestPrice)||0,
           low:parseFloat(row.LowestPrice)||0,
-          date:row.Date?row.Date.replace(/^(\d{3})(\d{2})(\d{2})$/,(_,y,m,d)=>`${+y+1911}/${m}/${d}`):'',
+          date:twseYear?`${twseYear}/${twseMonth}/${twseDay}`:'',
           src:'TWSE'};
         loaded++;
       });
+
+      // TWSE 是昨天資料 → 用 MIS 補抓今日
+      if(!isToday){
+        setSt('ld',`TWSE 為 ${twseYear}/${twseMonth}/${twseDay} 資料，MIS 補抓今日上市收盤價...`);
+        const tseCodes = STOCKS.filter(s=>s.ex==='tse').map(s=>`tse_${s.code}.tw`);
+        for(let i=0; i<tseCodes.length; i+=20){
+          const batch = tseCodes.slice(i,i+20).join(',');
+          try{
+            const r = await fetch(`${CF_PROXY}?type=realtime&codes=${encodeURIComponent(batch)}`);
+            if(!r.ok) continue;
+            const data = await r.json();
+            (data.stocks||[]).forEach(s=>{
+              if(!s.code||!s.close) return;
+              const rawDate = s.date||'';
+              if(rawDate && rawDate !== todayStr) return; // 只取今日
+              const dateStr = `${rawDate.slice(0,4)}/${rawDate.slice(4,6)}/${rawDate.slice(6,8)}`;
+              PD[s.code]={close:s.close,chg:s.chg,chgPct:s.chgPct,
+                open:s.open,high:s.high,low:s.low,
+                vol:Math.round(s.vol/1000),
+                date:dateStr, src:'MIS'};
+            });
+          }catch(e){}
+        }
+      }
+
     } else {
-      // TWSE 無法取得 → 改用 MIS API 補抓上市股票（同上櫃做法）
+      // TWSE 完全無資料 → MIS 補抓上市
       setSt('ld','TWSE 暫無資料，改用 MIS 補抓上市股票...');
       const tseCodes = STOCKS.filter(s=>s.ex==='tse').map(s=>`tse_${s.code}.tw`);
       for(let i=0; i<tseCodes.length; i+=20){
-        const batch = tseCodes.slice(i,i+20).join(',');  // Worker 內部再轉成 |
+        const batch = tseCodes.slice(i,i+20).join(',');
         try{
           const r = await fetch(`${CF_PROXY}?type=realtime&codes=${encodeURIComponent(batch)}`);
           if(!r.ok) continue;
