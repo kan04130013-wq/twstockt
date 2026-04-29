@@ -233,14 +233,28 @@ tr:last-child td{border-bottom:none}
         <option value="觀察">觀察</option>
         <option value="持有">持有</option>
       </select>
+      <select id="scSel">
+        <option value="">所有評分</option>
+        <option value="5">★★★★★ 五星</option>
+        <option value="4">★★★★ 四星以上</option>
+        <option value="3">★★★ 三星以上</option>
+      </select>
+      <select id="dateSel">
+        <option value="">所有交易日</option>
+        <option value="today">今日更新</option>
+        <option value="live">盤中即時</option>
+        <option value="old">非今日（舊資料）</option>
+      </select>
       <select id="sortSel">
         <option value="">預設排序</option>
+        <option value="sc-d">評分 ▼ 高到低</option>
+        <option value="sc-a">評分 ▲ 低到高</option>
         <option value="chg-d">漲跌幅 ▼</option>
         <option value="chg-a">漲跌幅 ▲</option>
+        <option value="date-d">交易日 最新優先</option>
         <option value="p-d">股價 ▼</option>
         <option value="p-a">股價 ▲</option>
         <option value="kd-d">KD值 ▼</option>
-        <option value="sc-d">評分 ▼</option>
       </select>
     </div>
 
@@ -807,7 +821,7 @@ const STOCKS=[
   {code:'5474',ex:'otc',name:'聰泰',ind:'機器人',sig:'買進',sc:4,note:'工業電腦與嵌入式平台，機器人視覺運算平台，AI推論加速模組需求成長',buy:'',sell:'',stop:''},
   {code:'6166',ex:'tse',name:'凌華',ind:'機器人',sig:'買進',sc:4,note:'機器人控制電腦與視覺系統平台，工業機器人EtherCAT控制解決方案',buy:'',sell:'',stop:''},
   {code:'2049',ex:'tse',name:'上銀',ind:'機器人',sig:'強烈買進',sc:5,note:'線性滑軌與滾珠螺桿全球前三大，機器人關節模組與醫療機械手臂，人形機器人精密傳動核心',buy:'',sell:'',stop:''},
-  {code:'4576',ex:'otc',name:'大銀微系統',ind:'機器人',sig:'買進',sc:4,note:'精密線性傳動元件，工業機器人與半導體設備精密導軌，切入人形機器人傳動系統',buy:'',sell:'',stop:''},
+  {code:'4576',ex:'tse',name:'大銀微系統',ind:'機器人',sig:'買進',sc:4,note:'精密線性傳動元件，工業機器人與半導體設備精密導軌，切入人形機器人傳動系統',buy:'',sell:'',stop:''},
   {code:'1597',ex:'tse',name:'直得',ind:'機器人',sig:'買進',sc:4,note:'微型線性滑軌與滾珠螺桿，協作機器人與醫療機器人關節精密傳動件，毛利率50%以上',buy:'',sell:'',stop:''},
   {code:'8374',ex:'tse',name:'羅昇',ind:'機器人',sig:'買進',sc:4,note:'自動化零組件通路商，代理機器人周邊設備與感測元件，受惠製造業自動化投資潮',buy:'',sell:'',stop:''},
   {code:'4540',ex:'tse',name:'全球傳動',ind:'機器人',sig:'強烈買進',sc:5,note:'滾珠螺桿台灣第一大廠，人形機器人精密絲桿傳動核心元件，特斯拉Optimus供應商候選',buy:'',sell:'',stop:''},
@@ -826,7 +840,7 @@ const STOCKS=[
   {code:'3003',ex:'tse',name:'健和興',ind:'連接器',sig:'買進',sc:4,note:'端子與連接器製造，車用與家電連接器，電動車充電設備連接器布局受惠',buy:'',sell:'',stop:''},
   {code:'2328',ex:'tse',name:'廣宇',ind:'連接器',sig:'買進',sc:4,note:'連接器與線束製造，AI伺服器電源連接組件，台灣最大線束廠之一',buy:'',sell:'',stop:''},
   {code:'2392',ex:'tse',name:'正崴',ind:'連接器',sig:'買進',sc:4,note:'連接器與電源線束，AI伺服器電源供應連接組件，蘋果供應鏈連接器製造',buy:'',sell:'',stop:''},
-  {code:'5457',ex:'tse',name:'宣德',ind:'連接器',sig:'買進',sc:4,note:'高速連接器與板對板連接器，伺服器與通訊設備高速訊號連接，PCIe Gen5受惠',buy:'',sell:'',stop:''},
+  {code:'5457',ex:'otc',name:'宣德',ind:'連接器',sig:'買進',sc:4,note:'高速連接器與板對板連接器，伺服器與通訊設備高速訊號連接，PCIe Gen5受惠',buy:'',sell:'',stop:''},
   {code:'6126',ex:'otc',name:'信音',ind:'連接器',sig:'觀察',sc:3,note:'電子連接器製造，消費電子與工業連接器，PCB板對板高頻連接器布局中',buy:'',sell:'',stop:''},
   {code:'8103',ex:'tse',name:'瀚荃',ind:'連接器',sig:'買進',sc:4,note:'FPC軟性電路板連接器，AI伺服器與儲存裝置連接組件，車用FPC需求持續成長',buy:'',sell:'',stop:''},
   {code:'2408',ex:'tse',name:'南亞科',ind:'記憶體',sig:'強烈買進',sc:5,note:'台灣最大DRAM廠，HBM3E及DDR5 AI伺服器記憶體需求爆發，美光系統受益台灣供應鏈',buy:'',sell:'',stop:''},
@@ -857,6 +871,7 @@ const STOCKS=[
   {code:'00987A',ex:'tse',name:'台新優勢成長',ind:'主動ETF',sig:'買進',sc:4,note:'聚焦AI算力、半導體及新興科技供應鏈，年配息，2026 YTD報酬率38.49%',buy:'',sell:'',stop:''},
   {code:'00985A',ex:'tse',name:'野村台灣50',ind:'主動ETF',sig:'買進',sc:4,note:'市值型主動ETF，選股池市值前150大，台積電比重近3成，靈活加碼強勢股，2026 YTD報酬率優於大盤',buy:'',sell:'',stop:''},
   {code:'00994A',ex:'tse',name:'第一金台股優',ind:'主動ETF',sig:'強烈買進',sc:5,note:'台積電條款受益，重押千金股，2026 YTD報酬率65%（績效季軍），八大公股銀行持續買超',buy:'',sell:'',stop:''},
+  {code:'00993A',ex:'tse',name:'主動安聯台灣',ind:'主動ETF',sig:'買進',sc:4,note:'安聯投信台股主動選股，不走市值加權，精選100-120檔，量化五大因子最佳化，台積電條款持股8.3%，規模109億',buy:'',sell:'',stop:''},
   {code:'00988A',ex:'tse',name:'統一全球創新',ind:'主動ETF',sig:'強烈買進',sc:5,note:'海外主動ETF績效王，佈局輝達、美光、博通等全球AI基建，2026 YTD報酬率62%，規模突破200億',buy:'',sell:'',stop:''},
 
 
@@ -1822,21 +1837,49 @@ function srt(f){
 }
 document.getElementById('srch').addEventListener('input',()=>{curPage=1;applyFilt()});
 document.getElementById('sigSel').addEventListener('change',()=>{curPage=1;applyFilt()});
+document.getElementById('scSel').addEventListener('change',()=>{curPage=1;applyFilt()});
+document.getElementById('dateSel').addEventListener('change',()=>{curPage=1;applyFilt()});
 document.getElementById('sortSel').addEventListener('change',e=>{sortMode=e.target.value;curPage=1;applyFilt()});
 
 function applyFilt(){
-  const q=document.getElementById('srch').value.toLowerCase();
-  const sig=document.getElementById('sigSel').value;
-  filtered=STOCKS.filter(s=>(!curInd||s.ind===curInd)&&(!q||s.code.includes(q)||s.name.toLowerCase().includes(q))&&(!sig||s.sig===sig));
+  const q       = document.getElementById('srch').value.toLowerCase();
+  const sig     = document.getElementById('sigSel').value;
+  const scMin   = parseInt(document.getElementById('scSel')?.value||'0')||0;
+  const dateF   = document.getElementById('dateSel')?.value||'';
+
+  // 取今日台灣日期字串（yyyy/mm/dd）
+  const tw = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+  const todayStr = `${tw.getFullYear()}/${String(tw.getMonth()+1).padStart(2,'0')}/${String(tw.getDate()).padStart(2,'0')}`;
+
+  filtered = STOCKS.filter(s=>{
+    if(curInd && s.ind!==curInd) return false;
+    if(q && !s.code.includes(q) && !s.name.toLowerCase().includes(q)) return false;
+    if(sig && s.sig!==sig) return false;
+    if(scMin && s.sc < scMin) return false;
+    if(dateF){
+      const d = PD[s.code]?.date||'';
+      if(dateF==='today'  && d!==todayStr) return false;
+      if(dateF==='live'   && d!=='盤中即時') return false;
+      if(dateF==='old'    && (d===todayStr||d==='盤中即時')) return false;
+    }
+    return true;
+  });
+
   if(sortMode) filtered.sort((a,b)=>{
-    const pa=PD[a.code],pb=PD[b.code];
-    const ia=IND[a.code],ib2=IND[b.code];
+    const pa=PD[a.code], pb=PD[b.code];
+    const ia=IND[a.code], ib2=IND[b.code];
     if(sortMode==='chg-d') return (pb?.chgPct||0)-(pa?.chgPct||0);
     if(sortMode==='chg-a') return (pa?.chgPct||0)-(pb?.chgPct||0);
-    if(sortMode==='p-d') return (pb?.close||0)-(pa?.close||0);
-    if(sortMode==='p-a') return (pa?.close||0)-(pb?.close||0);
-    if(sortMode==='kd-d') return (ib2?.kd?.k||50)-(ia?.kd?.k||50);
-    if(sortMode==='sc-d') return b.sc-a.sc;
+    if(sortMode==='p-d')   return (pb?.close||0)-(pa?.close||0);
+    if(sortMode==='p-a')   return (pa?.close||0)-(pb?.close||0);
+    if(sortMode==='kd-d')  return (ib2?.kd?.k||50)-(ia?.kd?.k||50);
+    if(sortMode==='sc-d')  return b.sc-a.sc;
+    if(sortMode==='sc-a')  return a.sc-b.sc;
+    if(sortMode==='date-d'){
+      // 盤中即時 > 今日日期 > 舊日期
+      const rank = d => d==='盤中即時'?'Z':d||'';
+      return rank(pb?.date).localeCompare(rank(pa?.date));
+    }
     return 0;
   });
   renderTbl(); updateSum();
