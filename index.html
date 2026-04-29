@@ -1193,30 +1193,47 @@ async function loadAll(){
 
   try{
     const rows = await fetchTSE();
-    if(!rows) throw new Error('無法取得上市股價');
-    const map={}; rows.forEach(row=>map[row.Code]=row);
-    STOCKS.filter(s=>s.ex==='tse').forEach(s=>{
-      const row=map[s.code]; if(!row) return;
-      const close=parseFloat(row.ClosingPrice)||0;
-      const chg=parseFloat(row.Change)||0;
-      const prev=close-chg;
-      PD[s.code]={close,chg,chgPct:prev?chg/prev*100:0,
-        vol:parseInt((row.TradeVolume||'0').replace(/,/g,''))/1000,
-        open:parseFloat(row.OpeningPrice)||0,
-        high:parseFloat(row.HighestPrice)||0,
-        low:parseFloat(row.LowestPrice)||0,
-        date:row.Date?row.Date.replace(/^(\d{3})(\d{2})(\d{2})$/,(_,y,m,d)=>`${+y+1911}/${m}/${d}`):'',
-        src:'TWSE'};
-      loaded++;
-    });
+    if(rows && rows.length > 0){
+      const map={}; rows.forEach(row=>map[row.Code]=row);
+      STOCKS.filter(s=>s.ex==='tse').forEach(s=>{
+        const row=map[s.code]; if(!row) return;
+        const close=parseFloat(row.ClosingPrice)||0;
+        const chg=parseFloat(row.Change)||0;
+        const prev=close-chg;
+        PD[s.code]={close,chg,chgPct:prev?chg/prev*100:0,
+          vol:parseInt((row.TradeVolume||'0').replace(/,/g,''))/1000,
+          open:parseFloat(row.OpeningPrice)||0,
+          high:parseFloat(row.HighestPrice)||0,
+          low:parseFloat(row.LowestPrice)||0,
+          date:row.Date?row.Date.replace(/^(\d{3})(\d{2})(\d{2})$/,(_,y,m,d)=>`${+y+1911}/${m}/${d}`):'',
+          src:'TWSE'};
+        loaded++;
+      });
+    } else {
+      // TWSE 無法取得 → 改用 FinMind 補抓上市股票
+      setSt('ld','TWSE 暫無資料，改用 FinMind 補抓上市股票...');
+      const tseCodes = STOCKS.filter(s=>s.ex==='tse').map(s=>s.code);
+      for(let i=0; i<tseCodes.length; i+=10){
+        const batch = tseCodes.slice(i,i+10);
+        try{
+          const r = await fetch(`${CF_PROXY}?type=price_finmind&codes=${batch.join(',')}`);
+          if(!r.ok) continue;
+          const data = await r.json();
+          (data.stocks||[]).forEach(s=>{
+            if(!s.code||!s.close) return;
+            PD[s.code]={close:s.close,chg:s.chg,chgPct:s.chgPct,
+              open:s.open,high:s.high,low:s.low,vol:s.vol,
+              date:s.date||'FinMind',src:'FinMind'};
+            loaded++;
+          });
+        }catch(e){}
+      }
+    }
     setProg(55);
   }catch(e){
-    const tw=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
-    const isWeekend=[0,6].includes(tw.getDay());
-    setSt('err', isWeekend?'今日休市，股價將於下一個交易日收盤後更新':'股價暫時無法取得，請稍後再試');
+    setSt('err','股價暫時無法取得，請稍後再試');
     document.getElementById('rfBtn').disabled=false;
     document.getElementById('rfBtn').textContent='↻ 更新股價';
-    return;
   }
 
   setSt('ld','取得上櫃收盤價...');
