@@ -379,59 +379,59 @@ tr:last-child td{border-bottom:none}
 
       <!-- AI分析分頁 -->
       <div id="det-tab-ai" style="display:none">
-        <div style="margin-bottom:12px">
-          <!-- 財務數據輸入區 -->
-          <div style="background:#f8fafc;border-radius:10px;padding:14px;border:1px solid #e2e8f0;margin-bottom:12px">
-            <div style="font-size:13px;font-weight:700;color:#1a202c;margin-bottom:10px">📋 財務資料輸入（輔助 AI 分析）</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-              <div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:3px">月營收（千元，最近3個月，逗號分隔）</div>
-                <input id="ai-rev" type="text" placeholder="例：1250000, 1180000, 1320000"
-                  style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none;font-family:monospace">
-              </div>
-              <div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:3px">季EPS（最近4季，逗號分隔）</div>
-                <input id="ai-eps" type="text" placeholder="例：8.5, 7.2, 6.8, 9.1"
-                  style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none;font-family:monospace">
-              </div>
-              <div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:3px">年EPS（近3年，逗號分隔）</div>
-                <input id="ai-eps-yr" type="text" placeholder="例：28.5, 32.1, 25.8"
-                  style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none;font-family:monospace">
-              </div>
-              <div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:3px">法人/投顧觀點（選填）</div>
-                <input id="ai-inst" type="text" placeholder="例：外資目標價320，投信連買5日"
-                  style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none">
-              </div>
+        <!-- 財務資料輸入 -->
+        <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;border:1px solid #e2e8f0;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:#475569;margin-bottom:8px">📋 輸入財務資料（選填，提升分析精準度）</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">月營收（千元，近3月，逗號分隔）</div>
+              <input id="ai-rev" type="text" placeholder="例：1250000, 1180000, 1320000"
+                style="width:100%;padding:5px 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:11px;outline:none;font-family:monospace">
             </div>
             <div>
-              <div style="font-size:11px;color:#64748b;margin-bottom:3px">補充資訊（產業趨勢、重要事件等）</div>
-              <textarea id="ai-extra" rows="2" placeholder="例：CoWoS訂單能見度至2026Q3，客戶涵蓋台積電與三星"
-                style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;outline:none;resize:vertical;font-family:inherit"></textarea>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">季EPS（近4季）</div>
+              <input id="ai-eps" type="text" placeholder="例：8.5, 7.2, 6.8, 9.1"
+                style="width:100%;padding:5px 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:11px;outline:none;font-family:monospace">
+            </div>
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">年EPS（近3年）</div>
+              <input id="ai-eps-yr" type="text" placeholder="例：28.5, 32.1, 25.8"
+                style="width:100%;padding:5px 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:11px;outline:none;font-family:monospace">
+            </div>
+            <div>
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">法人/投顧觀點</div>
+              <input id="ai-inst" type="text" placeholder="例：外資目標價320，投信連買5日"
+                style="width:100%;padding:5px 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:11px;outline:none">
             </div>
           </div>
-          <button onclick="runAiAnalysis()" id="ai-btn"
-            style="width:100%;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-            🤖 生成 AI 個股分析報告
-          </button>
+          <div>
+            <div style="font-size:10px;color:#94a3b8;margin-bottom:2px">補充資訊</div>
+            <textarea id="ai-extra" rows="2" placeholder="例：CoWoS訂單能見度至2026Q3，客戶涵蓋台積電"
+              style="width:100%;padding:5px 8px;border:1px solid #e2e8f0;border-radius:5px;font-size:11px;outline:none;resize:none;font-family:inherit"></textarea>
+          </div>
         </div>
+
+        <button onclick="runAiAnalysis()" id="ai-btn"
+          style="width:100%;padding:11px;border-radius:8px;border:none;background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px">
+          🤖 生成完整 AI 專業分析報告
+        </button>
+
+        <div id="ai-loading" style="display:none;text-align:center;padding:32px;color:#94a3b8;font-size:13px">
+          <div style="font-size:28px;margin-bottom:10px">🤖</div>
+          <div style="font-weight:600;margin-bottom:6px">AI 深度分析中...</div>
+          <div id="ai-progress" style="font-size:11px;color:#cbd5e0">整合技術指標、籌碼、型態、產業資料</div>
+        </div>
+
         <!-- AI 分析結果 -->
         <div id="ai-result" style="display:none">
-          <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:16px">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-              <div style="font-size:13px;font-weight:700;color:#0369a1">🤖 AI 個股分析報告</div>
-              <span id="ai-date" style="font-size:11px;color:#94a3b8"></span>
-            </div>
-            <div id="ai-content" style="font-size:13px;line-height:1.9;color:#1e293b;white-space:pre-wrap"></div>
-            <div style="margin-top:12px;padding:8px 12px;background:#fefce8;border-radius:6px;border:1px solid #fde68a">
-              <span style="font-size:11px;color:#854d0e">⚠️ AI 分析僅供參考，不構成投資建議。投資有風險，請自行判斷。</span>
-            </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div style="font-size:13px;font-weight:700;color:#1e293b">🤖 AI 專業分析報告</div>
+            <span id="ai-date" style="font-size:10px;color:#94a3b8"></span>
           </div>
-        </div>
-        <div id="ai-loading" style="display:none;text-align:center;padding:24px;color:#94a3b8;font-size:13px">
-          <div style="margin-bottom:8px">🤖 AI 分析中，請稍候...</div>
-          <div id="ai-progress" style="font-size:11px;color:#cbd5e0"></div>
+          <div id="ai-sections"></div>
+          <div style="margin-top:10px;padding:8px 12px;background:#fefce8;border-radius:6px;border:1px solid #fde68a">
+            <span style="font-size:10px;color:#854d0e">⚠️ AI 分析僅供參考，不構成投資建議。投資有風險，請獨立判斷。</span>
+          </div>
         </div>
       </div>
     </div><!-- end det -->
@@ -2103,7 +2103,8 @@ async function openDet(code){
   document.getElementById('ai-result').style.display='none';
   document.getElementById('ai-loading').style.display='none';
   document.getElementById('ai-btn').style.display='flex';
-  document.getElementById('ai-btn').textContent='🤖 生成 AI 個股分析報告';
+  document.getElementById('ai-btn').textContent='🤖 生成完整 AI 專業分析報告';
+  document.getElementById('ai-sections').innerHTML='';
   // 自動帶入法人觀點（若有）
   const si = STOCKS.find(x=>x.code===code);
   if(si?.note) document.getElementById('ai-extra').value = '';
@@ -2287,93 +2288,276 @@ async function runAiAnalysis(){
   const p = PD[code];
   if(!code||!s) return;
 
-  const btn = document.getElementById('ai-btn');
+  const btn     = document.getElementById('ai-btn');
   const loading = document.getElementById('ai-loading');
-  const result = document.getElementById('ai-result');
-  const content = document.getElementById('ai-content');
+  const result  = document.getElementById('ai-result');
+  const sections= document.getElementById('ai-sections');
+  const progress= document.getElementById('ai-progress');
 
   btn.style.display='none';
   loading.style.display='block';
   result.style.display='none';
 
-  // 收集資料
-  const rev     = document.getElementById('ai-rev').value.trim();
-  const eps     = document.getElementById('ai-eps').value.trim();
-  const epsYr   = document.getElementById('ai-eps-yr').value.trim();
-  const instOp  = document.getElementById('ai-inst').value.trim();
-  const extra   = document.getElementById('ai-extra').value.trim();
-  const ind     = s.ind;
-  const sig     = s.sig;
-  const kd      = IND[code]?.kd;
-  const macd    = IND[code]?.macd;
-  const chipRow = chipData[code];
-  const dispInfo= DISP_INFO[code];
+  const rev    = document.getElementById('ai-rev').value.trim();
+  const eps    = document.getElementById('ai-eps').value.trim();
+  const epsYr  = document.getElementById('ai-eps-yr').value.trim();
+  const instOp = document.getElementById('ai-inst').value.trim();
+  const extra  = document.getElementById('ai-extra').value.trim();
 
-  const progress = document.getElementById('ai-progress');
-  progress.textContent = '整理財務資料中...';
+  const kd     = IND[code]?.kd   || {k:50,d:50};
+  const macd   = IND[code]?.macd || {macd:0,signal:0,hist:0,bull:false};
+  const closes = HIST[code]      || [];
+  const ch     = chipData[code]  || {};
+  const disp   = DISP_INFO[code];
 
-  // 組成 prompt
-  const prompt = `你是一位專業的台股分析師，請針對以下個股提供深度分析報告。
+  // 計算額外技術指標
+  const calcMA = (arr, n) => arr.length>=n ? arr.slice(-n).reduce((a,b)=>a+b,0)/n : null;
+  const ma5  = calcMA(closes,5);
+  const ma10 = calcMA(closes,10);
+  const ma20 = calcMA(closes,20);
+  const ma60 = calcMA(closes,60);
+  const cur  = p?.close || 0;
 
-【個股基本資料】
-股票代號：${code}
-公司名稱：${s.name}
-產業類別：${ind}
-目前股價：${p?.close||'未知'} 元
-漲跌：${p?.chgPct?.toFixed(2)||'0'}%
-AI訊號：${sig}
-${dispInfo?`⚠️ 處置股：${dispInfo.startDate}～${dispInfo.endDate}`:''}
+  // RSI
+  const calcRSI = (arr, n=14) => {
+    if(arr.length<n+1) return 50;
+    const diffs = arr.slice(-n-1).map((v,i,a)=>i>0?v-a[i-1]:0).slice(1);
+    const gains = diffs.filter(d=>d>0).reduce((a,b)=>a+b,0)/n;
+    const losses= Math.abs(diffs.filter(d=>d<0).reduce((a,b)=>a+b,0))/n;
+    return losses===0 ? 100 : Math.round(100-100/(1+gains/losses));
+  };
+  const rsi = calcRSI(closes);
 
-【技術指標】
-KD值：K=${kd?.k?.toFixed(1)||0} / D=${kd?.d?.toFixed(1)||0}（${kd?.status||'中性'}）
-MACD：${macd?.macd?.toFixed(2)||0} / 訊號線：${macd?.signal?.toFixed(2)||0} / 趨勢：${macd?.trend||'中性'}
+  // 布林通道
+  const calcBoll = (arr, n=20) => {
+    if(arr.length<n) return null;
+    const recent = arr.slice(-n);
+    const mid = recent.reduce((a,b)=>a+b,0)/n;
+    const std = Math.sqrt(recent.reduce((a,b)=>a+(b-mid)**2,0)/n);
+    return { upper: Math.round((mid+2*std)*100)/100, mid: Math.round(mid*100)/100, lower: Math.round((mid-2*std)*100)/100 };
+  };
+  const boll = calcBoll(closes);
 
-【法人籌碼（最新一日，張）】
-外資：${chipRow?(chipRow.foreign>0?'+':'')+chipRow.foreign:'未知'}
-投信：${chipRow?(chipRow.trust>0?'+':'')+chipRow.trust:'未知'}
-自營商：${chipRow?(chipRow.dealer>0?'+':'')+chipRow.dealer:'未知'}
+  // ATR 波動度
+  const calcATR = (arr, n=14) => {
+    if(arr.length<n+1) return 0;
+    const trs = arr.slice(-n).map((v,i,a)=>i>0?Math.abs(v-a[i-1]):0);
+    return Math.round(trs.reduce((a,b)=>a+b,0)/n*100)/100;
+  };
+  const atr = calcATR(closes);
 
-${rev?`【月營收（千元）】\n${rev}\n`:''}${eps?`【季EPS】\n${eps}\n`:''}${epsYr?`【年EPS】\n${epsYr}\n`:''}${instOp?`【法人/投顧觀點】\n${instOp}\n`:''}${extra?`【補充資訊】\n${extra}\n`:''}${s.note?`【公司簡介】\n${s.note}\n`:''}
-請依照以下結構提供分析（繁體中文，言簡意賅）：
+  // K線型態偵測
+  const detectPatterns = (arr) => {
+    if(arr.length < 5) return [];
+    const patterns = [];
+    const c = arr.slice(-5);
+    const last = c[4], prev1 = c[3], prev2 = c[2];
 
-1. 📊 營收與獲利趨勢分析
-2. 🔍 產業地位與競爭優勢
-3. 📈 技術面與籌碼面解讀
-4. 💡 短中期操作看法（1-3個月）
-5. 🎯 合理評價區間（本益比或其他估值方法）
-6. ⚠️ 主要風險提示
+    // 黃金交叉
+    const ma5r  = calcMA(arr, 5);
+    const ma20r = calcMA(arr, 20);
+    const ma5p  = arr.length>=6 ? calcMA(arr.slice(0,-1), 5) : null;
+    const ma20p = arr.length>=21 ? calcMA(arr.slice(0,-1), 20) : null;
+    if(ma5r && ma20r && ma5p && ma20p){
+      if(ma5p<ma20p && ma5r>ma20r) patterns.push({name:'黃金交叉',type:'bull',desc:'MA5由下穿越MA20，短期趨勢轉強，動能啟動訊號'});
+      if(ma5p>ma20p && ma5r<ma20r) patterns.push({name:'死亡交叉',type:'bear',desc:'MA5由上跌破MA20，短期趨勢轉弱，注意回檔風險'});
+    }
 
-請直接給出分析內容，不要重複列出已知資料。`;
+    // 三連紅/三連黑
+    const rising3 = c[2]>c[1] && c[3]>c[2] && c[4]>c[3];
+    const fall3   = c[2]<c[1] && c[3]<c[2] && c[4]<c[3];
+    if(rising3) patterns.push({name:'三連紅',type:'bull',desc:'連續三日收紅，買方持續主導，短線偏多操作'});
+    if(fall3)   patterns.push({name:'三連黑',type:'bear',desc:'連續三日收黑，賣壓沉重，宜觀察底部訊號'});
 
-  progress.textContent = '送出分析請求中...';
+    // 布林通道突破
+    if(boll){
+      if(last > boll.upper) patterns.push({name:'突破布林上軌',type:'bull',desc:`股價(${last})突破布林上軌(${boll.upper})，強勢突破，但注意過熱回壓`});
+      if(last < boll.lower) patterns.push({name:'跌破布林下軌',type:'bear',desc:`股價(${last})跌破布林下軌(${boll.lower})，超賣訊號，可留意反彈機會`});
+      if(Math.abs(last-boll.mid)/boll.mid < 0.005) patterns.push({name:'回測均線',type:'neu',desc:'股價接近布林中軌，方向待確認'});
+    }
+
+    // KD交叉
+    if(kd.k>kd.d && kd.k<30) patterns.push({name:'KD低檔黃金交叉',type:'bull',desc:`KD K值(${kd.k})低檔上穿D值，超賣反彈訊號，搭配量能確認`});
+    if(kd.k<kd.d && kd.k>70) patterns.push({name:'KD高檔死亡交叉',type:'bear',desc:`KD K值(${kd.k})高檔下穿D值，超買回檔風險，宜減碼`});
+    if(kd.k>80) patterns.push({name:'KD超買區',type:'bear',desc:`KD(${kd.k})進入超買區，短線漲幅過大，注意高檔震盪`});
+    if(kd.k<20) patterns.push({name:'KD超賣區',type:'bull',desc:`KD(${kd.k})進入超賣區，賣壓宣洩，逢低分批布局參考`});
+
+    // MACD
+    if(macd.macd>0 && macd.hist>0) patterns.push({name:'MACD多頭排列',type:'bull',desc:`MACD(${macd.macd})與柱狀(${macd.hist}>0)雙多，趨勢明確向上`});
+    if(macd.macd<0 && macd.hist<0) patterns.push({name:'MACD空頭排列',type:'bear',desc:`MACD(${macd.macd})與柱狀均為負，趨勢偏空，觀望為宜`});
+
+    // MA支撐/壓力
+    if(ma20 && cur>0){
+      const diff20 = (cur-ma20)/ma20*100;
+      if(diff20>0 && diff20<2) patterns.push({name:'站上MA20',type:'bull',desc:`股價剛站上MA20(${ma20?.toFixed(1)})，中期趨勢轉多`});
+      if(diff20<0 && diff20>-2) patterns.push({name:'跌破MA20',type:'bear',desc:`股價跌破MA20(${ma20?.toFixed(1)})，中期趨勢轉弱`});
+    }
+    if(ma60 && cur>0){
+      const diff60 = (cur-ma60)/ma60*100;
+      if(diff60>0 && diff60<1.5) patterns.push({name:'站上MA60',type:'bull',desc:`股價站上半年線(${ma60?.toFixed(1)})，長期趨勢偏多`});
+    }
+
+    // RSI
+    if(rsi>=70) patterns.push({name:'RSI超買',type:'bear',desc:`RSI(${rsi})進入超買區(≥70)，短線上漲動能減弱`});
+    if(rsi<=30) patterns.push({name:'RSI超賣',type:'bull',desc:`RSI(${rsi})進入超賣區(≤30)，可能出現技術性反彈`});
+
+    return patterns;
+  };
+  const patterns = detectPatterns(closes);
+
+  // 主力出貨警示計算
+  const dispWarn  = disp ? `⛔ 注意：${disp.startDate}～${disp.endDate} 處置股，成交量限制，波動加大` : '';
+  const kdWarn    = kd.k>80 ? '⚠️ KD 超買，短線獲利了結壓力' : kd.k<20 ? '✅ KD 超賣，逢低布局參考' : '';
+  const chipWarn  = ch.total && ch.total < -500 ? `⚠️ 三大法人合計賣超 ${Math.abs(ch.total)} 張，主力出貨警示` : ch.total > 500 ? `✅ 三大法人合計買超 ${ch.total} 張，法人積極布局` : '';
+
+  // 短線勝率評估（0-100）
+  let winRate = 50;
+  if(kd.k<40) winRate+=10; if(kd.k>70) winRate-=10;
+  if(macd.hist>0) winRate+=10; if(macd.hist<0) winRate-=10;
+  if(ch.total>200) winRate+=10; if(ch.total<-200) winRate-=10;
+  if(rsi<40) winRate+=8; if(rsi>65) winRate-=8;
+  if(ma5>ma20) winRate+=8; else winRate-=5;
+  if(disp) winRate-=15;
+  winRate = Math.max(10, Math.min(90, Math.round(winRate)));
+
+  progress.textContent = '送出 AI 深度分析請求...';
+
+  // 組成超詳細 prompt
+  const prompt = `你是一位有20年經驗的台股技術分析師，精通型態學、籌碼分析與波段操作。請針對以下個股提供最專業的操作建議，作為明日開盤的交易參考。
+
+═══════════════════════════════
+【一、股票基本資訊】
+═══════════════════════════════
+代號/名稱：${code} ${s.name}
+產業：${s.ind} ｜ 市場：${s.ex==='tse'?'上市':'上櫃'}
+收盤價：${cur} 元 ｜ 漲跌：${p?.chg>=0?'+':''}${p?.chg?.toFixed(2)||0} (${p?.chgPct>=0?'+':''}${p?.chgPct?.toFixed(2)||0}%)
+交易日：${p?.date||'未知'}
+AI預設訊號：${s.sig} ｜ 評分：${'★'.repeat(s.sc)}${'☆'.repeat(5-s.sc)}
+${dispWarn ? dispWarn+'\n' : ''}
+═══════════════════════════════
+【二、技術指標數據】
+═══════════════════════════════
+KD：K=${kd.k} / D=${kd.d} → ${kd.k>80?'超買區':kd.k<20?'超賣區':kd.k>kd.d?'多頭排列':'空頭排列'}
+RSI(14)：${rsi} → ${rsi>70?'超買':rsi<30?'超賣':'中性'}
+MACD：${macd.macd} / 訊號線：${macd.signal} / 柱狀：${macd.hist} → ${macd.hist>0?'多頭':'空頭'}
+布林通道：上軌${boll?.upper||'—'} / 中軌${boll?.mid||'—'} / 下軌${boll?.lower||'—'}
+ATR波動度：${atr}元/日
+均線：MA5=${ma5?.toFixed(1)||'—'} / MA10=${ma10?.toFixed(1)||'—'} / MA20=${ma20?.toFixed(1)||'—'} / MA60=${ma60?.toFixed(1)||'—'}
+均線多空：${ma5&&ma20?(ma5>ma20?'✅ MA5>MA20（短線多頭）':'⚠️ MA5<MA20（短線空頭）'):'資料不足'}
+歷史收盤筆數：${closes.length}筆
+
+═══════════════════════════════
+【三、法人籌碼（最新一日，張）】
+═══════════════════════════════
+外資：買${ch.foreignBuy||0} / 賣${ch.foreignSell||0} / 淨${(ch.foreign||0)>0?'+':''}${ch.foreign||0}
+投信：買${ch.trustBuy||0} / 賣${ch.trustSell||0} / 淨${(ch.trust||0)>0?'+':''}${ch.trust||0}
+自營商：${(ch.dealer||0)>0?'+':''}${ch.dealer||0}
+三大法人合計：${(ch.total||0)>0?'+':''}${ch.total||0} 張
+${chipWarn ? chipWarn+'\n' : ''}
+═══════════════════════════════
+【四、偵測到的技術型態（${patterns.length}個）】
+═══════════════════════════════
+${patterns.length>0 ? patterns.map(p=>`[${p.type==='bull'?'多頭':p.type==='bear'?'空頭':'中性'}] ${p.name}：${p.desc}`).join('\n') : '目前無明顯特殊型態訊號'}
+
+${rev?`═══════════════════════════════\n【五、財務數據】\n═══════════════════════════════\n月營收（千元）：${rev}\n`:''}${eps?`季EPS：${eps}\n`:''}${epsYr?`年EPS：${epsYr}\n`:''}${instOp?`法人觀點：${instOp}\n`:''}${extra?`補充資訊：${extra}\n`:''}${s.note?`公司概況：${s.note}\n`:''}
+═══════════════════════════════
+【系統評估】
+短線勝率參考：${winRate}%
+═══════════════════════════════
+
+請依照以下12個區塊，用繁體中文提供最專業的分析（每個區塊都要有實質內容，不可敷衍）：
+
+1. 📊【K線型態分析】說明目前K線結構，最近5日走勢判讀，支撐壓力位階
+2. 📈【均線系統解讀】MA5/10/20/60多空排列，葛蘭碧八大法則應用
+3. ⚡【KD/RSI動能解析】目前超買超賣狀態，背離訊號，最佳進出時機
+4. 🌊【MACD趨勢研判】零軸上下方向，柱狀圖收斂/擴散，波段拐點
+5. 🎯【布林通道應用】通道寬窄（波動率），突破/回測訊號，目標價位
+6. 🏦【籌碼分析詳解】外資/投信/自營商意圖，主力出貨或吸貨判斷
+7. 🔍【主力出貨/吸貨警示】根據籌碼數據判斷是否有出貨跡象
+8. 💡【明日開盤操作建議】具體的進場/出場價位、停損點、預期目標
+9. 📐【六大型態綜合判讀】整合以上型態，給出多/空/中立的明確方向
+10. ⚖️【短線勝率分析】成功率、風險報酬比、適合的操作周期
+11. 🌏【產業趨勢與股價催化劑】近期產業動態對股價的影響
+12. 📋【整體結論與台股規則提示】明日開盤建議（買進/賣出/觀望），注意台股漲跌幅限制、處置股規定等
+
+最後附上：【明日操作策略卡】包含：方向、進場價位、目標價、停損價、預期持有天數、信心指數(1-5顆星)`;
 
   try{
     const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1800,
+        messages:[{role:'user', content:prompt}]
       })
     });
-
-    if(!response.ok) throw new Error(`API Error ${response.status}`);
+    if(!response.ok) throw new Error(`API ${response.status}`);
     const data = await response.json();
-    const text = data.content?.[0]?.text || '無法取得分析結果';
+    const text = data.content?.[0]?.text||'無法取得分析';
 
-    content.textContent = text;
-    document.getElementById('ai-date').textContent =
-      `生成時間：${new Date().toLocaleString('zh-TW')}`;
+    // 先渲染本地技術指標卡片
+    sections.innerHTML = `
+      <!-- 技術指標總覽 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+        ${[
+          {label:'KD', val:`${kd.k}/${kd.d}`, sub:kd.k>80?'超買':kd.k<20?'超賣':'中性', col:kd.k>80?'#dc2626':kd.k<20?'#16a34a':'#64748b'},
+          {label:'RSI', val:rsi, sub:rsi>70?'超買':rsi<30?'超賣':'中性', col:rsi>70?'#dc2626':rsi<30?'#16a34a':'#64748b'},
+          {label:'MACD', val:macd.macd, sub:macd.hist>0?'多頭':'空頭', col:macd.hist>0?'#16a34a':'#dc2626'},
+          {label:'勝率', val:`${winRate}%`, sub:winRate>60?'偏多':winRate<40?'偏空':'中性', col:winRate>60?'#16a34a':winRate<40?'#dc2626':'#64748b'},
+        ].map(c=>`
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:#94a3b8">${c.label}</div>
+            <div style="font-size:16px;font-weight:800;font-family:monospace;color:${c.col}">${c.val}</div>
+            <div style="font-size:10px;color:${c.col};font-weight:600">${c.sub}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- 均線狀態 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+        ${[['MA5',ma5],['MA10',ma10],['MA20',ma20],['MA60',ma60]].map(([lbl,val])=>{
+          const col = val&&cur>0?(cur>val?'#16a34a':'#dc2626'):'#94a3b8';
+          const rel = val&&cur>0?(cur>val?'上方':'下方'):'—';
+          return `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:10px;color:#94a3b8">${lbl}</div>
+            <div style="font-size:13px;font-weight:700;font-family:monospace;color:${col}">${val?val.toFixed(1):'—'}</div>
+            <div style="font-size:10px;color:${col}">${rel}</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- 布林通道 -->
+      ${boll?`<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center">
+        <div><div style="font-size:9px;color:#dc2626">上軌</div><div style="font-weight:700;font-family:monospace;color:#dc2626">${boll.upper}</div></div>
+        <div><div style="font-size:9px;color:#64748b">中軌</div><div style="font-weight:700;font-family:monospace">${boll.mid}</div></div>
+        <div><div style="font-size:9px;color:#16a34a">下軌</div><div style="font-weight:700;font-family:monospace;color:#16a34a">${boll.lower}</div></div>
+      </div>`:''}
+
+      <!-- 型態警示 -->
+      ${patterns.length>0?`<div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:#475569;margin-bottom:6px">🔍 偵測到 ${patterns.length} 個技術型態</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${patterns.map(pt=>`<span style="padding:3px 8px;border-radius:12px;font-size:11px;font-weight:600;background:${pt.type==='bull'?'#dcfce7':pt.type==='bear'?'#fee2e2':'#f1f5f9'};color:${pt.type==='bull'?'#16a34a':pt.type==='bear'?'#dc2626':'#64748b'}">${pt.name}</span>`).join('')}
+        </div>
+      </div>`:''}
+
+      <!-- AI 分析全文 -->
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:#0369a1;margin-bottom:10px">🤖 AI 深度分析報告</div>
+        <div style="font-size:13px;line-height:1.85;color:#1e293b;white-space:pre-wrap">${text}</div>
+      </div>`;
+
+    document.getElementById('ai-date').textContent = `分析時間：${new Date().toLocaleString('zh-TW')}`;
     result.style.display='block';
     loading.style.display='none';
     btn.textContent='🔄 重新分析';
     btn.style.display='flex';
+
   }catch(e){
     loading.style.display='none';
     btn.style.display='flex';
-    btn.textContent='🤖 生成 AI 個股分析報告';
-    content.textContent=`分析失敗：${e.message}`;
+    btn.textContent='🤖 生成完整 AI 專業分析報告';
+    sections.innerHTML=`<div style="color:#dc2626;padding:12px;background:#fef2f2;border-radius:8px">分析失敗：${e.message}</div>`;
     result.style.display='block';
   }
 }
