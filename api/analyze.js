@@ -7,9 +7,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.Gemini_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'Gemini_API_KEY not configured' });
+    return res.status(500).json({ error: 'GEMINI_API_KEY not configured' });
   }
 
   try {
@@ -18,33 +18,39 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'no prompt' });
     }
 
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const model = 'gemini-2.0-flash-exp';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const r = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 8192,
-        messages: [{ role: 'user', content: prompt }],
+        contents: [{
+          role: 'user',
+          parts: [{ text: prompt }],
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 8192,
+        },
       }),
     });
 
     if (!r.ok) {
       const errText = await r.text();
       return res.status(r.status).json({
-        error: `Anthropic API ${r.status}`,
-        detail: errText
+        error: `Gemini API ${r.status}`,
+        detail: errText,
       });
     }
 
     const data = await r.json();
-    const text = data.content?.[0]?.text || '';
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const finishReason = data.candidates?.[0]?.finishReason || '';
+
     return res.status(200).json({
       text,
-      stop_reason: data.stop_reason
+      stop_reason: finishReason === 'MAX_TOKENS' ? 'max_tokens' : 'end_turn',
     });
   } catch (e) {
     return res.status(500).json({ error: e.message });
