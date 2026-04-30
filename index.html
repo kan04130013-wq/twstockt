@@ -3208,7 +3208,204 @@ function renderWatchlist(){
     </tr>`;
   }).join('');
 }
+// ===== 持股深度分析 Dashboard =====
+let dashChart = null;
+let dashTheme = 'cyber'; // 'cyber' or 'light'
 
+function openDash(code){
+  const s = STOCKS.find(x=>x.code===code);
+  const p = PD[code];
+  if(!s){ alert('找不到此股票資料'); return; }
+
+  // 顯示 overlay
+  document.getElementById('dashOverlay').classList.add('on');
+  document.getElementById('dash-title').textContent = `📊 ${s.code} ${s.name} · ${s.ind}`;
+
+  // 報價列
+  if(p){
+    const cls = p.chg>0?'dash-num-up':p.chg<0?'dash-num-dn':'dash-num-fl';
+    document.getElementById('dash-price').textContent = p.close.toFixed(2);
+    document.getElementById('dash-price').className = `dash-num ${cls}`;
+    document.getElementById('dash-chg').textContent = `${p.chg>=0?'+':''}${p.chg.toFixed(2)} (${p.chgPct>=0?'+':''}${p.chgPct.toFixed(2)}%)`;
+    document.getElementById('dash-chg').className = `dash-num ${cls}`;
+    document.getElementById('dash-open').textContent = p.open?.toFixed(2)||'—';
+    document.getElementById('dash-high').textContent = p.high?.toFixed(2)||'—';
+    document.getElementById('dash-low').textContent = p.low?.toFixed(2)||'—';
+    document.getElementById('dash-vol').textContent = p.vol?fv(p.vol)+'K':'—';
+  }
+
+  // 技術指標
+  const ind = IND[code];
+  const closes = HIST[code]||[];
+  const calcMA = (n) => closes.length>=n ? (closes.slice(-n).reduce((a,b)=>a+b,0)/n).toFixed(2) : '—';
+  const calcRSI = (n=14) => {
+    if(closes.length<n+1) return 50;
+    const diffs = closes.slice(-n-1).map((v,i,a)=>i>0?v-a[i-1]:0).slice(1);
+    const gains = diffs.filter(d=>d>0).reduce((a,b)=>a+b,0)/n;
+    const losses= Math.abs(diffs.filter(d=>d<0).reduce((a,b)=>a+b,0))/n;
+    return losses===0?100:Math.round(100-100/(1+gains/losses));
+  };
+  const rsi = calcRSI();
+  const ma5 = calcMA(5), ma10 = calcMA(10), ma20 = calcMA(20), ma60 = calcMA(60);
+  const k = ind?.kd?.k ?? 50, d = ind?.kd?.d ?? 50;
+  const macd = ind?.macd || {hist:0, bull:false};
+
+  document.getElementById('dash-indicators').innerHTML = `
+    <div class="dash-row"><span class="dash-label">KD (K/D)</span><span class="dash-num ${k>80?'dash-num-up':k<20?'dash-num-dn':'dash-num-fl'}">${k} / ${d}</span></div>
+    <div class="dash-row"><span class="dash-label">RSI(14)</span><span class="dash-num ${rsi>70?'dash-num-up':rsi<30?'dash-num-dn':'dash-num-fl'}">${rsi}</span></div>
+    <div class="dash-row"><span class="dash-label">MACD</span><span class="dash-num ${macd.bull?'dash-num-up':'dash-num-dn'}">${macd.bull?'▲ 多頭':'▼ 空頭'} ${macd.hist?.toFixed(2)||'0'}</span></div>
+    <div class="dash-row"><span class="dash-label">MA5</span><span class="dash-num">${ma5}</span></div>
+    <div class="dash-row"><span class="dash-label">MA10</span><span class="dash-num">${ma10}</span></div>
+    <div class="dash-row"><span class="dash-label">MA20</span><span class="dash-num">${ma20}</span></div>
+    <div class="dash-row"><span class="dash-label">MA60</span><span class="dash-num">${ma60}</span></div>
+    <div class="dash-row"><span class="dash-label">AI 訊號</span><span class="dash-num">${s.sig}</span></div>
+    <div class="dash-row"><span class="dash-label">評分</span><span class="dash-num">${'★'.repeat(s.sc)}${'☆'.repeat(5-s.sc)}</span></div>
+  `;
+
+  // 走勢圖
+  drawDashChart(code);
+
+  // 觸發 AI 分析
+  document.getElementById('dash-ai-loading').style.display='block';
+  document.getElementById('dash-ai-content').style.display='none';
+  runDashAi(code);
+}
+
+function closeDash(){
+  document.getElementById('dashOverlay').classList.remove('on');
+  if(dashChart){ dashChart.destroy(); dashChart=null; }
+}
+
+function toggleDashTheme(){
+  const el = document.getElementById('dashContent');
+  const btn = document.getElementById('dash-theme-btn');
+  if(dashTheme === 'cyber'){
+    el.classList.remove('dash-cyber');
+    el.classList.add('dash-light');
+    btn.textContent = '🌙 深色';
+    dashTheme = 'light';
+  } else {
+    el.classList.remove('dash-light');
+    el.classList.add('dash-cyber');
+    btn.textContent = '☀️ 淺色';
+    dashTheme = 'cyber';
+  }
+  // 重畫 chart 套用新色
+  const code = document.getElementById('dashOverlay').dataset.code;
+  if(code) drawDashChart(code);
+}
+
+function drawDashChart(code){
+  const closes = HIST[code]||[];
+  if(!closes.length) return;
+  if(dashChart){ dashChart.destroy(); }
+  const labels = [];
+  for(let i=closes.length-1; i>=0; i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    labels.push(`${d.getMonth()+1}/${d.getDate()}`);
+  }
+  const isUp = closes[closes.length-1] >= closes[0];
+  const lineCol = dashTheme==='cyber' ? (isUp?'#ff3b3b':'#00ff88') : (isUp?'#dc2626':'#16a34a');
+  const gridCol = dashTheme==='cyber' ? 'rgba(0,255,255,.1)' : '#f1f5f9';
+  const tickCol = dashTheme==='cyber' ? '#94a3b8' : '#94a3b8';
+
+  dashChart = new Chart(document.getElementById('dash-chart').getContext('2d'),{
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        data:closes,
+        borderColor:lineCol,
+        backgroundColor:lineCol+'25',
+        borderWidth:2,
+        tension:.3,
+        fill:true,
+        pointRadius:0,
+        pointHoverRadius:5
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:gridCol},ticks:{color:tickCol,font:{size:10},maxTicksLimit:8}},
+        y:{grid:{color:gridCol},ticks:{color:tickCol,font:{size:10}}}
+      }
+    }
+  });
+}
+
+async function runDashAi(code){
+  const s = STOCKS.find(x=>x.code===code);
+  const p = PD[code];
+  const ind = IND[code];
+  const closes = HIST[code]||[];
+  const ch = chipData[code]||{};
+  const k = ind?.kd?.k||50, d = ind?.kd?.d||50;
+  const macd = ind?.macd||{macd:0,hist:0,bull:false};
+
+  const prompt = `你是台股技術分析專家,針對以下個股提供 12 個專業分析區塊:
+
+【股票資訊】
+代號/名稱:${code} ${s.name}
+產業:${s.ind} | 市場:${s.ex==='tse'?'上市':'上櫃'}
+現價:${p?.close||0} | 漲跌:${p?.chgPct||0}%
+
+【技術指標】
+KD: K=${k} / D=${d}
+MACD: ${macd.macd} / 柱狀=${macd.hist} / ${macd.bull?'多頭':'空頭'}
+歷史筆數:${closes.length}
+
+【法人籌碼】
+外資:${ch.foreign||0} | 投信:${ch.trust||0} | 自營商:${ch.dealer||0} | 合計:${ch.total||0}
+
+【公司概況】
+${s.note||''}
+
+請依下列 12 項提供繁體中文專業分析,每項約 100-150 字:
+
+1. 📊 K線型態分析
+2. 📈 均線系統解讀(葛蘭碧八大法則)
+3. ⚡ KD/RSI 動能解析
+4. 🌊 MACD 趨勢研判
+5. 🎯 布林通道應用
+6. 🏦 籌碼分析詳解
+7. 🔍 主力出貨/吸貨警示
+8. 💡 明日開盤具體操作建議(進場/出場/停損價位)
+9. 📐 六大型態綜合判讀
+10. ⚖️ 短線勝率分析
+11. 🌏 產業趨勢與催化劑
+12. 📋 整體結論 + 明日操作策略卡`;
+
+  try{
+    const r = await fetch('/api/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt})
+    });
+    if(!r.ok){
+      const err = await r.json().catch(()=>({}));
+      throw new Error(`API ${r.status}: ${err.error||''}`);
+    }
+    const data = await r.json();
+    const text = data.text || '無法取得分析';
+    document.getElementById('dash-ai-loading').style.display='none';
+    document.getElementById('dash-ai-content').style.display='block';
+    document.getElementById('dash-ai-content').textContent = text;
+  }catch(e){
+    document.getElementById('dash-ai-loading').style.display='none';
+    document.getElementById('dash-ai-content').style.display='block';
+    document.getElementById('dash-ai-content').textContent = `AI 分析失敗:${e.message}`;
+  }
+}
+
+// 記錄當前打開的 code(用於 toggleTheme 重畫)
+const _origOpenDash = openDash;
+openDash = function(code){
+  document.getElementById('dashOverlay').dataset.code = code;
+  _origOpenDash(code);
+};
 buildTabs(); applyFilt(); loadManualDisp(); loadAll();
 </script><!-- ===== 持股深度分析 Dashboard ===== -->
 <div class="dash-overlay" id="dashOverlay">
