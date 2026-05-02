@@ -3119,7 +3119,8 @@ function renderEtfInst(){
       <td style="text-align:center">${wt(h.code,'00981A')}</td>
       <td style="text-align:center">${wt(h.code,'00990A')}</td>
       <td style="text-align:center">${wt(h.code,'00991A')}</td>
-      <td style="text-align:center"><span style="display:inline-flex;gap:2px">${Array.from({length:etfCount}).map(()=>'🟠').join('')}${Array.from({length:4-etfCount}).map(()=>'⬜').join('')}</span></td>
+      <td style="text-align:center">${wt(h.code,'00987A')}</td>
+      <td style="text-align:center"><span style="display:inline-flex;gap:2px">${Array.from({length:etfCount}).map(()=>'🟠').join('')}${Array.from({length:5-etfCount}).map(()=>'⬜').join('')}.map(()=>'⬜').join('')}</span></td>
       <td>${p?`<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>`:'—'}</td>
       <td>${p?`<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>`:'—'}</td>
       <td>${ours?`<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:#f0fdf4;color:#16a34a;border:1px solid #86efac">追蹤中</span>`:'<span style="font-size:11px;color:#94a3b8">未追蹤</span>'}</td>
