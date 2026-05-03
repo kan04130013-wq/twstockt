@@ -978,7 +978,7 @@ function calcMACD(closes){
 
 // ── 狀態 ───────────────────────────────────────────────────────
 const CF_PROXY = 'https://cool-limit-f6a0twse-proxy.kan04130013.workers.dev';
-let PD={}, HIST={}, IND={}, DISP=new Set();
+let PD={}, HIST={}, OHLC={}, IND={}, DISP=new Set();
 // 目標價直接寫在 STOCKS 陣列的 buy/sell/stop 欄位
 let rtTimer = null;   // 盤中自動更新 timer
 let isTrading = false; // 是否盤中
@@ -1057,20 +1057,25 @@ async function loadRealHistory(){
     const batch = stocks.slice(i, i+10);
     await Promise.all(batch.map(async s=>{
       try{
-        const url = `${CF_PROXY}?type=stock_hist&code=${s.code}&start=${fmt(startDate)}&end=${fmt(endDate)}`;
+        // 新版:加 ohlc=1 參數,一次拿 close + OHLC
+        const url = `${CF_PROXY}?type=stock_hist&code=${s.code}&start=${fmt(startDate)}&end=${fmt(endDate)}&ohlc=1`;
         const r = await fetch(url);
         if(!r.ok) return;
         const data = await r.json();
-        const closes = (data.closes||[]).filter(v=>v>0);
-        if(closes.length >= 26){
-          HIST[s.code] = closes;
-          IND[s.code] = {kd:calcKD(closes), macd:calcMACD(closes)};
+        const candles = (data.candles||[]).filter(c=>c.close>0);
+        if(candles.length >= 26){
+          // 同時存兩種格式:
+          // 1) HIST[code] = [close 陣列](維持舊功能相容)
+          // 2) OHLC[code] = [{date, open, high, low, close, vol} 陣列](蠟燭圖用)
+          HIST[s.code] = candles.map(c=>c.close);
+          OHLC[s.code] = candles;
+          IND[s.code] = {kd:calcKD(HIST[s.code]), macd:calcMACD(HIST[s.code])};
           updated++;
         }
       }catch(e){}
     }));
   }
-  if(updated > 0){ applyFilt(); console.log(`技術指標真實歷史更新：${updated} 檔`); }
+  if(updated > 0){ applyFilt(); console.log(`技術指標真實歷史更新（含 OHLC）：${updated} 檔`); }
 }
 
 // ── 收盤後自動輪詢（每5分鐘檢查 TWSE 是否更新）────────────────
