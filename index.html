@@ -1705,6 +1705,7 @@ async function loadChip(){
 
   // 用 FinMind 抓全部股票（上市+上櫃），每批30檔送 Worker，Worker 內部並行
   try{
+    throw new Error('FinMind 批次查詢已停用,改走 T86'); 
     const allCodes = STOCKS.filter(s=>!s.code.includes('A')).map(s=>s.code);
     document.getElementById('chip-status').textContent = `FinMind 載入中...（${allCodes.length} 檔）`;
     let done = 0;
