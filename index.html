@@ -3319,8 +3319,8 @@ function drawDashChart(code){
     return arr;
   };
   const ma5  = calcMASeries(5);
+  const ma10 = calcMASeries(10);
   const ma20 = calcMASeries(20);
-  const ma60 = calcMASeries(60);
   dashChart=new Chart(document.getElementById('dash-chart').getContext('2d'),{
     type:'line',
     data:{
@@ -3329,7 +3329,7 @@ function drawDashChart(code){
         {label:'收盤',data:closes,borderColor:lineCol,borderWidth:2.5,tension:.3,fill:false,pointRadius:0,pointHoverRadius:5,order:10},
         {label:'MA5', data:ma5, borderColor:'#fbbf24',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
         {label:'MA20',data:ma20,borderColor:'#3b82f6',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
-        {label:'MA60',data:ma60,borderColor:'#a855f7',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
+        {label:'MA20',data:ma20,borderColor:'#3b82f6',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
       ]
     },
     options:{
