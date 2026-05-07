@@ -3307,10 +3307,42 @@ function drawDashChart(code){
   const isUp=closes[closes.length-1]>=closes[0];
   const lineCol=dashTheme==='cyber'?(isUp?'#ff3b3b':'#00ff88'):(isUp?'#dc2626':'#16a34a');
   const gridCol=dashTheme==='cyber'?'rgba(0,255,255,.1)':'#f1f5f9';
+  // 計算移動平均
+  const calcMASeries = (n) => {
+    const arr = [];
+    for(let i=0; i<closes.length; i++){
+      if(i<n-1){ arr.push(null); continue; }
+      let sum = 0;
+      for(let j=i-n+1; j<=i; j++) sum += closes[j];
+      arr.push(+(sum/n).toFixed(2));
+    }
+    return arr;
+  };
+  const ma5  = calcMASeries(5);
+  const ma20 = calcMASeries(20);
+  const ma60 = calcMASeries(60);
   dashChart=new Chart(document.getElementById('dash-chart').getContext('2d'),{
     type:'line',
-    data:{labels,datasets:[{data:closes,borderColor:lineCol,backgroundColor:lineCol+'25',borderWidth:2,tension:.3,fill:true,pointRadius:0,pointHoverRadius:5}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gridCol},ticks:{color:'#94a3b8',font:{size:10},maxTicksLimit:8}},y:{grid:{color:gridCol},ticks:{color:'#94a3b8',font:{size:10}}}}}
+    data:{
+      labels,
+      datasets:[
+        {label:'收盤',data:closes,borderColor:lineCol,backgroundColor:lineCol+'25',borderWidth:2,tension:.3,fill:true,pointRadius:0,pointHoverRadius:5,order:10},
+        {label:'MA5', data:ma5, borderColor:'#fbbf24',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
+        {label:'MA20',data:ma20,borderColor:'#3b82f6',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
+        {label:'MA60',data:ma60,borderColor:'#a855f7',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'top',labels:{color:'#94a3b8',font:{size:10},boxWidth:20,usePointStyle:false}}
+      },
+      scales:{
+        x:{grid:{color:gridCol},ticks:{color:'#94a3b8',font:{size:10},maxTicksLimit:8}},
+        y:{grid:{color:gridCol},ticks:{color:'#94a3b8',font:{size:10}}}
+      }
+    }
   });
 }
 
