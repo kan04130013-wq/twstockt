@@ -3345,8 +3345,7 @@ function drawDashChart(code){
     }
   });
 }
-
-// 蠟燭圖渲染
+// 蠟燭圖渲染(含 MA5/MA10/MA20 均線疊圖)
 function drawDashCandle(code){
   const candles = OHLC[code]||[];
   if(!candles.length) return;
@@ -3360,6 +3359,23 @@ function drawDashCandle(code){
     c: c.close,
   }));
 
+  // 計算均線(以 OHLC 的 close 計算,座標用時間戳對齊)
+  const closesArr = candles.map(c => c.close);
+  const calcMASeriesC = (n) => {
+    const arr = [];
+    for(let i=0; i<closesArr.length; i++){
+      const xt = new Date(candles[i].date).getTime();
+      if(i<n-1){ arr.push({x:xt, y:null}); continue; }
+      let sum = 0;
+      for(let j=i-n+1; j<=i; j++) sum += closesArr[j];
+      arr.push({x:xt, y:+(sum/n).toFixed(2)});
+    }
+    return arr;
+  };
+  const ma5C  = calcMASeriesC(5);
+  const ma10C = calcMASeriesC(10);
+  const ma20C = calcMASeriesC(20);
+
   const upCol   = dashTheme==='cyber' ? '#ff3b3b' : '#dc2626';
   const downCol = dashTheme==='cyber' ? '#00ff88' : '#16a34a';
   const gridCol = dashTheme==='cyber' ? 'rgba(0,255,255,.1)' : '#f1f5f9';
@@ -3367,23 +3383,33 @@ function drawDashCandle(code){
   dashChart = new Chart(document.getElementById('dash-chart').getContext('2d'),{
     type:'candlestick',
     data:{
-      datasets:[{
-        label:'OHLC',
-        data:data,
-        color:{up:downCol, down:upCol, unchanged:'#94a3b8'},
-        borderColor:{up:downCol, down:upCol, unchanged:'#94a3b8'},
-      }]
+      datasets:[
+        {
+          label:'OHLC',
+          type:'candlestick',
+          data:data,
+          color:{up:downCol, down:upCol, unchanged:'#94a3b8'},
+          borderColor:{up:downCol, down:upCol, unchanged:'#94a3b8'},
+          order:10,
+        },
+        {label:'MA5', type:'line', data:ma5C,  borderColor:'#fbbf24',borderWidth:1.2,fill:false,pointRadius:0,order:1,spanGaps:true},
+        {label:'MA10',type:'line', data:ma10C, borderColor:'#a855f7',borderWidth:1.2,fill:false,pointRadius:0,order:1,spanGaps:true},
+        {label:'MA20',type:'line', data:ma20C, borderColor:'#3b82f6',borderWidth:1.2,fill:false,pointRadius:0,order:1,spanGaps:true},
+      ]
     },
     options:{
       responsive:true,
       maintainAspectRatio:false,
       plugins:{
-        legend:{display:false},
+        legend:{display:true,position:'top',labels:{color:'#94a3b8',font:{size:10},boxWidth:20,usePointStyle:false,filter:(item)=>item.text!=='OHLC'}},
         tooltip:{
           callbacks:{
             label:(ctx)=>{
               const d=ctx.raw;
-              return [`開:${d.o}`,`高:${d.h}`,`低:${d.l}`,`收:${d.c}`];
+              if(ctx.dataset.label==='OHLC'){
+                return [`開:${d.o}`,`高:${d.h}`,`低:${d.l}`,`收:${d.c}`];
+              }
+              return `${ctx.dataset.label}:${d.y}`;
             }
           }
         }
