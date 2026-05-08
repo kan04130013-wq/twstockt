@@ -3369,8 +3369,8 @@ function drawDashCandle(code){
     l: c.low,
     c: c.close,
   }));
-
-  // 計算均線(以 OHLC 的 close 計算,座標用時間戳對齊)
+  
+ // 計算均線(以 OHLC 的 close 計算,座標用時間戳對齊)
   const closesArr = candles.map(c => c.close);
   const calcMASeriesC = (n) => {
     const arr = [];
@@ -3441,6 +3441,11 @@ function drawDashCandle(code){
   });
 }
 
+// 成交量圖全域變數
+let dashVolumeChart = null;
+let upColCache = '#ff3b3b';
+let downColCache = '#00ff88';
+  
 // 切換折線/蠟燭模式
 function setDashChartMode(mode){
   const code = document.getElementById('dashOverlay').dataset.code;
