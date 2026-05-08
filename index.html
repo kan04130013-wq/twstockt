@@ -3318,6 +3318,11 @@ function drawDashChart(code){
   const isUp=closes[closes.length-1]>=closes[0];
   const lineCol=dashTheme==='cyber'?(isUp?'#ff3b3b':'#00ff88'):(isUp?'#dc2626':'#16a34a');
   const gridCol=dashTheme==='cyber'?'rgba(0,255,255,.1)':'#f1f5f9';
+
+  // 更新顏色快取(供成交量圖使用)
+  upColCache = dashTheme==='cyber' ? '#ff3b3b' : '#dc2626';
+  downColCache = dashTheme==='cyber' ? '#00ff88' : '#16a34a';
+  
   // 計算移動平均
   const calcMASeries = (n) => {
     const arr = [];
@@ -3355,7 +3360,10 @@ function drawDashChart(code){
       }
     }
   });
+
+  drawDashVolume(code);
 }
+
 // 蠟燭圖渲染(含 MA5/MA10/MA20 均線疊圖)
 function drawDashCandle(code){
   const candles = OHLC[code]||[];
