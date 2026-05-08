@@ -3318,6 +3318,9 @@ function drawDashChart(code){
   const isUp=closes[closes.length-1]>=closes[0];
   const lineCol=dashTheme==='cyber'?(isUp?'#ff3b3b':'#00ff88'):(isUp?'#dc2626':'#16a34a');
   const gridCol=dashTheme==='cyber'?'rgba(0,255,255,.1)':'#f1f5f9';
+  // 更新顏色快取(供成交量圖使用)
+  upColCache = dashTheme==='cyber' ? '#ff3b3b' : '#dc2626';
+  downColCache = dashTheme==='cyber' ? '#00ff88' : '#16a34a';
   // 計算移動平均
   const calcMASeries = (n) => {
     const arr = [];
@@ -3355,6 +3358,9 @@ function drawDashChart(code){
       }
     }
   });
+  });
+  drawDashVolume(code);          
+}
 }
 // 蠟燭圖渲染(含 MA5/MA10/MA20 均線疊圖)
 function drawDashCandle(code){
@@ -3369,6 +3375,7 @@ function drawDashCandle(code){
     l: c.low,
     c: c.close,
   }));
+  
 
   // 計算均線(以 OHLC 的 close 計算,座標用時間戳對齊)
   const closesArr = candles.map(c => c.close);
@@ -3440,6 +3447,104 @@ function drawDashCandle(code){
     }
   });
 }
+// 成交量柱狀圖渲染(含 5 日均量線)
+let dashVolumeChart = null;
+function drawDashVolume(code){
+  const candles = OHLC[code]||[];
+  if(!candles.length){
+    if(dashVolumeChart){ dashVolumeChart.destroy(); dashVolumeChart=null; }
+    return;
+  }
+  if(dashVolumeChart){ dashVolumeChart.destroy(); dashVolumeChart=null; }
+
+  // 用 OHLC 算出每天的「漲跌」(close vs open)
+  // 注意:OHLC[i] 對應第 i 天,但今天比較 close vs 昨天 close 也行
+  // 這邊用 close vs open(當日內漲跌),跟 K 棒顏色一致
+  const labels = candles.map(c => c.date);
+  const volumes = candles.map(c => c.vol||0);
+  const colors = candles.map(c => c.close >= c.open ? upColCache : downColCache);
+
+  // 計算 5 日均量
+  const calcVMA = (n) => {
+    const arr = [];
+    for(let i=0; i<volumes.length; i++){
+      if(i<n-1){ arr.push(null); continue; }
+      let sum = 0;
+      for(let j=i-n+1; j<=i; j++) sum += volumes[j];
+      arr.push(Math.round(sum/n));
+    }
+    return arr;
+  };
+  const vma5 = calcVMA(5);
+
+  const gridCol = dashTheme==='cyber' ? 'rgba(0,255,255,.1)' : '#f1f5f9';
+
+  dashVolumeChart = new Chart(document.getElementById('dash-volume').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {
+          label:'成交量',
+          type:'bar',
+          data:volumes,
+          backgroundColor:colors,
+          borderColor:colors,
+          borderWidth:0,
+          barPercentage:0.95,
+          categoryPercentage:0.95,
+          order:10,
+        },
+        {
+          label:'5日均量',
+          type:'line',
+          data:vma5,
+          borderColor:'#fbbf24',
+          borderWidth:1.2,
+          tension:.3,
+          fill:false,
+          pointRadius:0,
+          spanGaps:true,
+          order:1,
+        },
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:(ctx)=>{
+              if(ctx.dataset.label==='成交量'){
+                return `量:${(ctx.raw||0).toLocaleString()} 張`;
+              }
+              return `5日均量:${(ctx.raw||0).toLocaleString()}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{
+          grid:{display:false},
+          ticks:{display:false}
+        },
+        y:{
+          grid:{color:gridCol},
+          ticks:{color:'#94a3b8', font:{size:9}, maxTicksLimit:3,
+            callback:(v)=> v>=10000 ? (v/1000).toFixed(0)+'K' : v
+          },
+          beginAtZero:true,
+        }
+      }
+    }
+  });
+}
+
+// 全域顏色快取(讓成交量柱狀圖能用到 K 線顏色)
+let upColCache = '#ff3b3b';
+let downColCache = '#00ff88';
 
 // 切換折線/蠟燭模式
 function setDashChartMode(mode){
