@@ -3548,6 +3548,46 @@ function drawDashVolume(code){
     }
   });
 }
+
+// 主力出貨警示判斷
+// 規則 A:量增價跌(成交量 > 5日均量×1.5 + 收盤 < 開盤)
+// 規則 C:上影線過長(上影線 > 實體×2 + 收盤 < 開盤)
+// 觸發 1 條 = 輕微🟡,2 條 = 嚴重🔴
+function calcOutflowAlert(code){
+  const candles = OHLC[code]||[];
+  if(candles.length < 6) return {level:0, rules:[], text:''}; // 資料不足
+
+  const today = candles[candles.length-1];
+  const recent5 = candles.slice(-6, -1); // 不含今天的前 5 天
+
+  const avgVol5 = recent5.reduce((s,c)=>s+(c.vol||0),0) / 5;
+  const todayVol = today.vol || 0;
+
+  const todayBody = Math.abs(today.close - today.open);
+  const todayUpperShadow = today.high - Math.max(today.open, today.close);
+  const isDown = today.close < today.open;
+
+  const rules = [];
+
+  // 規則 A:量增價跌
+  if(todayVol > avgVol5 * 1.5 && isDown){
+    rules.push({code:'A', name:'量增價跌', detail:`量${(todayVol/1000).toFixed(0)}K vs 5日均量${(avgVol5/1000).toFixed(0)}K`});
+  }
+
+  // 規則 C:上影線過長
+  if(todayBody > 0 && todayUpperShadow > todayBody * 2 && isDown){
+    rules.push({code:'C', name:'上影線過長', detail:`上影${todayUpperShadow.toFixed(2)} vs 實體${todayBody.toFixed(2)}`});
+  }
+
+  let level = 0, text = '正常', icon = '✅';
+  if(rules.length === 1){
+    level = 1; text = '輕微出貨'; icon = '🟡';
+  } else if(rules.length >= 2){
+    level = 2; text = '嚴重出貨'; icon = '🔴';
+  }
+
+  return {level, rules, text, icon};
+}
  
 // 切換折線/蠟燭模式
 function setDashChartMode(mode){
