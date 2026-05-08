@@ -3336,7 +3336,7 @@ function drawDashChart(code){
   };
   const ma5  = calcMASeries(5);
   const ma10 = calcMASeries(10);
-  const ma20 = calcMASeries(20);
+  const ma30 = calcMASeries(30);
   dashChart=new Chart(document.getElementById('dash-chart').getContext('2d'),{
     type:'line',
     data:{
@@ -3345,7 +3345,7 @@ function drawDashChart(code){
         {label:'收盤',data:closes,borderColor:lineCol,borderWidth:2.5,tension:.3,fill:false,pointRadius:0,pointHoverRadius:5,order:10},
         {label:'MA5', data:ma5, borderColor:'#fbbf24',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
         {label:'MA10',data:ma10,borderColor:'#a855f7',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
-        {label:'MA20',data:ma20,borderColor:'#3b82f6',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
+        {label:'MA30',data:ma30,borderColor:'#3b82f6',borderWidth:1.2,tension:.3,fill:false,pointRadius:0,order:1},
       ]
     },
     options:{
@@ -3393,7 +3393,7 @@ function drawDashCandle(code){
   };
   const ma5C  = calcMASeriesC(5);
   const ma10C = calcMASeriesC(10);
-  const ma20C = calcMASeriesC(20);
+  const ma30C = calcMASeriesC(30);
 
   const upCol   = dashTheme==='cyber' ? '#ff3b3b' : '#dc2626';
   const downCol = dashTheme==='cyber' ? '#00ff88' : '#16a34a';
@@ -3413,7 +3413,7 @@ function drawDashCandle(code){
         },
         {label:'MA5', type:'line', data:ma5C,  borderColor:'#fbbf24',borderWidth:1.2,fill:false,pointRadius:0,order:1,spanGaps:true},
         {label:'MA10',type:'line', data:ma10C, borderColor:'#a855f7',borderWidth:1.2,fill:false,pointRadius:0,order:1,spanGaps:true},
-        {label:'MA20',type:'line', data:ma20C, borderColor:'#3b82f6',borderWidth:1.2,fill:false,pointRadius:0,order:1,spanGaps:true},
+        {label:'MA30', type:'line', data:ma30C, borderColor:'#3b82f6',borderWidth:1.2,fill:false,pointRadius:0,order:1,spanGaps:true},
       ]
     },
     options:{
