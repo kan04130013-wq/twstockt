@@ -3273,7 +3273,8 @@ function openDash(code){
     <div class="dash-row"><span class="dash-label">MA20</span><span class="dash-num">${ma20}</span></div>
     <div class="dash-row"><span class="dash-label">MA60</span><span class="dash-num">${ma60}</span></div>
     <div class="dash-row"><span class="dash-label">AI 訊號</span><span class="dash-num">${s.sig}</span></div>
-    <div class="dash-row"><span class="dash-label">評分</span><span class="dash-num">${'★'.repeat(s.sc)}${'☆'.repeat(5-s.sc)}</span></div>`;
+    <div class="dash-row"><span class="dash-label">評分</span><span class="dash-num">${'★'.repeat(s.sc)}${'☆'.repeat(5-s.sc)}</span></div>
+    <div class="dash-row"><span class="dash-label">主力警示</span><span class="dash-num" id="dash-outflow">—</span></div>`;
   drawDashChart(code);
   document.getElementById('dash-ai-loading').style.display='block';
   document.getElementById('dash-ai-content').style.display='none';
