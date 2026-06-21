@@ -3385,7 +3385,7 @@ function openDash(code){
   }
   
   drawDashChart(code);
-  document.getElementById('dash-ai-loading').style.display='block';
+  document.getElementById('dash-ai-detail').style.display='block';
   document.getElementById('dash-ai-content').style.display='none';
   runDashAi(code);
 }
@@ -3681,9 +3681,9 @@ function renderDashCards(data){
     return 'dash-num-fl';
   };
   // 填入操作建議
-  document.getElementById('card-buy').textContent  = data.buy_price ?? '—';
-  document.getElementById('card-sell').textContent = data.sell_price ?? '—';
-  document.getElementById('card-stop').textContent = data.stop_loss ?? '—';
+  document.getElementById('card-buy').textContent  = (data.buy_price && data.buy_price > 0) ? data.buy_price : '不建議';
+  document.getElementById('card-sell').textContent = (data.sell_price && data.sell_price > 0) ? data.sell_price : '—';
+  document.getElementById('card-stop').textContent = (data.stop_loss && data.stop_loss > 0) ? data.stop_loss : '—';
   // 填入風險評估
   const riskEl = document.getElementById('card-risk');
   riskEl.textContent = stars(data.risk_level);
@@ -3847,7 +3847,9 @@ buildTabs(); applyFilt(); loadManualDisp(); loadAll();
 </div>
 <!-- /結構化卡片區 -->
 
-<div id="dash-ai-content" style="display:none;white-space:pre-wrap;line-height:1.8;font-size:13px"></div>
-  <div id="dash-ai-content" class="dash-ai-box" style="display:none"></div></div>
+<details id="dash-ai-detail" style="display:none;margin-top:10px">
+  <summary style="cursor:pointer;padding:8px;font-size:12px;color:#94a3b8;border:1px dashed rgba(0,255,255,.3);border-radius:6px;text-align:center">📖 展開完整 12 區塊 AI 分析詳細報告</summary>
+  <div id="dash-ai-content" style="white-space:pre-wrap;line-height:1.8;font-size:13px;padding:14px;margin-top:8px;background:rgba(0,30,60,.4);border-radius:6px;border:1px solid rgba(0,255,255,.2)"></div>
+</details>
 </div></div></div></body>
 </html>
