@@ -3663,7 +3663,48 @@ function drawDashVolume(code){
 // 規則 A:量增價跌(成交量 > 5日均量×1.5 + 收盤 < 開盤)
 // 規則 C:上影線過長(上影線 > 實體×2 + 收盤 < 開盤)
 // 觸發 1 條 = 輕微🟡,2 條 = 嚴重🔴
-function calcOutflowAlert(code){
+// Step 5C: 把 JSON 資料填到結構化卡片
+function renderDashCards(data){
+  if(!data){
+    document.getElementById('dash-ai-cards').style.display='none';
+    return;
+  }
+  // 數字 → 星星轉換
+  const stars = (n) => {
+    n = Math.max(0, Math.min(5, parseInt(n)||0));
+    return '★'.repeat(n) + '☆'.repeat(5-n);
+  };
+  // AI 訊號顏色
+  const signalColor = (sig) => {
+    if(/強烈買進|買進/.test(sig)) return 'dash-num-up';
+    if(/強烈賣出|賣出/.test(sig)) return 'dash-num-dn';
+    return 'dash-num-fl';
+  };
+  // 填入操作建議
+  document.getElementById('card-buy').textContent  = data.buy_price ?? '—';
+  document.getElementById('card-sell').textContent = data.sell_price ?? '—';
+  document.getElementById('card-stop').textContent = data.stop_loss ?? '—';
+  // 填入風險評估
+  const riskEl = document.getElementById('card-risk');
+  riskEl.textContent = stars(data.risk_level);
+  riskEl.className = data.risk_level >= 4 ? 'dash-num-dn' : (data.risk_level <= 2 ? 'dash-num-up' : 'dash-num-fl');
+  const sigEl = document.getElementById('card-signal');
+  sigEl.textContent = data.ai_signal || '—';
+  sigEl.className = signalColor(data.ai_signal);
+  document.getElementById('card-score').textContent = stars(data.score);
+  // 填入文字卡片
+  document.getElementById('card-tech').textContent    = data.technical_note   || '—';
+  document.getElementById('card-chip').textContent    = data.chip_note        || '—';
+  document.getElementById('card-fund').textContent    = data.fundamental_note || '—';
+  document.getElementById('card-warning').textContent = data.key_warning      || '—';
+  document.getElementById('card-summary').textContent = data.summary          || '—';
+  document.getElementById('card-trend').textContent   = '趨勢:' + (data.trend || '—');
+  // 顯示卡片區
+  document.getElementById('dash-ai-cards').style.display='block';
+}
+
+// 主力出貨警示判斷
+  calcOutflowAlert(code){
   const candles = OHLC[code]||[];
   if(candles.length < 6) return {level:0, rules:[], text:''}; // 資料不足
 
@@ -3741,6 +3782,7 @@ async function runDashAi(code){
       try{
         window.lastDashJson = JSON.parse(jsonMatch[1]);
         console.log('✅ AI JSON parse 成功:', code, window.lastDashJson);
+        renderDashCards(window.lastDashJson);
       }catch(err){
         console.warn('⚠️ JSON 解析失敗:', code, err.message);
         window.lastDashJson = null;
