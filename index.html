@@ -3385,8 +3385,8 @@ function openDash(code){
   }
   
   drawDashChart(code);
+  document.getElementById('dash-ai-detail').style.display='none';
   document.getElementById('dash-ai-detail').style.display='block';
-  document.getElementById('dash-ai-content').style.display='none';
   runDashAi(code);
 }
 function closeDash(){
