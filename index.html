@@ -191,6 +191,50 @@ tr:last-child td{border-bottom:none}
 .dash-outflow-mild{color:#fbbf24 !important;text-shadow:0 0 8px #fbbf24;font-weight:bold}
 .dash-outflow-severe{color:#ff3b3b !important;text-shadow:0 0 12px #ff3b3b,0 0 20px #ff3b3b;font-weight:bold;animation:dash-blink 1.2s ease-in-out infinite}
 @keyframes dash-blink{0%,100%{opacity:1}50%{opacity:.6}}
+/* Step 5B: 結構化卡片樣式(賽博龐克版) */
+.dash-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.dash-card{border-radius:6px;padding:10px;font-size:12px}
+.dash-card-title{font-size:11px;letter-spacing:1px;font-weight:700;margin-bottom:6px;padding-bottom:4px;border-bottom:1px dashed currentColor;opacity:.8}
+.dash-card-body{line-height:1.7}
+.dash-card-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
+.dash-card-row span:first-child{opacity:.7;font-size:11px}
+.dash-card-row span:last-child{font-weight:700;font-family:'Courier New',monospace}
+.dash-card-trend{font-size:11px;opacity:.7;margin-top:6px;padding-top:6px;border-top:1px dashed currentColor;font-style:italic}
+
+/* 賽博龐克版 */
+.dash-cyber .dash-card{background:rgba(0,30,60,.5);border:1px solid rgba(0,255,255,.3);box-shadow:inset 0 0 10px rgba(0,255,255,.05)}
+.dash-cyber .dash-card-trade{border-color:#ff3b3b;box-shadow:inset 0 0 12px rgba(255,59,59,.15)}
+.dash-cyber .dash-card-trade .dash-card-title{color:#ff3b3b;text-shadow:0 0 8px #ff3b3b}
+.dash-cyber .dash-card-risk{border-color:#fbbf24;box-shadow:inset 0 0 12px rgba(251,191,36,.15)}
+.dash-cyber .dash-card-risk .dash-card-title{color:#fbbf24;text-shadow:0 0 8px #fbbf24}
+.dash-cyber .dash-card-tech{border-color:#3b82f6;box-shadow:inset 0 0 12px rgba(59,130,246,.15)}
+.dash-cyber .dash-card-tech .dash-card-title{color:#3b82f6;text-shadow:0 0 8px #3b82f6}
+.dash-cyber .dash-card-chip{border-color:#a855f7;box-shadow:inset 0 0 12px rgba(168,85,247,.15)}
+.dash-cyber .dash-card-chip .dash-card-title{color:#a855f7;text-shadow:0 0 8px #a855f7}
+.dash-cyber .dash-card-fund{border-color:#00ff88;box-shadow:inset 0 0 12px rgba(0,255,136,.15)}
+.dash-cyber .dash-card-fund .dash-card-title{color:#00ff88;text-shadow:0 0 8px #00ff88}
+.dash-cyber .dash-card-warning{border-color:#ff3b3b;box-shadow:inset 0 0 12px rgba(255,59,59,.2);animation:dash-blink 2s ease-in-out infinite}
+.dash-cyber .dash-card-warning .dash-card-title{color:#ff3b3b;text-shadow:0 0 10px #ff3b3b}
+.dash-cyber .dash-card-summary{background:rgba(0,40,80,.7);border:2px solid #00ffff;box-shadow:0 0 15px rgba(0,255,255,.3),inset 0 0 15px rgba(0,255,255,.1);padding:14px;margin-bottom:10px}
+.dash-cyber .dash-card-summary .dash-card-title{color:#00ffff;text-shadow:0 0 10px #00ffff;font-size:13px}
+.dash-cyber .dash-card-summary .dash-card-body{font-size:13px;line-height:1.8}
+
+/* 淺色版 */
+.dash-light .dash-card{background:#f8fafc;border:1px solid #e2e8f0}
+.dash-light .dash-card-trade{border-left:3px solid #dc2626}
+.dash-light .dash-card-trade .dash-card-title{color:#dc2626}
+.dash-light .dash-card-risk{border-left:3px solid #f59e0b}
+.dash-light .dash-card-risk .dash-card-title{color:#f59e0b}
+.dash-light .dash-card-tech{border-left:3px solid #3b82f6}
+.dash-light .dash-card-tech .dash-card-title{color:#3b82f6}
+.dash-light .dash-card-chip{border-left:3px solid #a855f7}
+.dash-light .dash-card-chip .dash-card-title{color:#a855f7}
+.dash-light .dash-card-fund{border-left:3px solid #16a34a}
+.dash-light .dash-card-fund .dash-card-title{color:#16a34a}
+.dash-light .dash-card-warning{border-left:3px solid #dc2626;background:#fef2f2}
+.dash-light .dash-card-warning .dash-card-title{color:#dc2626}
+.dash-light .dash-card-summary{background:#fff;border:2px solid #1a202c;padding:14px;margin-bottom:10px}
+.dash-light .dash-card-summary .dash-card-title{font-size:13px}
 .dash-cyber .dash-label{color:#94a3b8;font-size:11px;letter-spacing:1px}
 .dash-cyber .dash-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px dashed rgba(0,255,255,.15)}
 .dash-cyber .dash-row:last-child{border-bottom:none}
