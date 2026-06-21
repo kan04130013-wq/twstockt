@@ -3704,7 +3704,7 @@ function renderDashCards(data){
 }
 
 // 主力出貨警示判斷
-  calcOutflowAlert(code){
+  function calcOutflowAlert(code){
   const candles = OHLC[code]||[];
   if(candles.length < 6) return {level:0, rules:[], text:''}; // 資料不足
 
