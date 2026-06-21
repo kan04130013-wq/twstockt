@@ -3690,6 +3690,21 @@ async function runDashAi(code){
     document.getElementById('dash-ai-loading').style.display='none';
     document.getElementById('dash-ai-content').style.display='block';
     document.getElementById('dash-ai-content').textContent=data.text||'無法取得分析';
+    // Step 2: 從 AI 回應抽出 JSON 區塊(供結構化卡片使用)
+    const txt = data.text||'';
+    const jsonMatch = txt.match(/```json\s*([\s\S]*?)\s*```/);
+    if(jsonMatch){
+      try{
+        window.lastDashJson = JSON.parse(jsonMatch[1]);
+        console.log('✅ AI JSON parse 成功:', code, window.lastDashJson);
+      }catch(err){
+        console.warn('⚠️ JSON 解析失敗:', code, err.message);
+        window.lastDashJson = null;
+      }
+    } else {
+      console.warn('⚠️ AI 沒有輸出 JSON 區塊:', code);
+      window.lastDashJson = null;
+    }
   }catch(e){
     document.getElementById('dash-ai-loading').style.display='none';
     document.getElementById('dash-ai-content').style.display='block';
