@@ -3847,9 +3847,40 @@ buildTabs(); applyFilt(); loadManualDisp(); loadAll();
 </div>
 <!-- /結構化卡片區 -->
 
-<details id="dash-ai-detail" style="display:none;margin-top:10px">
-  <summary style="cursor:pointer;padding:8px;font-size:12px;color:#94a3b8;border:1px dashed rgba(0,255,255,.3);border-radius:6px;text-align:center">📖 展開完整 12 區塊 AI 分析詳細報告</summary>
-  <div id="dash-ai-content" style="white-space:pre-wrap;line-height:1.8;font-size:13px;padding:14px;margin-top:8px;background:rgba(0,30,60,.4);border-radius:6px;border:1px solid rgba(0,255,255,.2)"></div>
+<details 
+<!-- Step 7: K 線型態教學表 -->
+<details class="dash-pattern-guide" style="margin-top:10px">
+  <summary style="cursor:pointer;padding:8px;font-size:12px;color:#94a3b8;border:1px dashed rgba(255,165,0,.4);border-radius:6px;text-align:center">📚 K 線型態快速識別表(10 個常見型態)</summary>
+  <div style="padding:14px;margin-top:8px;background:rgba(40,20,0,.4);border-radius:6px;border:1px solid rgba(255,165,0,.3);overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;color:#e2e8f0">
+      <thead>
+        <tr style="background:rgba(255,165,0,.15);color:#fbbf24">
+          <th style="padding:6px;text-align:left;border-bottom:1px solid rgba(255,165,0,.3)">型態</th>
+          <th style="padding:6px;text-align:left;border-bottom:1px solid rgba(255,165,0,.3)">K 線特徵</th>
+          <th style="padding:6px;text-align:left;border-bottom:1px solid rgba(255,165,0,.3)">出現位置</th>
+          <th style="padding:6px;text-align:center;border-bottom:1px solid rgba(255,165,0,.3)">訊號</th>
+          <th style="padding:6px;text-align:center;border-bottom:1px solid rgba(255,165,0,.3)">可信度</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">黃金交叉</td><td style="padding:5px">短均線由下穿越長均線</td><td style="padding:5px">低檔/盤整末端</td><td style="padding:5px;text-align:center;color:#ff3b3b">🟢 多頭</td><td style="padding:5px;text-align:center">★★★★☆</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">死亡交叉</td><td style="padding:5px">短均線由上跌破長均線</td><td style="padding:5px">高檔/上漲末端</td><td style="padding:5px;text-align:center;color:#00ff88">🔴 空頭</td><td style="padding:5px;text-align:center">★★★★☆</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">紅三兵</td><td style="padding:5px">連續 3 根陽線,逐根創高</td><td style="padding:5px">低檔反轉</td><td style="padding:5px;text-align:center;color:#ff3b3b">🟢 強勢上漲</td><td style="padding:5px;text-align:center">★★★★★</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">黑三鴉</td><td style="padding:5px">連續 3 根陰線,逐根創低</td><td style="padding:5px">高檔反轉</td><td style="padding:5px;text-align:center;color:#00ff88">🔴 強勢下跌</td><td style="padding:5px;text-align:center">★★★★★</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">早晨之星</td><td style="padding:5px">陰線 + 小 K 線 + 陽線</td><td style="padding:5px">低檔築底</td><td style="padding:5px;text-align:center;color:#ff3b3b">🟢 底部反轉</td><td style="padding:5px;text-align:center">★★★★☆</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">黃昏之星</td><td style="padding:5px">陽線 + 小 K 線 + 陰線</td><td style="padding:5px">高檔做頭</td><td style="padding:5px;text-align:center;color:#00ff88">🔴 頂部反轉</td><td style="padding:5px;text-align:center">★★★★☆</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">槌子線</td><td style="padding:5px">下影線長,實體小在上方</td><td style="padding:5px">下跌末端</td><td style="padding:5px;text-align:center;color:#ff3b3b">🟢 止跌訊號</td><td style="padding:5px;text-align:center">★★★☆☆</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">流星線</td><td style="padding:5px">上影線長,實體小在下方</td><td style="padding:5px">上漲末端</td><td style="padding:5px;text-align:center;color:#00ff88">🔴 滯漲訊號</td><td style="padding:5px;text-align:center">★★★☆☆</td></tr>
+        <tr style="border-bottom:1px dashed rgba(255,255,255,.1)"><td style="padding:5px">多頭吞噬</td><td style="padding:5px">大陽線吞噬前根陰線</td><td style="padding:5px">下跌末端</td><td style="padding:5px;text-align:center;color:#ff3b3b">🟢 反轉向上</td><td style="padding:5px;text-align:center">★★★★☆</td></tr>
+        <tr><td style="padding:5px">空頭吞噬</td><td style="padding:5px">大陰線吞噬前根陽線</td><td style="padding:5px">上漲末端</td><td style="padding:5px;text-align:center;color:#00ff88">🔴 反轉向下</td><td style="padding:5px;text-align:center">★★★★☆</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:8px;padding:6px;background:rgba(255,165,0,.1);border-left:3px solid #fbbf24;font-size:11px;color:#94a3b8">
+      💡 提示:K 線型態僅供參考,請搭配技術指標、籌碼面、產業趨勢綜合判斷。<br>
+      📊 訊號顏色採台股慣例:🟢 紅 = 多頭/上漲,🔴 綠 = 空頭/下跌
+    </div>
+  </div>
 </details>
+<!-- /Step 7 -->
 </div></div></div></body>
 </html>
