@@ -3703,6 +3703,9 @@ function renderDashCards(data){
   document.getElementById('card-chip').textContent    = data.chip_note        || '—';
   document.getElementById('card-fund').textContent    = data.fundamental_note || '—';
   document.getElementById('card-warning').textContent = data.key_warning      || '—';
+  document.getElementById('card-pattern').textContent          = data.pattern          || '—';
+  document.getElementById('card-pattern-strength').textContent = stars(data.pattern_strength);
+  document.getElementById('card-pattern-signal').textContent   = data.pattern_signal   || '—';
   document.getElementById('card-summary').textContent = data.summary          || '—';
   document.getElementById('card-trend').textContent   = '趨勢:' + (data.trend || '—');
   // 顯示卡片區
