@@ -3273,8 +3273,49 @@ function renderEtfInst(){
     </tr>`;
   }).join('');
 }
-
 document.getElementById('etf-our-only')?.addEventListener('change', renderEtfInst);
+// 從總覽表格快速加入追蹤(⭐ 按鈕用)
+function addToWatchFromTable(code){
+  const stock = STOCKS.find(s => s.code === code);
+  if(!stock){
+    alert('找不到此股票');
+    return;
+  }
+  // 檢查是否已在清單
+  const existIdx = watchList.findIndex(x => x.code === code);
+  if(existIdx >= 0){
+    // 已在清單 → 移除
+    watchList.splice(existIdx, 1);
+    localStorage.setItem('wl', JSON.stringify(watchList));
+    renderWatchlist();
+    applyFilt(); // 重新渲染總覽,更新 ⭐ 狀態
+    showToast(`📤 已從追蹤清單移除:${code} ${stock.name}`);
+  } else {
+    // 不在清單 → 加入(目標價空白)
+    watchList.push({code, name:stock.name, buy:'', sell:'', stop:''});
+    localStorage.setItem('wl', JSON.stringify(watchList));
+    renderWatchlist();
+    applyFilt(); // 重新渲染總覽,更新 ⭐ 狀態
+    showToast(`✅ 已加入追蹤清單:${code} ${stock.name}`);
+  }
+}
+
+// Toast 訊息提示(右下角彈出,2 秒後消失)
+function showToast(msg){
+  let toast = document.getElementById('dash-toast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'dash-toast';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:10px 16px;background:rgba(0,40,80,.95);color:#00ffff;border:1px solid #00ffff;border-radius:6px;font-size:13px;box-shadow:0 0 20px rgba(0,255,255,.4);z-index:9999;opacity:0;transition:opacity .3s';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    toast.style.opacity = '0';
+  }, 2000);
+}
 function addWatchItem(){
   const code=document.getElementById('wl-code').value.trim().toUpperCase();
   const buy=document.getElementById('wl-buy').value.trim();
