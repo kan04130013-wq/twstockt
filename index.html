@@ -1789,6 +1789,7 @@ function renderQuarterly(){
 
   document.getElementById('qtr-tbl').innerHTML = list.map(s => {
     const p = s.p;
+    const isWatched = watchList.some(w => w.code === s.code);
     return `<tr class="drow" onclick="openDet('${s.code}')">
       <td class="code">${s.code}</td>
       <td style="font-weight:500">${s.name}</td>
