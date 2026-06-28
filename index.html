@@ -2206,7 +2206,9 @@ function renderTbl(){
     const pCell=p?`<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>`:`<span class="pld">—</span>`;
     const cCell=p?`<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>`:'—';
     const dtCell=p?`<span style="font-size:10px;color:#3f567a">${p.date}</span>`:'—';
+    const isWatched = watchList.some(w => w.code === s.code);
     return `<tr class="drow" onclick="openDet('${s.code}')" style="${DISP.has(s.code)?'background:#fff5f5':''}">
+      <td class="wl-star-cell" onclick="event.stopPropagation();addToWatchFromTable('${s.code}')"><span class="wl-star ${isWatched?'active':''}">${isWatched?'★':'☆'}</span></td>
       <td class="code">${s.code}</td>
       <td style="font-weight:500">${s.name}</td>
       <td>${ib(s.ind)}</td>
