@@ -2265,7 +2265,7 @@ function renderTbl(){
       <td>${ptCell(s.code, p?.close||0)}</td>
       <td>${kdBadge(s.code)}</td>
       <td>${macdCell(s.code)}</td>
-      <td>${sb(s.sig)}</td>
+      <td>${sb(autoSig(s.code))}</td>
       <td>${stars(s.sc)}</td>
       <td>${dtCell}</td>
     </tr>`;
