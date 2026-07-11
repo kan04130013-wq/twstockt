@@ -2225,6 +2225,26 @@ function macdCell(code){
 }
 
 // ── 渲染表格 ──────────────────────────────────────────────────
+// 階段 3.6:AI 訊號自動判定(方向 B)
+// 根據即時技術指標(KD、MACD)動態判定訊號
+function autoSig(code){
+  const ind = IND[code];
+  if(!ind) {
+    // IND 還沒載入 → 用 STOCKS.sig 當備援
+    return STOCKS.find(s => s.code === code)?.sig || '觀察';
+  }
+  const k = ind.kd?.k;
+  const bull = ind.macd?.bull;
+  if(k === undefined) {
+    return STOCKS.find(s => s.code === code)?.sig || '觀察';
+  }
+  // 5 級判定規則(從強到弱)
+  if(k < 20 && bull === true) return '強烈買進';
+  if(k < 30) return '買進';
+  if(k > 80 && bull === false) return '賣出';
+  if(k > 70) return '觀察';
+  return '持有';
+}
 function renderTbl(){
   const s0=(curPage-1)*PAGE, page=filtered.slice(s0,s0+PAGE);
   document.getElementById('tbl').innerHTML=page.map(s=>{
