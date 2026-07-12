@@ -3979,7 +3979,7 @@ async function runDashAi(code){
     document.getElementById('dash-ai-content').textContent=`AI 分析失敗:${e.message}`;
   }
 }
-buildTabs(); applyFilt(); loadManualDisp(); loadAll();
+buildTabs(); applyFilt(); loadManualDisp(); loadAll();loadEps();
 </script>
 <div class="dash-overlay" id="dashOverlay"><div class="dash-container"><div class="dash-cyber" id="dashContent">
 <div class="dash-toolbar"><div class="dash-h1" id="dash-title">📊 載入中...</div><div class="dash-toolbar-r"><button class="dash-btn" onclick="toggleDashTheme()" id="dash-theme-btn">☀️ 淺色</button><button class="dash-btn" onclick="closeDash()">✕ 關閉</button></div></div>
