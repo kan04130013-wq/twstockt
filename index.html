@@ -1115,6 +1115,7 @@ function calcMACD(closes){
 
 // ── 狀態 ───────────────────────────────────────────────────────
 const CF_PROXY = 'https://cool-limit-f6a0twse-proxy.kan04130013.workers.dev';
+const FINMIND_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoia2FuMDQxMzAwMTNAZ21haWwuY29tIiwiZW1haWwiOiJrYW4wNDEzMDAxM0BnbWFpbC5jb20iLCJ0b2tlbl92ZXJzaW9uIjowfQ.TmrTaYW6Xu8qc2WjWIeAx5fwDq1ojxQNorXBVl80C4s';
 let PD={}, HIST={}, OHLC={}, IND={}, DISP=new Set();
 // 目標價直接寫在 STOCKS 陣列的 buy/sell/stop 欄位
 let rtTimer = null;   // 盤中自動更新 timer
