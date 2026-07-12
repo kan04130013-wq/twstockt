@@ -1836,7 +1836,48 @@ document.getElementById('qtr-sort').addEventListener('change', renderQuarterly);
 
 // ── 籌碼追蹤 ──────────────────────────────────────────────────
 let chipData = {};
+// ═══════════════════════════════════════════════════
+// 階段 4A:抓 FinMind EPS(每股盈餘)+ 儲存全域變數
+// ═══════════════════════════════════════════════════
+window.EPS = {};  // 全域 EPS 資料 {code: {eps, date, originName}}
 
+async function loadEps(){
+  const token = FINMIND_TOKEN;  // 從全域變數讀取
+  if(!token){
+    console.warn('⚠️ FinMind Token 未設定,無法抓 EPS');
+    return;
+  }
+  const codes = STOCKS.map(s => s.code);
+  const chunkSize = 50;  // 每批 50 檔,避免 URL 過長
+  let successCount = 0;
+
+  for(let i=0; i<codes.length; i+=chunkSize){
+    const batch = codes.slice(i, i+chunkSize);
+    const url = `${CF_PROXY}/api/stock?type=eps&codes=${batch.join(',')}&token=${encodeURIComponent(token)}`;
+    try{
+      const r = await fetch(url);
+      if(!r.ok){
+        console.warn(`⚠️ EPS 批次 ${i} 失敗:`, r.status);
+        continue;
+      }
+      const data = await r.json();
+      const stocks = data.stocks || [];
+      stocks.forEach(s => {
+        window.EPS[s.code] = {
+          eps: s.eps,
+          date: s.date,
+          originName: s.originName
+        };
+      });
+      successCount += stocks.length;
+    }catch(e){
+      console.warn(`⚠️ EPS 批次 ${i} 錯誤:`, e.message);
+    }
+  }
+  console.log(`✅ EPS 載入完成:${successCount} / ${codes.length} 檔`);
+  // 觸發總覽表格重新渲染(讓「盈」徽章顯示)
+  if(typeof applyFilt === 'function') applyFilt();
+}
 async function loadChip(){
   document.getElementById('chip-status').textContent = '載入中...';
   chipData = {};
