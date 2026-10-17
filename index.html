@@ -1265,37 +1265,89 @@ async function fetchRealtime(){
 let filtered=[...STOCKS], curInd='', curPage=1, sortMode='', detChart=null;
 const PAGE=15;
 // ── 真實歷史收盤價（FinMind，背景載入）──────────────────────────
-async function loadRealHistory(){
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 130);
-  const fmt = d => d.toISOString().slice(0,10);
-  const stocks = STOCKS.filter(s=>PD[s.code] && !s.code.includes('A'));
-  let updated = 0;
+// ── K 線歷史:本機快取(避免每次開網頁都重抓,省 FinMind 額度)──────
+const OHLC_CACHE_KEY = 'cache_ohlc_v1';
+let _histLoading = false;
+function ohlcCacheRead(){
+  try{ return JSON.parse(localStorage.getItem(OHLC_CACHE_KEY) || '{}') || {}; }catch(e){ return {}; }
+}
+function ohlcCacheWrite(obj){
+  try{ localStorage.setItem(OHLC_CACHE_KEY, JSON.stringify(obj)); }
+  catch(e){ console.warn('K 線快取寫入失敗(瀏覽器空間不足):', e.message); }
+}
+// 最近一個「已收盤」的交易日(週一到週五 14:30 後算當天)
+function lastClosedTradeDay(){
+  const tw = new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Taipei'}));
+  if(tw.getHours()*60 + tw.getMinutes() < 14*60+30) tw.setDate(tw.getDate()-1);
+  while(tw.getDay()===0 || tw.getDay()===6) tw.setDate(tw.getDate()-1);
+  return `${tw.getFullYear()}-${String(tw.getMonth()+1).padStart(2,'0')}-${String(tw.getDate()).padStart(2,'0')}`;
+}
+function applyCandles(code, candles){
+  HIST[code] = candles.map(c=>c.close);
+  OHLC[code] = candles;
+  IND[code] = {kd:calcKD(HIST[code]), macd:calcMACD(HIST[code])};
+}
 
-  for(let i=0; i<stocks.length; i+=10){
-    const batch = stocks.slice(i, i+10);
-    await Promise.all(batch.map(async s=>{
-      try{
-        // 新版:加 ohlc=1 參數,一次拿 close + OHLC
-        const url = `${CF_PROXY}?type=stock_hist&code=${s.code}&start=${fmt(startDate)}&end=${fmt(endDate)}&ohlc=1`;
-        const r = await fetch(url);
-        if(!r.ok) return;
-        const data = await r.json();
-        const candles = (data.candles||[]).filter(c=>c.close>0);
-        if(candles.length >= 26){
-          // 同時存兩種格式:
-          // 1) HIST[code] = [close 陣列](維持舊功能相容)
-          // 2) OHLC[code] = [{date, open, high, low, close, vol} 陣列](蠟燭圖用)
-          HIST[s.code] = candles.map(c=>c.close);
-          OHLC[s.code] = candles;
-          IND[s.code] = {kd:calcKD(HIST[s.code]), macd:calcMACD(HIST[s.code])};
-          updated++;
-        }
-      }catch(e){}
-    }));
+async function loadRealHistory(){
+  if(_histLoading) return;
+  _histLoading = true;
+  try{
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 130);
+    const fmt = d => d.toISOString().slice(0,10);
+    const stocks = STOCKS.filter(s=>PD[s.code] && !s.code.includes('A'));
+    const cache = ohlcCacheRead();
+    const wantDay = lastClosedTradeDay();
+    const SIX_H = 6*60*60*1000;
+
+    // 1) 先用快取立刻畫出來
+    let fromCache = 0;
+    const todo = [];
+    stocks.forEach(s=>{
+      const c = cache[s.code];
+      if(c && c.k && c.k.length >= 26){
+        applyCandles(s.code, c.k.map(a=>({date:a[0], open:a[1], high:a[2], low:a[3], close:a[4], vol:a[5]})));
+        fromCache++;
+        const fresh = c.k[c.k.length-1][0] >= wantDay || (Date.now() - (c.t||0)) < SIX_H;
+        if(fresh) return;
+      }
+      todo.push(s);
+    });
+    if(fromCache){ applyFilt(); console.log(`K 線快取:${fromCache} 檔,需要更新:${todo.length} 檔`); }
+
+    // 2) 只補抓過期或沒有的;遇到額度用完就停,下次開網頁再補
+    let updated = 0, quotaHit = false;
+    for(let i=0; i<todo.length && !quotaHit; i+=10){
+      const batch = todo.slice(i, i+10);
+      await Promise.all(batch.map(async s=>{
+        if(quotaHit) return;
+        try{
+          const url = `${CF_PROXY}?type=stock_hist&code=${s.code}&start=${fmt(startDate)}&end=${fmt(endDate)}&ohlc=1`;
+          const r = await fetch(url);
+          if(!r.ok){
+            const t = await r.text();
+            if(t.includes('402') || r.status === 429) quotaHit = true;
+            return;
+          }
+          const data = await r.json();
+          const candles = (data.candles||[]).filter(c=>c.close>0);
+          if(candles.length >= 26){
+            applyCandles(s.code, candles);
+            cache[s.code] = { t: Date.now(), k: candles.map(c=>[c.date, +c.open.toFixed(2), +c.high.toFixed(2), +c.low.toFixed(2), +c.close.toFixed(2), c.vol]) };
+            updated++;
+          }
+        }catch(e){}
+      }));
+    }
+    if(updated > 0){
+      ohlcCacheWrite(cache);
+      applyFilt();
+    }
+    console.log(`K 線更新:新抓 ${updated} 檔` + (quotaHit ? '(FinMind 每小時額度已用完,其餘下次開網頁再補)' : ''));
+  } finally {
+    _histLoading = false;
   }
-  if(updated > 0){ applyFilt(); console.log(`技術指標真實歷史更新（含 OHLC）：${updated} 檔`); }
 }
 
 // ── 收盤後自動輪詢（每5分鐘檢查 TWSE 是否更新）────────────────
