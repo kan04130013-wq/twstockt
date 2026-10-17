@@ -159,6 +159,79 @@ tr:last-child td{border-bottom:none}
 .wl-btn{padding:7px 16px;border-radius:7px;border:1px solid #bfdbfe;background:#eff6ff;color:#2563eb;font-size:13px;cursor:pointer;transition:all .15s;font-weight:500}
 .wl-btn:hover{background:#dbeafe}
 .wl-note{font-size:12px;color:#94a3b8}
+/* 階段 4B:強勢產業排名 */
+.rr-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.rr-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:8px;font-size:15px;color:#1a202c}
+.rr-head span{font-size:12px;color:#94a3b8}
+.rr-clear{margin-left:auto;font-size:12px;padding:3px 10px;border-radius:6px;border:1px solid #bfdbfe;background:#eff6ff;color:#2563eb;cursor:pointer}
+.rr-row{display:grid;grid-template-columns:22px 96px 1fr 68px 84px;align-items:center;gap:10px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13px}
+.rr-row:hover{background:#f8fafc}
+.rr-row.on{background:#eff6ff;box-shadow:inset 0 0 0 1px #bfdbfe}
+.rr-rank{color:#94a3b8;font-weight:700;text-align:right}
+.rr-track{height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden}
+.rr-bar{display:block;height:100%;border-radius:4px}
+.rr-val{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.rr-cnt{text-align:right;font-size:11px;color:#94a3b8}
+@media(max-width:640px){.rr-row{grid-template-columns:18px 84px 1fr 60px}.rr-cnt{display:none}}
+/* 階段 5:EPS 趨勢 */
+.eps-cell{display:inline-flex;align-items:center;gap:5px;font-size:12px;white-space:nowrap}
+.eps-badge{padding:1px 5px;border-radius:3px;font-weight:700;font-size:10px;border:1px solid}
+.eps-badge.win{background:#dcfce7;color:#166534;border-color:#86efac}
+.eps-badge.loss{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+.eps-q{font-size:9px;color:#94a3b8}
+.eps-yoy{font-size:10px;font-weight:700}
+/* 下跌預警 2.0 */
+.rk-badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;border:1px solid;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rk1{background:#f0fdf4;color:#15803d;border-color:#86efac}
+.rk2{background:#fefce8;color:#a16207;border-color:#fde047}
+.rk3{background:#fff7ed;color:#c2410c;border-color:#fdba74}
+.rk4{background:#fef2f2;color:#b91c1c;border-color:#fca5a5}
+.rk5{background:#991b1b;color:#fff;border-color:#7f1d1d}
+.rk-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:9px 14px;margin-bottom:10px;font-size:13px;color:#334155}
+.rk-bar-note{font-size:12px;color:#94a3b8}
+.rk-bar-chips{display:flex;flex-wrap:wrap;gap:6px;margin-left:auto}
+.rk-chip{font-size:12px;padding:3px 9px;border-radius:6px;border:1px solid;cursor:pointer;font-weight:600}
+.rk-chip.on{box-shadow:0 0 0 2px #2563eb}
+.rk-top{display:grid;grid-template-columns:230px 1fr;gap:18px;align-items:center}
+.rk-gauge-box{text-align:center}
+.rk-gauge{width:220px;max-width:100%;display:block;margin:0 auto}
+.rk-g-tick{font-size:10px;fill:#94a3b8}
+.rk-score{font-size:34px;font-weight:800;line-height:1;margin-top:-10px;font-variant-numeric:tabular-nums}
+.rk-score small{font-size:13px;font-weight:500;opacity:.6;margin-left:2px}
+.rk-lv{margin-top:6px;font-size:13px;padding:3px 12px}
+.rk-act{font-size:12px;margin-top:6px;opacity:.8}
+.rk-f{display:grid;grid-template-columns:130px 1fr 34px;align-items:center;gap:10px;padding:5px 0;font-size:13px}
+.rk-f-name small{opacity:.55;margin-left:5px;font-size:11px}
+.rk-f-track{height:9px;border-radius:5px;overflow:hidden}
+.rk-f-bar{display:block;height:100%;border-radius:5px;border:none!important}
+.rk-f-bar.rk1{background:#16a34a}.rk-f-bar.rk2{background:#ca8a04}.rk-f-bar.rk3{background:#ea580c}.rk-f-bar.rk4{background:#dc2626}.rk-f-bar.rk5{background:#991b1b}
+.rk-f-val{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.rk-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px}
+.rk-sub{font-size:12px;font-weight:700;margin-bottom:6px;opacity:.85}
+.rk-hits{list-style:none;margin:0;padding:0;font-size:13px}
+.rk-hits li{display:flex;align-items:center;gap:8px;padding:4px 0}
+.rk-tag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;flex:none}
+.rk-pts{margin-left:auto;font-size:11px;opacity:.6;font-variant-numeric:tabular-nums}
+.rk-cal{width:100%;border-collapse:collapse;font-size:12px}
+.rk-cal th,.rk-cal td{padding:4px 6px;text-align:right}
+.rk-cal th:first-child,.rk-cal td:first-child{text-align:left}
+.rk-note{font-size:11px;opacity:.6;margin-top:6px;line-height:1.5}
+.rk-empty{font-size:13px;opacity:.7;padding:10px 0}
+.dash-cyber .rk-f-track{background:rgba(255,255,255,.08)}
+.dash-cyber .rk-tag{background:rgba(0,255,255,.12);color:#67e8f9}
+.dash-cyber .rk-hits li,.dash-cyber .rk-cal td{border-bottom:1px dashed rgba(0,255,255,.12)}
+.dash-cyber .rk-cal th{color:#94a3b8}
+.dash-cyber .rk-g-needle{stroke:#e2e8f0}.dash-cyber .rk-g-hub{fill:#e2e8f0}
+.dash-cyber #dash-risk{color:#e2e8f0}
+.dash-light .rk-f-track{background:#f1f5f9}
+.dash-light .rk-tag{background:#eff6ff;color:#2563eb}
+.dash-light .rk-hits li,.dash-light .rk-cal td{border-bottom:1px solid #f1f5f9}
+.dash-light .rk-cal th{color:#64748b}
+.dash-light .rk-g-needle{stroke:#1e293b}.dash-light .rk-g-hub{fill:#1e293b}
+.dash-light #dash-risk{color:#1e293b}
+@media(max-width:760px){.rk-top,.rk-cols{grid-template-columns:1fr}.rk-f{grid-template-columns:110px 1fr 30px}.rk-bar-chips{margin-left:0}}
+
+.eps-warn{font-size:10px;font-weight:700;color:#b45309;background:#fef3c7;border:1px solid #fcd34d;border-radius:3px;padding:0 4px}
 
 /* ETF篩選按鈕 */
 .etf-filter-btn{padding:5px 12px;border-radius:16px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:12px;cursor:pointer;transition:all .15s}
@@ -339,6 +412,12 @@ tr:last-child td{border-bottom:none}
         <option value="觀察">觀察</option>
         <option value="持有">持有</option>
       </select>
+      <select id="riskSel">
+        <option value="">所有風險</option>
+        <option value="40">警戒以上(≥40)</option>
+        <option value="60">高風險以上(≥60)</option>
+        <option value="80">極高風險(≥80)</option>
+      </select>
       <select id="scSel">
         <option value="">所有評分</option>
         <option value="5">★★★★★ 五星</option>
@@ -361,6 +440,7 @@ tr:last-child td{border-bottom:none}
         <option value="p-d">股價 ▼</option>
         <option value="p-a">股價 ▲</option>
         <option value="kd-d">KD值 ▼</option>
+        <option value="risk-d">風險分數 ▼</option>
       </select>
     </div>
 
@@ -542,6 +622,7 @@ tr:last-child td{border-bottom:none}
       </div>
     </div><!-- end det -->
 
+    <div class="rk-bar" id="riskBar"></div>
     <div class="tbl-card">
       <div class="tbl-sc">
         <table>
@@ -552,7 +633,7 @@ tr:last-child td{border-bottom:none}
             <th>目標價格</th>
             <th onclick="srt('kd')">KD ↕</th>
             <th>MACD</th>
-            <th>AI訊號</th><th>EPS</th><th>評分</th><th>交易日</th>
+            <th>AI訊號</th><th>EPS</th><th>風險</th><th>評分</th><th>交易日</th>
           </tr></thead>
           <tbody id="tbl"></tbody>
         </table>
@@ -621,20 +702,21 @@ tr:last-child td{border-bottom:none}
   <!-- 月營收頁 -->
   <div id="page-revenue" style="display:none">
     <div class="watchlist-toolbar">
-      <button class="wl-btn" onclick="loadRevenue()">↻ 載入最新月營收</button>
-      <select id="rev-sort" style="padding:6px 10px;border-radius:7px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#dde6f5;font-size:13px;outline:none">
+      <button class="wl-btn" onclick="loadRevenue(true)">↻ 更新月營收</button>
+      <select id="rev-sort" style="padding:6px 10px;border-radius:7px;border:1px solid #e2e8f0;background:#fff;color:#1a202c;font-size:14px;outline:none">
         <option value="yoy-d">年增率 ▼</option>
         <option value="yoy-a">年增率 ▲</option>
         <option value="mom-d">月增率 ▼</option>
         <option value="rev-d">營收 ▼</option>
       </select>
-      <span class="wl-note" id="rev-status">點擊載入按鈕取得最新月營收資料</span>
+      <span class="wl-note" id="rev-status">月營收載入中...</span>
     </div>
+    <div class="rr-card" id="rev-rank" style="display:none"></div>
     <div class="tbl-card">
       <div class="tbl-sc">
         <table>
           <thead><tr>
-            <th>代號</th><th>名稱</th><th>產業</th>
+            <th>代號</th><th>名稱</th><th>產業</th><th>市場</th><th>營收月份</th>
             <th>當月營收(千)</th><th>月增率%</th><th>年增率%</th>
             <th>累計營收(千)</th><th>累計年增%</th><th>現價</th><th>漲跌%</th>
           </tr></thead>
@@ -1115,7 +1197,7 @@ function calcMACD(closes){
 
 // ── 狀態 ───────────────────────────────────────────────────────
 const CF_PROXY = 'https://cool-limit-f6a0twse-proxy.kan04130013.workers.dev';
-const FINMIND_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoia2FuMDQxMzAwMTNAZ21haWwuY29tIiwiZW1haWwiOiJrYW4wNDEzMDAxM0BnbWFpbC5jb20iLCJ0b2tlbl92ZXJzaW9uIjowfQ.TmrTaYW6Xu8qc2WjWIeAx5fwDq1ojxQNorXBVl80C4s';
+// FinMind Token 已移到 Cloudflare Worker 環境變數(FINMIND_TOKEN),前端不再保存
 let PD={}, HIST={}, OHLC={}, IND={}, DISP=new Set();
 // 目標價直接寫在 STOCKS 陣列的 buy/sell/stop 欄位
 let rtTimer = null;   // 盤中自動更新 timer
@@ -1186,7 +1268,7 @@ const PAGE=15;
 async function loadRealHistory(){
   const endDate = new Date();
   const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 90);
+  startDate.setDate(startDate.getDate() - 130);
   const fmt = d => d.toISOString().slice(0,10);
   const stocks = STOCKS.filter(s=>PD[s.code] && !s.code.includes('A'));
   let updated = 0;
@@ -1634,89 +1716,120 @@ function switchPage(name, el){
   });
 }
 
-// ── 月營收 ────────────────────────────────────────────────────
-let revenueData = {};
+// ── 月營收(階段 4B:FinMind,上市+上櫃)───────────────────────
+let revenueData = {};   // {code: {ym, rev(千), mom, yoy, cumRev(千), cumYoy}}
+let revIndFilter = '';
+const REV_CACHE_KEY = 'cache_rev_v1';
 
-async function loadRevenue(){
-  document.getElementById('rev-status').textContent = '載入中...';
-  const now = new Date();
-  // 嘗試抓本月，若太早則抓上月
-  const tryDates = [];
-  for(let i=0;i<3;i++){
-    const d = new Date(now.getFullYear(), now.getMonth()-i, 10);
-    tryDates.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}10`);
+async function loadRevenue(force){
+  const st = document.getElementById('rev-status');
+  const cached = !force && cacheRead(REV_CACHE_KEY);
+  if(cached){
+    revenueData = cached;
+    st.textContent = revStatusText() + '(本機快取,按按鈕可更新)';
+    renderRevenue();
+    return;
   }
-
-  let loaded = false;
-  for(const date of tryDates){
-    try{
-      const r = await fetch(`${CF_PROXY}?type=revenue&market=tse&date=${date}`);
-      if(!r.ok) continue;
-      const data = await r.json();
-      if(data.stat === 'OK' && data.data && data.data.length > 0){
-        // 解析上市月營收
-        // fields: 公司代號、公司名稱、當月營收、當月比較增減(%)、去年當月營收、當月前期比較增減(%)、當年累計營收、去年累計營收、前期比較增減(%)
-        data.data.forEach(row => {
-          const code = row[0]?.trim();
-          if(!code) return;
-          revenueData[code] = {
-            rev: parseInt((row[2]||'0').replace(/,/g,'')),
-            mom: parseFloat(row[3]||0),
-            yoy: parseFloat(row[5]||0),
-            cumRev: parseInt((row[6]||'0').replace(/,/g,'')),
-            cumYoy: parseFloat(row[8]||0),
-          };
-        });
-        loaded = true;
-        document.getElementById('rev-status').textContent =
-          `已載入 ${Object.keys(revenueData).length} 筆月營收 · ${date.slice(0,4)}/${date.slice(4,6)}`;
-        break;
-      }
-    }catch(e){ console.warn('revenue error', e); }
-  }
-  if(!loaded){
-    document.getElementById('rev-status').textContent = '月營收 API 暫無法取得，請點個股查看外部連結';
+  st.textContent = '載入中...';
+  const fresh = {};
+  const codes = fmCodes();
+  const n = await fetchFmBatches('revenue_fm', codes, s => { fresh[s.code] = s; },
+    (d, t) => { st.textContent = `載入中... ${d} / ${t}`; });
+  if(n > 0){
+    revenueData = fresh;
+    cacheWrite(REV_CACHE_KEY, fresh);
+    st.textContent = revStatusText();
+  } else {
+    st.textContent = '月營收暫時取不到,可能已達 FinMind 每小時上限,請稍後再按一次';
   }
   renderRevenue();
 }
 
+function revMainYm(){
+  const cnt = {};
+  Object.values(revenueData).forEach(r => { if(r.ym) cnt[r.ym] = (cnt[r.ym]||0) + 1; });
+  return Object.keys(cnt).sort((a,b) => cnt[b]-cnt[a] || b.localeCompare(a))[0] || '';
+}
+function revStatusText(){
+  return `已載入 ${Object.keys(revenueData).length} 檔月營收,多數公司最新為 ${revMainYm()}`;
+}
+function setRevInd(ind){
+  revIndFilter = (revIndFilter === ind) ? '' : ind;
+  renderRevenue();
+}
+
+function renderRevRank(){
+  const box = document.getElementById('rev-rank');
+  if(!box) return;
+  const ym = revMainYm();
+  if(!ym){ box.innerHTML = ''; box.style.display = 'none'; return; }
+  const groups = {};
+  STOCKS.forEach(s => {
+    const r = revenueData[s.code];
+    if(!r || r.ym !== ym || r.yoy == null) return;
+    (groups[s.ind] = groups[s.ind] || []).push(r.yoy);
+  });
+  const median = a => { const b = [...a].sort((x,y)=>x-y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m-1]+b[m])/2; };
+  const list = Object.entries(groups)
+    .filter(([,a]) => a.length >= 3)
+    .map(([ind,a]) => ({ ind, med: median(a), up: a.filter(v => v > 0).length, n: a.length }))
+    .sort((a,b) => b.med - a.med);
+  if(!list.length){ box.innerHTML = ''; box.style.display = 'none'; return; }
+  const maxAbs = Math.max(...list.map(x => Math.abs(x.med)), 1);
+  box.style.display = '';
+  box.innerHTML = `
+    <div class="rr-head">
+      <b>強勢產業排名</b>
+      <span>${ym} 營收年增率(產業中位數),點產業可篩選下表</span>
+      ${revIndFilter ? `<button class="rr-clear" onclick="setRevInd('')">顯示全部產業 ✕</button>` : ''}
+    </div>
+    ${list.map((x,i) => {
+      const pos = x.med >= 0;
+      const w = Math.max(3, Math.round(Math.abs(x.med) / maxAbs * 100));
+      return `<div class="rr-row ${revIndFilter===x.ind?'on':''}" onclick="setRevInd('${x.ind}')">
+        <span class="rr-rank">${i+1}</span>
+        <span>${ib(x.ind)}</span>
+        <span class="rr-track"><span class="rr-bar" style="width:${w}%;background:${pos?'#dc2626':'#16a34a'}"></span></span>
+        <span class="rr-val ${pos?'up':'dn'}">${pos?'+':''}${x.med.toFixed(1)}%</span>
+        <span class="rr-cnt">${x.up}/${x.n} 檔年增</span>
+      </div>`;
+    }).join('')}`;
+}
+
 function renderRevenue(){
+  renderRevRank();
   const sortMode = document.getElementById('rev-sort').value;
-  // 只顯示我們追蹤的股票
-  let list = STOCKS.map(s => ({
-    ...s,
-    p: PD[s.code],
-    rv: revenueData[s.code]
-  })).filter(s => s.rv || s.p);
+  const num = v => (v == null ? -Infinity : v);
+  let list = STOCKS
+    .filter(s => revenueData[s.code] && (!revIndFilter || s.ind === revIndFilter))
+    .map(s => ({ ...s, p: PD[s.code], rv: revenueData[s.code] }));
 
   list.sort((a,b) => {
-    if(sortMode==='yoy-d') return (b.rv?.yoy||0)-(a.rv?.yoy||0);
-    if(sortMode==='yoy-a') return (a.rv?.yoy||0)-(b.rv?.yoy||0);
-    if(sortMode==='mom-d') return (b.rv?.mom||0)-(a.rv?.mom||0);
-    if(sortMode==='rev-d') return (b.rv?.rev||0)-(a.rv?.rev||0);
+    if(sortMode==='yoy-d') return num(b.rv.yoy) - num(a.rv.yoy);
+    if(sortMode==='yoy-a') return (a.rv.yoy ?? Infinity) - (b.rv.yoy ?? Infinity);
+    if(sortMode==='mom-d') return num(b.rv.mom) - num(a.rv.mom);
+    if(sortMode==='rev-d') return num(b.rv.rev) - num(a.rv.rev);
     return 0;
   });
 
+  const pctCell = v => v == null ? '<span class="pld">—</span>'
+    : `<span class="${v>0?'up':v<0?'dn':'fl'}">${v>0?'+':''}${v.toFixed(1)}%</span>`;
+  const numCell = v => v == null ? '<span class="pld">—</span>' : v.toLocaleString();
+
   document.getElementById('rev-tbl').innerHTML = list.map(s => {
-    const rv = s.rv;
-    const p = s.p;
-    const revCell = rv ? rv.rev.toLocaleString() : '<span class="pld">—</span>';
-    const momCell = rv ? `<span class="${rv.mom>0?'up':rv.mom<0?'dn':'fl'}">${rv.mom>0?'+':''}${rv.mom.toFixed(1)}%</span>` : '—';
-    const yoyCell = rv ? `<span class="${rv.yoy>0?'up':rv.yoy<0?'dn':'fl'}">${rv.yoy>0?'+':''}${rv.yoy.toFixed(1)}%</span>` : '—';
-    const cumCell = rv ? rv.cumRev.toLocaleString() : '—';
-    const cumYoyCell = rv ? `<span class="${rv.cumYoy>0?'up':rv.cumYoy<0?'dn':'fl'}">${rv.cumYoy>0?'+':''}${rv.cumYoy.toFixed(1)}%</span>` : '—';
+    const rv = s.rv, p = s.p;
     const priceCell = p ? `<span class="prc ${cc(p.chg)}">${p.close.toFixed(2)}</span>` : '—';
     const chgCell = p ? `<span class="mono ${cc(p.chg)}" style="font-size:12px">${p.chg>=0?'+':''}${p.chgPct.toFixed(2)}%</span>` : '—';
-    return `<tr class="drow">
+    return `<tr class="drow" onclick="openDet('${s.code}')">
       <td class="code">${s.code}</td>
       <td style="font-weight:500">${s.name}${dispBadge(s.code)}</td>
       <td>${ib(s.ind)}</td>
       <td><span style="font-size:11px;padding:2px 7px;border-radius:4px;font-weight:600;${s.ex==='tse'?'background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe':'background:#f0fdf4;color:#16a34a;border:1px solid #86efac'}">${s.ex==='tse'?'上市':'上櫃'}</span></td>
-      <td>${dispCell(s.code)}</td>
-      <td class="mono" style="font-size:12px">${revCell}</td>
-      <td>${momCell}</td><td>${yoyCell}</td>
-      <td class="mono" style="font-size:12px">${cumCell}</td>
-      <td>${cumYoyCell}</td>
+      <td style="font-size:12px;color:#64748b">${rv.ym || '—'}</td>
+      <td class="mono" style="font-size:12px">${numCell(rv.rev)}</td>
+      <td>${pctCell(rv.mom)}</td><td>${pctCell(rv.yoy)}</td>
+      <td class="mono" style="font-size:12px">${numCell(rv.cumRev)}</td>
+      <td>${pctCell(rv.cumYoy)}</td>
       <td>${priceCell}</td><td>${chgCell}</td>
     </tr>`;
   }).join('');
@@ -1838,86 +1951,63 @@ document.getElementById('qtr-sort').addEventListener('change', renderQuarterly);
 // ── 籌碼追蹤 ──────────────────────────────────────────────────
 let chipData = {};
 // ═══════════════════════════════════════════════════
-// 階段 4A:抓 FinMind EPS(每股盈餘)+ 儲存全域變數
+// FinMind 共用工具:本機快取 12 小時 + 分批(每批 20 檔、3 路並行)
 // ═══════════════════════════════════════════════════
-window.EPS = {};  // 全域 EPS 資料 {code: {eps, date, originName}}
-
-async function loadEps(){
-  const token = FINMIND_TOKEN;  // 從全域變數讀取
-  if(!token){
-    console.warn('⚠️ FinMind Token 未設定,無法抓 EPS');
-    return;
-  }
-  const codes = STOCKS.map(s => s.code);
-  const chunkSize = 50;  // 每批 50 檔,避免 URL 過長
-  let successCount = 0;
-
-  for(let i=0; i<codes.length; i+=chunkSize){
-    const batch = codes.slice(i, i+chunkSize);
-    const url = `${CF_PROXY}/api/stock?type=eps&codes=${batch.join(',')}&token=${encodeURIComponent(token)}`;
-    try{
-      const r = await fetch(url);
-      if(!r.ok){
-        console.warn(`⚠️ EPS 批次 ${i} 失敗:`, r.status);
-        continue;
-      }
-      const data = await r.json();
-      const stocks = data.stocks || [];
-      stocks.forEach(s => {
-        window.EPS[s.code] = {
-          eps: s.eps,
-          date: s.date,
-          originName: s.originName
-        };
-      });
-      successCount += stocks.length;
-    }catch(e){
-      console.warn(`⚠️ EPS 批次 ${i} 錯誤:`, e.message);
-    }
-  }
-  console.log(`✅ EPS 載入完成:${successCount} / ${codes.length} 檔`);
-  // 觸發總覽表格重新渲染(讓「盈」徽章顯示)
-  if(typeof applyFilt === 'function') applyFilt();
+const FM_CACHE_TTL = 12*60*60*1000;
+function cacheRead(key){
+  try{
+    const o = JSON.parse(localStorage.getItem(key)||'null');
+    if(o && Date.now()-o.t < FM_CACHE_TTL) return o.d;
+  }catch(e){}
+  return null;
 }
-// ═══════════════════════════════════════════════════
-// 階段 4A:抓 FinMind EPS(每股盈餘)+ 儲存全域變數
-// ═══════════════════════════════════════════════════
-window.EPS = {};  // 全域 EPS 資料 {code: {eps, date, originName}}
-
-async function loadEps(){
-  if(!FINMIND_TOKEN || FINMIND_TOKEN === 'PASTE_YOUR_FINMIND_TOKEN_HERE'){
-    console.warn('⚠️ FinMind Token 未設定,無法抓 EPS');
-    return;
-  }
-  const codes = STOCKS.map(s => s.code);
-  const chunkSize = 50;  // 每批 50 檔
-  let successCount = 0;
-
-  for(let i=0; i<codes.length; i+=chunkSize){
-    const batch = codes.slice(i, i+chunkSize);
-    const url = `${CF_PROXY}/api/stock?type=eps&codes=${batch.join(',')}&token=${encodeURIComponent(FINMIND_TOKEN)}`;
-    try{
-      const r = await fetch(url);
-      if(!r.ok){
-        console.warn(`⚠️ EPS 批次 ${i} 失敗:`, r.status);
-        continue;
-      }
-      const data = await r.json();
-      const stocks = data.stocks || [];
-      stocks.forEach(s => {
-        window.EPS[s.code] = {
-          eps: s.eps,
-          date: s.date,
-          originName: s.originName
-        };
-      });
-      successCount += stocks.length;
-    }catch(e){
-      console.warn(`⚠️ EPS 批次 ${i} 錯誤:`, e.message);
+function cacheWrite(key, d){
+  try{ localStorage.setItem(key, JSON.stringify({t:Date.now(), d})); }catch(e){}
+}
+function fmCodes(){ return STOCKS.filter(s => s.ind !== '主動ETF').map(s => s.code); }
+async function fetchFmBatches(type, codes, onRow, onProgress){
+  const queue = [];
+  for(let i=0; i<codes.length; i+=20) queue.push(codes.slice(i, i+20));
+  let done = 0, ok = 0;
+  const lane = async () => {
+    while(queue.length){
+      const b = queue.shift();
+      try{
+        const r = await fetch(`${CF_PROXY}/api/stock?type=${type}&codes=${b.join(',')}`);
+        if(r.ok){
+          const j = await r.json();
+          (j.stocks||[]).forEach(onRow);
+          ok += (j.stocks||[]).length;
+        }
+      }catch(e){ console.warn(`⚠️ ${type} 批次錯誤:`, e.message); }
+      done += b.length;
+      if(onProgress) onProgress(done, codes.length);
     }
+  };
+  await Promise.all([lane(), lane(), lane()]);
+  return ok;
+}
+
+// ═══════════════════════════════════════════════════
+// 階段 4A + 5:EPS(最新一季 + 近 8 季歷史)
+// ═══════════════════════════════════════════════════
+window.EPS = {};  // {code: {eps, date, originName, hist:[{d,v}]}}
+const EPS_CACHE_KEY = 'cache_eps_v2';
+
+async function loadEps(force){
+  const cached = !force && cacheRead(EPS_CACHE_KEY);
+  if(cached){
+    window.EPS = cached;
+    console.log(`✅ EPS(本機快取):${Object.keys(cached).length} 檔`);
+  } else {
+    const fresh = {};
+    const codes = fmCodes();
+    const n = await fetchFmBatches('eps', codes, s => {
+      fresh[s.code] = { eps: s.eps, date: s.date, originName: s.originName, hist: s.hist || [] };
+    });
+    if(n > 0){ window.EPS = fresh; cacheWrite(EPS_CACHE_KEY, fresh); }
+    console.log(`✅ EPS 載入完成:${n} / ${codes.length} 檔`);
   }
-  console.log(`✅ EPS 載入完成:${successCount} / ${codes.length} 檔`);
-  // 觸發總覽表格重新渲染(讓「盈」徽章顯示)
   if(typeof applyFilt === 'function') applyFilt();
 }
 async function loadChip(){
@@ -2185,6 +2275,7 @@ function srt(f){
 }
 document.getElementById('srch').addEventListener('input',()=>{curPage=1;applyFilt()});
 document.getElementById('sigSel').addEventListener('change',()=>{curPage=1;applyFilt()});
+document.getElementById('riskSel').addEventListener('change',()=>{curPage=1;applyFilt()});
 document.getElementById('scSel').addEventListener('change',()=>{curPage=1;applyFilt()});
 document.getElementById('dateSel').addEventListener('change',()=>{curPage=1;applyFilt()});
 document.getElementById('sortSel').addEventListener('change',e=>{sortMode=e.target.value;curPage=1;applyFilt()});
@@ -2193,6 +2284,7 @@ function applyFilt(){
   const q       = document.getElementById('srch').value.toLowerCase();
   const sig     = document.getElementById('sigSel').value;
   const scMin   = parseInt(document.getElementById('scSel')?.value||'0')||0;
+  const rkMin   = parseInt(document.getElementById('riskSel')?.value||'0')||0;
   const dateF   = document.getElementById('dateSel')?.value||'';
 
   // 取今日台灣日期字串（yyyy/mm/dd）
@@ -2204,6 +2296,7 @@ function applyFilt(){
     if(q && !s.code.includes(q) && !s.name.toLowerCase().includes(q)) return false;
     if(sig && s.sig!==sig) return false;
     if(scMin && s.sc < scMin) return false;
+    if(rkMin){ const rk = calcRisk(s.code); if(!rk || rk.score < rkMin) return false; }
     if(dateF){
       const d = PD[s.code]?.date||'';
       if(dateF==='today'  && d!==todayStr) return false;
@@ -2216,6 +2309,7 @@ function applyFilt(){
   if(sortMode) filtered.sort((a,b)=>{
     const pa=PD[a.code], pb=PD[b.code];
     const ia=IND[a.code], ib2=IND[b.code];
+    if(sortMode==='risk-d') return (calcRisk(b.code)?.score ?? -1) - (calcRisk(a.code)?.score ?? -1);
     if(sortMode==='chg-d') return (pb?.chgPct||0)-(pa?.chgPct||0);
     if(sortMode==='chg-a') return (pa?.chgPct||0)-(pb?.chgPct||0);
     if(sortMode==='p-d')   return (pb?.close||0)-(pa?.close||0);
@@ -2308,31 +2402,47 @@ function macdCell(code){
 }
 
 // ── 渲染表格 ──────────────────────────────────────────────────
-// 階段 4A:EPS 徽章顯示
-function epsCell(code){
+// 階段 4A + 5:EPS 徽章 + 近 4 季走勢 + 年增 + 衰退警示
+function epsSpark(vals){
+  if(vals.length < 2) return '';
+  const W = 40, H = 16, min = Math.min(...vals, 0), max = Math.max(...vals, 0), span = (max - min) || 1;
+  const pts = vals.map((v,i) => [Math.round(i/(vals.length-1)*(W-4))+2, Math.round((1-(v-min)/span)*(H-4))+2]);
+  const zeroY = Math.round((1-(0-min)/span)*(H-4))+2;
+  const last = pts[pts.length-1], rising = vals[vals.length-1] >= vals[vals.length-2];
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="flex:none">
+    <line x1="2" y1="${zeroY}" x2="${W-2}" y2="${zeroY}" stroke="#e2e8f0" stroke-width="1"/>
+    <polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linejoin="round"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="2.2" fill="${rising?'#dc2626':'#16a34a'}"/>
+  </svg>`;
+}
+function epsInfo(code){
   const data = window.EPS?.[code];
-  if(!data || data.eps === undefined || data.eps === null){
-    return '<span style="color:#3f567a">—</span>';
-  }
-  const eps = data.eps;
-  const date = data.date || '';
-  const quarter = date.slice(0,7);  // 2026-03
-  
-  if(eps > 0){
-    return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px">
-      <span style="background:#dcfce7;color:#166534;padding:1px 5px;border-radius:3px;font-weight:700;font-size:10px;border:1px solid #86efac">盈</span>
-      <span class="mono" style="color:#166534;font-weight:600">${eps.toFixed(2)}</span>
-      <span style="font-size:9px;color:#94a3b8">${quarter}</span>
-    </span>`;
-  } else if(eps < 0){
-    return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px">
-      <span style="background:#fee2e2;color:#991b1b;padding:1px 5px;border-radius:3px;font-weight:700;font-size:10px;border:1px solid #fca5a5">虧</span>
-      <span class="mono" style="color:#991b1b;font-weight:600">${eps.toFixed(2)}</span>
-      <span style="font-size:9px;color:#94a3b8">${quarter}</span>
-    </span>`;
-  } else {
-    return `<span style="color:#3f567a">${eps.toFixed(2)}</span>`;
-  }
+  if(!data || data.eps == null) return null;
+  const hist = data.hist || [];
+  const latest = data.eps, date = data.date || '';
+  const lastYear = hist.find(h => h.d === `${+date.slice(0,4)-1}${date.slice(4)}`);
+  const yoy = (lastYear && lastYear.v > 0) ? (latest - lastYear.v) / lastYear.v * 100 : null;
+  const prev = hist.length >= 2 ? hist[hist.length-2].v : null;
+  const drop = (yoy != null && yoy <= -30) || (prev != null && prev > 0 && latest < prev * 0.5);
+  return { latest, date, hist, yoy, prev, drop };
+}
+function epsCell(code){
+  const info = epsInfo(code);
+  if(!info) return '<span style="color:#3f567a">—</span>';
+  const { latest, date, hist, yoy, drop } = info;
+  const q = date ? `${date.slice(2,4)}Q${Math.ceil(+date.slice(5,7)/3)}` : '';
+  const last4 = hist.slice(-4);
+  const tip = last4.map(h => `${h.d.slice(0,4)}Q${Math.ceil(+h.d.slice(5,7)/3)}:${h.v.toFixed(2)}`).join('  ')
+    + (yoy != null ? `  年增 ${yoy>=0?'+':''}${yoy.toFixed(0)}%` : '');
+  const badge = latest > 0 ? '<span class="eps-badge win">盈</span>'
+              : latest < 0 ? '<span class="eps-badge loss">虧</span>' : '';
+  const yoyTag = yoy == null ? '' :
+    `<span class="eps-yoy ${yoy>=0?'up':'dn'}">${yoy>=0?'▲':'▼'}${Math.abs(yoy).toFixed(0)}%</span>`;
+  const warn = drop ? '<span class="eps-warn">衰退</span>' : '';
+  return `<span class="eps-cell" title="${tip}">
+    ${badge}<span class="mono" style="font-weight:600;color:${latest>=0?'#166534':'#991b1b'}">${latest.toFixed(2)}</span>
+    <span class="eps-q">${q}</span>${epsSpark(last4.map(h => h.v))}${yoyTag}${warn}
+  </span>`;
 }
 // 階段 3.6:AI 訊號自動判定(方向 B)
 // 根據即時技術指標(KD、MACD)動態判定訊號
@@ -2354,6 +2464,330 @@ function autoSig(code){
   if(k > 70) return '觀察';
   return '持有';
 }
+// ═══════════════════════════════════════════════════════════════
+// 台股下跌預警系統 2.0:六因子風險引擎(F1~F6,總分 0~100)
+// R = Σ w_k·F_k,另算大盤系統風險 M(不重複計入個股總分以外)
+// ═══════════════════════════════════════════════════════════════
+const RISK_W = {F1:.20, F2:.15, F3:.20, F4:.15, F5:.15, F6:.15};
+const RISK_NAMES = {F1:'趨勢破壞', F2:'動能衰竭', F3:'量價異常', F4:'波動與尾端', F5:'市場與籌碼', F6:'流動性與事件'};
+const RISK_LV = [
+  {min:80, name:'極高風險', cls:'rk5', act:'可能趨勢反轉,執行風控'},
+  {min:60, name:'高風險',   cls:'rk4', act:'風險訊號密集,重新評估部位'},
+  {min:40, name:'警戒',     cls:'rk3', act:'多項風險轉弱,檢查部位'},
+  {min:20, name:'留意',     cls:'rk2', act:'出現部分弱化訊號'},
+  {min:0,  name:'低風險',   cls:'rk1', act:'正常,持續觀察'},
+];
+function riskLevel(score){ return RISK_LV.find(l => score >= l.min); }
+
+const _rkSma = (a, n, i) => { if(i < n-1 || i >= a.length) return null; let s = 0; for(let j=i-n+1; j<=i; j++) s += a[j]; return s/n; };
+const _rkEma = (a, n) => { const k = 2/(n+1), o = []; a.forEach((v,i) => o.push(i ? v*k + o[i-1]*(1-k) : v)); return o; };
+const _rkMax = a => Math.max(...a), _rkMin = a => Math.min(...a);
+const _rkMean = a => a.reduce((x,y)=>x+y,0) / (a.length||1);
+const _rkSd = a => { const m = _rkMean(a); return Math.sqrt(_rkMean(a.map(x => (x-m)*(x-m)))); };
+const _rkMedian = a => { const b = [...a].sort((x,y)=>x-y), m = b.length >> 1; return b.length ? (b.length % 2 ? b[m] : (b[m-1]+b[m])/2) : 0; };
+
+// 每檔 OHLC 預先計算指標序列(快取)
+const _rkPrepCache = {};
+function riskPrep(code){
+  const cd = OHLC[code];
+  if(!cd || cd.length < 30) return null;
+  const hit = _rkPrepCache[code];
+  if(hit && hit.ref === cd && hit.n === cd.length) return hit.P;
+  const C = cd.map(x=>x.close), H = cd.map(x=>x.high), L = cd.map(x=>x.low), O = cd.map(x=>x.open), V = cd.map(x=>x.vol||0);
+  const e12 = _rkEma(C,12), e26 = _rkEma(C,26);
+  const dif = C.map((_,i) => e12[i]-e26[i]), dea = _rkEma(dif,9), hist = dif.map((v,i) => v-dea[i]);
+  // RSI(14) Wilder
+  const rsi = new Array(C.length).fill(null); let g=0, l=0;
+  for(let i=1; i<C.length; i++){
+    const d = C[i]-C[i-1], up = Math.max(d,0), dn = Math.max(-d,0);
+    if(i <= 14){ g += up; l += dn; if(i === 14){ g/=14; l/=14; rsi[i] = l===0 ? 100 : 100-100/(1+g/l); } }
+    else { g = (g*13+up)/14; l = (l*13+dn)/14; rsi[i] = l===0 ? 100 : 100-100/(1+g/l); }
+  }
+  // KD(9)
+  const K = [], D = [];
+  for(let i=0; i<C.length; i++){
+    const lo = _rkMin(L.slice(Math.max(0,i-8), i+1)), hi = _rkMax(H.slice(Math.max(0,i-8), i+1));
+    const rsv = hi > lo ? (C[i]-lo)/(hi-lo)*100 : 50;
+    K.push(i ? K[i-1]*2/3 + rsv/3 : 50); D.push(i ? D[i-1]*2/3 + K[i]/3 : 50);
+  }
+  // OBV、真實波幅
+  const obv = [0], tr = [H[0]-L[0]];
+  for(let i=1; i<C.length; i++){
+    obv.push(obv[i-1] + (C[i]>C[i-1] ? V[i] : C[i]<C[i-1] ? -V[i] : 0));
+    tr.push(Math.max(H[i]-L[i], Math.abs(H[i]-C[i-1]), Math.abs(L[i]-C[i-1])));
+  }
+  const P = {cd, C, H, L, O, V, dif, dea, hist, rsi, K, D, obv, tr};
+  _rkPrepCache[code] = {ref:cd, n:cd.length, P};
+  return P;
+}
+
+// F1~F4:純技術面(可對歷史任一天 e 計算,供回測使用)
+function riskTech(P, e){
+  const s = {F1:0, F2:0, F3:0, F4:0}, hits = [];
+  const add = (f, pts, txt) => { s[f] += pts; hits.push({f, pts, txt}); };
+  const C = P.C, c = C[e];
+
+  // F1 趨勢破壞
+  const ma20 = _rkSma(C,20,e), ma60 = _rkSma(C,60,e), ma20p = _rkSma(C,20,e-5);
+  if(ma20 && c < ma20) add('F1', 30, '收盤跌破月線(MA20)');
+  if(ma60 && c < ma60) add('F1', 25, '收盤跌破季線(MA60)');
+  if(ma20 && ma20p && ma20 < ma20p) add('F1', 20, '月線斜率由正轉負');
+  if(ma20 && ma60 && ma20 < ma60) add('F1', 10, '月線位於季線之下');
+  if(c < _rkMin(P.L.slice(e-20, e))) add('F1', 15, '跌破近 20 日支撐');
+
+  // F2 動能衰竭
+  const winMax = _rkMax(C.slice(e-19, e+1));
+  if(_rkMax(C.slice(e-4, e+1)) >= winMax){
+    const prevR = P.rsi.slice(e-19, e-4).filter(x => x != null), nowR = _rkMax(P.rsi.slice(e-4, e+1).filter(x => x != null));
+    if(prevR.length && _rkMax(prevR) > 60 && nowR < _rkMax(prevR) - 5) add('F2', 30, 'RSI 頂背離');
+  }
+  const h = P.hist;
+  if(h[e] > 0 && h[e] < h[e-1] && h[e-1] < h[e-2]) add('F2', 20, 'MACD 紅柱連續縮短');
+  else if(h[e] < 0 && h[e] < h[e-1]) add('F2', 15, 'MACD 綠柱擴大');
+  if(P.dif[e] < P.dea[e] && P.dif[e-3] >= P.dea[e-3]) add('F2', 20, 'DIF 下穿訊號線');
+  const roc = (c/C[e-10]-1)*100;
+  if(roc < 0) add('F2', 15, `10 日 ROC 轉負(${roc.toFixed(1)}%)`);
+  if(P.K[e] < P.D[e] && P.K[e-1] >= P.D[e-1] && P.K[e-1] > 70) add('F2', 20, '高檔 KD 死叉');
+
+  // F3 量價異常
+  const V = P.V, vma = _rkMean(V.slice(e-20, e));
+  const rg = P.H[e]-P.L[e], pos = rg > 0 ? (c-P.L[e])/rg : .5;
+  if(vma && V[e] > 2*vma && pos < .3 && c < P.O[e]) add('F3', 35, '爆量長黑、收在低檔');
+  else if(vma && V[e] > 2*vma && c < C[e-1]) add('F3', 20, '爆量下跌');
+  if(c >= _rkMax(C.slice(e-19, e)) && P.obv[e] < _rkMax(P.obv.slice(e-19, e))) add('F3', 25, '股價創高但 OBV 未創高');
+  let upV=0, upN=0, dnV=0, dnN=0;
+  for(let i=e-9; i<=e; i++){ if(C[i] > C[i-1]){ upV += V[i]; upN++; } else if(C[i] < C[i-1]){ dnV += V[i]; dnN++; } }
+  if(upN && dnN && dnV/dnN > 1.3*upV/upN) add('F3', 25, '上漲量縮、下跌量增');
+  const vsd = _rkSd(V.slice(e-20, e));
+  if(vsd > 0 && (V[e]-vma)/vsd > 3) add('F3', 15, '成交量極端異常');
+
+  // F4 波動與尾端風險
+  const atrPct = i => _rkMean(P.tr.slice(i-13, i+1)) / C[i];
+  if(e-20 >= 14 && atrPct(e) > 1.3*atrPct(e-20)) add('F4', 30, 'ATR/股價 明顯上升');
+  const rets = []; for(let i=e-19; i<=e; i++) rets.push(C[i]/C[i-1]-1);
+  const vol = _rkSd(rets)*Math.sqrt(250)*100;
+  if(vol > 60) add('F4', 25, `20 日年化波動 ${vol.toFixed(0)}%`);
+  else if(vol > 40) add('F4', 15, `20 日年化波動 ${vol.toFixed(0)}%`);
+  const r5 = (c/C[e-5]-1)*100;
+  if(r5 < -8) add('F4', 25, `5 日跌幅 ${r5.toFixed(1)}%`);
+  const dd = (c/winMax-1)*100;
+  if(dd < -15) add('F4', 20, `距 20 日高點回落 ${dd.toFixed(1)}%`);
+  const neg = rets.filter(x => x < 0), sq = a => a.reduce((x,y)=>x+y*y, 0), tot = sq(rets);
+  if(tot > 0 && sq(neg)/tot > .65) add('F4', 15, '下行波動占比偏高');
+
+  Object.keys(s).forEach(k => s[k] = Math.min(100, s[k]));
+  return {s, hits};
+}
+
+// 大盤與產業背景(3 秒快取)
+let _rkCtx = null, _rkCtxT = 0;
+function riskCtx(){
+  if(_rkCtx && Date.now()-_rkCtxT < 3000) return _rkCtx;
+  let up=0, dn=0, below=0, withMA=0;
+  const ind = {};
+  STOCKS.forEach(s => {
+    const p = PD[s.code], P = riskPrep(s.code);
+    const g = ind[s.ind] = ind[s.ind] || {chg:[], below:0, n:0, r20:[]};
+    if(p){ if(p.chgPct > 0) up++; else if(p.chgPct < 0) dn++; g.chg.push(p.chgPct); }
+    if(P){
+      const e = P.C.length-1, ma = _rkSma(P.C,20,e);
+      if(ma){ withMA++; g.n++; if(P.C[e] < ma){ below++; g.below++; } }
+      g.r20.push((P.C[e]/P.C[e-20]-1)*100);
+    }
+  });
+  const dnRatio = (up+dn) ? dn/(up+dn) : 0, belowRatio = withMA ? below/withMA : 0;
+  const clamp = v => Math.max(0, Math.min(100, v));
+  const M = Math.round(clamp((dnRatio-.4)/.4*50) + clamp((belowRatio-.4)/.4*50));
+  const indStat = {};
+  Object.entries(ind).forEach(([k,g]) => indStat[k] = {
+    chgMed: g.chg.length ? _rkMedian(g.chg) : 0,
+    belowRatio: g.n ? g.below/g.n : 0,
+    r20Med: g.r20.length ? _rkMedian(g.r20) : 0,
+  });
+  _rkCtx = {dnRatio, belowRatio, M, indStat, up, dn};
+  _rkCtxT = Date.now();
+  return _rkCtx;
+}
+
+// 個股完整風險(F1~F6)
+function calcRisk(code){
+  const P = riskPrep(code);
+  if(!P) return null;
+  const s = STOCKS.find(x => x.code === code);
+  const e = P.C.length-1;
+  const t = riskTech(P, e);
+  const F = {...t.s, F5:0, F6:0}, hits = [...t.hits];
+  const add = (f, pts, txt) => { F[f] += pts; hits.push({f, pts, txt}); };
+
+  // F5 市場與籌碼
+  const ctx = riskCtx(), is = ctx.indStat[s?.ind] || {};
+  if(ctx.dnRatio > .6) add('F5', 20, `大盤寬度惡化(下跌家數 ${(ctx.dnRatio*100).toFixed(0)}%)`);
+  if(ctx.belowRatio > .6) add('F5', 15, `多數個股跌破月線(${(ctx.belowRatio*100).toFixed(0)}%)`);
+  if(is.chgMed < -1) add('F5', 20, `${s.ind} 產業同步走弱(中位數 ${is.chgMed.toFixed(1)}%)`);
+  if(is.belowRatio > .6) add('F5', 15, `${s.ind} 產業過半跌破月線`);
+  const r20 = (P.C[e]/P.C[e-20]-1)*100;
+  if(is.r20Med != null && r20 - is.r20Med < -10) add('F5', 15, `20 日報酬落後產業 ${(r20-is.r20Med).toFixed(1)}%`);
+  const ch = (typeof chipData !== 'undefined') ? chipData[code] : null;
+  if(ch){
+    if(ch.foreign < 0 && ch.trust < 0) add('F5', 25, '外資、投信同步賣超');
+    else if(ch.total < 0) add('F5', 10, '三大法人合計賣超');
+  }
+
+  // F6 流動性與事件
+  const avgV = _rkMean(P.V.slice(-20));
+  if(avgV < 300) add('F6', 30, `流動性不足(日均 ${Math.round(avgV)} 張)`);
+  else if(avgV < 1000) add('F6', 15, `成交偏淡(日均 ${Math.round(avgV)} 張)`);
+  const avgRg = _rkMean(P.H.slice(-20).map((h,i) => (h - P.L.slice(-20)[i]) / P.C.slice(-20)[i]));
+  if(avgRg > .06) add('F6', 15, `日內振幅偏大(均 ${(avgRg*100).toFixed(1)}%)`);
+  if(typeof DISP !== 'undefined' && DISP.has(code)) add('F6', 40, '處置股');
+  const ei = (typeof epsInfo === 'function') ? epsInfo(code) : null;
+  if(ei){
+    if(ei.drop) add('F6', 25, 'EPS 衰退');
+    if(ei.latest < 0) add('F6', 15, '最新一季虧損');
+  }
+  const rv = (typeof revenueData !== 'undefined') ? revenueData[code] : null;
+  if(rv && rv.yoy != null && rv.yoy < -20) add('F6', 20, `月營收年減 ${rv.yoy.toFixed(1)}%`);
+
+  Object.keys(F).forEach(k => F[k] = Math.min(100, F[k]));
+  const score = Math.round(Object.keys(RISK_W).reduce((a,k) => a + RISK_W[k]*F[k], 0));
+  const techScore = Math.round((F.F1*RISK_W.F1 + F.F2*RISK_W.F2 + F.F3*RISK_W.F3 + F.F4*RISK_W.F4) / .7);
+  hits.forEach(h => h.w = h.pts*RISK_W[h.f]);
+  hits.sort((a,b) => b.w - a.w);
+  return {
+    score, F, hits, techScore, level: riskLevel(score), date: P.cd[e].date,
+    data: { tech:true, chip:!!ch, eps:!!ei, rev:!!rv },
+  };
+}
+
+// 歷史回測:以技術分數(F1~F4)分級,統計未來 5/10/20 日內曾跌 ≥5% 的比例
+let _rkCal = null, _rkCalKey = '';
+function riskCalibrate(){
+  const key = Object.keys(OHLC).length + ':' + Object.values(OHLC).reduce((a,c) => a+(c?.length||0), 0);
+  if(_rkCal && _rkCalKey === key) return _rkCal;
+  const HZ = [5,10,20], mk = () => ({n:0, hit:0});
+  const by = {}, all = {};
+  RISK_LV.forEach(l => { by[l.name] = {}; HZ.forEach(h => by[l.name][h] = mk()); });
+  HZ.forEach(h => all[h] = mk());
+  Object.keys(OHLC).forEach(code => {
+    const P = riskPrep(code);
+    if(!P) return;
+    const n = P.C.length;
+    for(let e=29; e<n-5; e++){
+      const t = riskTech(P, e).s;
+      const ts = (t.F1*.20 + t.F2*.15 + t.F3*.20 + t.F4*.15) / .7;
+      const lv = riskLevel(ts).name;
+      HZ.forEach(h => {
+        if(e+h >= n) return;
+        const fall = _rkMin(P.C.slice(e+1, e+h+1)) / P.C[e] - 1 <= -.05;
+        by[lv][h].n++; all[h].n++;
+        if(fall){ by[lv][h].hit++; all[h].hit++; }
+      });
+    }
+  });
+  _rkCal = {by, all, HZ};
+  _rkCalKey = key;
+  return _rkCal;
+}
+
+// ── 表格徽章 ──
+function riskCell(code){
+  const r = calcRisk(code);
+  if(!r) return '<span style="color:#cbd5e0">—</span>';
+  const top = r.hits.slice(0,3).map(h => h.txt).join('、') || '無明顯風險訊號';
+  return `<span class="rk-badge ${r.level.cls}" title="${top}">${r.score} ${r.level.name}</span>`;
+}
+
+// ── 市場總覽上方的風險摘要列 ──
+function renderRiskBar(){
+  const el = document.getElementById('riskBar');
+  if(!el) return;
+  const ctx = riskCtx();
+  const cnt = {}; RISK_LV.forEach(l => cnt[l.name] = 0);
+  let n = 0;
+  STOCKS.forEach(s => { const r = calcRisk(s.code); if(r){ cnt[r.level.name]++; n++; } });
+  if(!n){ el.innerHTML = '<span class="rk-bar-note">風險分數計算中(需等技術指標歷史載入)…</span>'; return; }
+  const mLv = riskLevel(ctx.M);
+  const cur = document.getElementById('riskSel')?.value || '';
+  el.innerHTML = `
+    <span class="rk-bar-m">大盤系統風險 <span class="rk-badge ${mLv.cls}">${ctx.M} ${mLv.name}</span></span>
+    <span class="rk-bar-note">下跌家數 ${(ctx.dnRatio*100).toFixed(0)}% · 跌破月線 ${(ctx.belowRatio*100).toFixed(0)}%</span>
+    <span class="rk-bar-chips">${[...RISK_LV].reverse().map(l => `<button class="rk-chip ${l.cls} ${cur===String(l.min)?'on':''}" onclick="setRiskFilter('${l.min}')">${l.name} ${cnt[l.name]}</button>`).join('')}</span>`;
+}
+function setRiskFilter(min){
+  const sel = document.getElementById('riskSel');
+  sel.value = (sel.value === String(min)) ? '' : String(min);
+  curPage = 1; applyFilt();
+}
+
+// ── 深度分析面板 ──
+function riskGaugeSVG(score){
+  const cx = 110, cy = 100, r = 78;
+  const pt = (v, rr) => { const a = Math.PI*(1 - v/100); return [cx + rr*Math.cos(a), cy - rr*Math.sin(a)]; };
+  const cols = ['#16a34a','#ca8a04','#ea580c','#dc2626','#991b1b'];
+  const segs = [0,20,40,60,80].map((a,i) => {
+    const [x1,y1] = pt(a+.6, r), [x2,y2] = pt(a+19.4, r);
+    return `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" stroke="${cols[i]}" stroke-width="14" fill="none"/>`;
+  }).join('');
+  const [nx,ny] = pt(score, r-22);
+  const ticks = [0,20,40,60,80,100].map(v => { const [x,y] = pt(v, r+16); return `<text x="${x.toFixed(1)}" y="${(y+4).toFixed(1)}" text-anchor="middle" class="rk-g-tick">${v}</text>`; }).join('');
+  return `<svg viewBox="0 0 220 122" class="rk-gauge" role="img" aria-label="風險分數 ${score}">
+    ${segs}${ticks}
+    <line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="rk-g-needle" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="${cx}" cy="${cy}" r="5" class="rk-g-hub"/>
+  </svg>`;
+}
+function renderDashRisk(code){
+  const el = document.getElementById('dash-risk');
+  if(!el) return;
+  const r = calcRisk(code);
+  if(!r){ el.innerHTML = '<div class="rk-empty">需要至少 30 日 K 線歷史才能計算風險分數,請稍候技術指標載入後再開啟。</div>'; return; }
+  const ctx = riskCtx(), mLv = riskLevel(ctx.M);
+  const factors = Object.keys(RISK_NAMES).map(k => {
+    const v = r.F[k], lv = riskLevel(v);
+    return `<div class="rk-f">
+      <span class="rk-f-name">${k} ${RISK_NAMES[k]}<small>${Math.round(RISK_W[k]*100)}%</small></span>
+      <span class="rk-f-track"><span class="rk-f-bar ${lv.cls}" style="width:${Math.max(2,v)}%"></span></span>
+      <span class="rk-f-val">${v}</span>
+    </div>`;
+  }).join('');
+  const hits = r.hits.length
+    ? r.hits.slice(0,6).map(h => `<li><span class="rk-tag">${h.f}</span>${h.txt}<span class="rk-pts">+${h.w.toFixed(1)}</span></li>`).join('')
+    : '<li>目前無明顯風險訊號</li>';
+  const cal = riskCalibrate(), tLv = riskLevel(r.techScore), row = cal.by[tLv.name];
+  const pct = o => o.n >= 30 ? (o.hit/o.n*100).toFixed(0)+'%' : '<span style="opacity:.6">樣本不足</span>';
+  const calRows = cal.HZ.map(h => `<tr><td>${h} 日內</td><td><b>${pct(row[h])}</b></td><td>${pct(cal.all[h])}</td><td>${row[h].n}</td></tr>`).join('');
+  const ok = v => v ? '✓' : '✗';
+  el.innerHTML = `
+    <div class="rk-top">
+      <div class="rk-gauge-box">
+        ${riskGaugeSVG(r.score)}
+        <div class="rk-score">${r.score}<small>/100</small></div>
+        <div class="rk-badge ${r.level.cls} rk-lv">${r.level.name}</div>
+        <div class="rk-act">${r.level.act}</div>
+      </div>
+      <div class="rk-factors">${factors}</div>
+    </div>
+    <div class="rk-cols">
+      <div>
+        <div class="rk-sub">主要觸發原因(依對總分貢獻排序)</div>
+        <ul class="rk-hits">${hits}</ul>
+      </div>
+      <div>
+        <div class="rk-sub">歷史回測:技術分數同為「${tLv.name}」時,未來曾下跌 ≥5% 的比例</div>
+        <table class="rk-cal"><thead><tr><th>期間</th><th>同等級</th><th>全體基準</th><th>樣本數</th></tr></thead><tbody>${calRows}</tbody></table>
+        <div class="rk-note">大盤系統風險 ${ctx.M}(${mLv.name}) · 資料:技術 ${ok(r.data.tech)} 籌碼 ${ok(r.data.chip)} EPS ${ok(r.data.eps)} 營收 ${ok(r.data.rev)} · 資料日 ${r.date}</div>
+        <div class="rk-note">回測只用本站追蹤股近幾個月的 K 線,樣本有限,用來看「這個等級過去準不準」,不是預測。籌碼未載入時 F5 只計大盤與產業。</div>
+      </div>
+    </div>`;
+}
+function riskPromptText(code){
+  const r = calcRisk(code);
+  if(!r) return '資料不足,未計算';
+  return `總分 ${r.score}/100(${r.level.name})| ` +
+    Object.keys(RISK_NAMES).map(k => `${RISK_NAMES[k]} ${r.F[k]}`).join(' / ') +
+    ` | 主要原因:${r.hits.slice(0,4).map(h => h.txt).join('、') || '無'}`;
+}
+
 function renderTbl(){
   const s0=(curPage-1)*PAGE, page=filtered.slice(s0,s0+PAGE);
   document.getElementById('tbl').innerHTML=page.map(s=>{
@@ -2376,11 +2810,12 @@ function renderTbl(){
       <td>${macdCell(s.code)}</td>
       <td>${sb(autoSig(s.code))}</td>
       <td>${epsCell(s.code)}</td>
+      <td>${riskCell(s.code)}</td>
       <td>${stars(s.sc)}</td>
       <td>${dtCell}</td>
     </tr>`;
   }).join('');
-  renderPg();
+  renderRiskBar(); renderPg();
 }
 
 function renderPg(){
@@ -3591,6 +4026,7 @@ function openDash(code){
   }
   
   drawDashChart(code);
+  renderDashRisk(code);
   document.getElementById('dash-ai-detail').style.display='none';
   document.getElementById('dash-ai-detail').style.display='block';
   runDashAi(code);
@@ -3976,7 +4412,7 @@ async function runDashAi(code){
   const closes=HIST[code]||[],ch=chipData[code]||{};
   const k=ind&&ind.kd?ind.kd.k:50,d=ind&&ind.kd?ind.kd.d:50;
   const macd=ind&&ind.macd?ind.macd:{macd:0,hist:0,bull:false};
-  const prompt=`你是台股技術分析專家,針對以下個股提供 12 個專業分析區塊:\n\n【股票資訊】\n代號/名稱:${code} ${s.name}\n產業:${s.ind} | 市場:${s.ex==='tse'?'上市':'上櫃'}\n現價:${p?p.close:0} | 漲跌:${p?p.chgPct:0}%\n\n【技術指標】\nKD: K=${k} / D=${d}\nMACD: ${macd.macd} / 柱狀=${macd.hist} / ${macd.bull?'多頭':'空頭'}\n歷史筆數:${closes.length}\n\n【法人籌碼】\n外資:${ch.foreign||0} | 投信:${ch.trust||0} | 自營商:${ch.dealer||0} | 合計:${ch.total||0}\n\n【公司概況】\n${s.note||''}\n\n請依下列 12 項提供繁體中文專業分析,每項約 100-150 字:\n\n1. 📊 K線型態分析\n2. 📈 均線系統解讀(葛蘭碧八大法則)\n3. ⚡ KD/RSI 動能解析\n4. 🌊 MACD 趨勢研判\n5. 🎯 布林通道應用\n6. 🏦 籌碼分析詳解\n7. 🔍 主力出貨/吸貨警示\n8. 💡 明日開盤具體操作建議(進場/出場/停損價位)\n9. 📐 六大型態綜合判讀\n10. ⚖️ 短線勝率分析\n11. 🌏 產業趨勢與催化劑\n12. 📋 整體結論 + 明日操作策略卡\n\n【第 13 區塊:結構化資料】\n在 12 個區塊分析完後,請額外輸出一段 JSON 結構化資料,放在 \\\`\\\`\\\`json 程式碼區塊內,格式如下(欄位值請依分析結果填入):\n\\\`\\\`\\\`json\n{\n  "summary": "30字以內的整體結論",\n  "trend": "短期/中期趨勢判斷(20字內)",\n  "buy_price": 進場價格數字,\n  "sell_price": 出場價格數字,\n  "stop_loss": 停損價格數字,\n  "risk_level": 1-5的風險等級數字,\n  "ai_signal": "買進/觀察/賣出/強烈買進/強烈賣出 其中之一",\n  "score": 1-5的評分數字,\n  "technical_note": "技術面重點(30字內)",\n  "chip_note": "籌碼面重點(30字內)",\n  "fundamental_note": "基本面/產業面重點(30字內)",\n  "key_warning": "最重要的警示或建議(30字內)",\n  "pattern": "K線型態名稱(例如:黃金交叉、W底、頭肩底、紅三兵、上升旗形等,若無明顯型態填無)",\n  "pattern_strength": 1-5的型態強度數字,\n  "pattern_signal": "型態訊號簡述(20字內)"\n}\n\\\`\\\`\\\``;
+  const prompt=`你是台股技術分析專家,針對以下個股提供 12 個專業分析區塊:\n\n【股票資訊】\n代號/名稱:${code} ${s.name}\n產業:${s.ind} | 市場:${s.ex==='tse'?'上市':'上櫃'}\n現價:${p?p.close:0} | 漲跌:${p?p.chgPct:0}%\n\n【技術指標】\nKD: K=${k} / D=${d}\nMACD: ${macd.macd} / 柱狀=${macd.hist} / ${macd.bull?'多頭':'空頭'}\n歷史筆數:${closes.length}\n\n【法人籌碼】\n外資:${ch.foreign||0} | 投信:${ch.trust||0} | 自營商:${ch.dealer||0} | 合計:${ch.total||0}\n\n【下跌風險預警(系統計算)】\n${riskPromptText(code)}\n\n【公司概況】\n${s.note||''}\n\n請依下列 12 項提供繁體中文專業分析,每項約 100-150 字:\n\n1. 📊 K線型態分析\n2. 📈 均線系統解讀(葛蘭碧八大法則)\n3. ⚡ KD/RSI 動能解析\n4. 🌊 MACD 趨勢研判\n5. 🎯 布林通道應用\n6. 🏦 籌碼分析詳解\n7. 🔍 主力出貨/吸貨警示\n8. 💡 明日開盤具體操作建議(進場/出場/停損價位)\n9. 📐 六大型態綜合判讀\n10. ⚖️ 短線勝率分析\n11. 🌏 產業趨勢與催化劑\n12. 📋 整體結論 + 明日操作策略卡\n\n【第 13 區塊:結構化資料】\n在 12 個區塊分析完後,請額外輸出一段 JSON 結構化資料,放在 \\\`\\\`\\\`json 程式碼區塊內,格式如下(欄位值請依分析結果填入):\n\\\`\\\`\\\`json\n{\n  "summary": "30字以內的整體結論",\n  "trend": "短期/中期趨勢判斷(20字內)",\n  "buy_price": 進場價格數字,\n  "sell_price": 出場價格數字,\n  "stop_loss": 停損價格數字,\n  "risk_level": 1-5的風險等級數字,\n  "ai_signal": "買進/觀察/賣出/強烈買進/強烈賣出 其中之一",\n  "score": 1-5的評分數字,\n  "technical_note": "技術面重點(30字內)",\n  "chip_note": "籌碼面重點(30字內)",\n  "fundamental_note": "基本面/產業面重點(30字內)",\n  "key_warning": "最重要的警示或建議(30字內)",\n  "pattern": "K線型態名稱(例如:黃金交叉、W底、頭肩底、紅三兵、上升旗形等,若無明顯型態填無)",\n  "pattern_strength": 1-5的型態強度數字,\n  "pattern_signal": "型態訊號簡述(20字內)"\n}\n\\\`\\\`\\\``;
   try{
     const r=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
     if(!r.ok){const err=await r.json().catch(()=>({}));throw new Error(`API ${r.status}: ${err.error||''}`);}
@@ -4006,13 +4442,13 @@ async function runDashAi(code){
     document.getElementById('dash-ai-content').textContent=`AI 分析失敗:${e.message}`;
   }
 }
-buildTabs(); applyFilt(); loadManualDisp(); loadAll();loadEps();
+buildTabs(); applyFilt(); loadManualDisp(); loadAll(); loadEps().then(() => loadRevenue());
 </script>
 <div class="dash-overlay" id="dashOverlay"><div class="dash-container"><div class="dash-cyber" id="dashContent">
 <div class="dash-toolbar"><div class="dash-h1" id="dash-title">📊 載入中...</div><div class="dash-toolbar-r"><button class="dash-btn" onclick="toggleDashTheme()" id="dash-theme-btn">☀️ 淺色</button><button class="dash-btn" onclick="closeDash()">✕ 關閉</button></div></div>
 <div class="dash-panel"><div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px"><div><span class="dash-label">現價</span><span class="dash-num" id="dash-price" style="font-size:28px;margin-left:8px">—</span><span class="dash-num" id="dash-chg" style="font-size:16px;margin-left:8px">—</span></div><div style="display:flex;gap:16px;font-size:12px"><div><span class="dash-label">開盤</span> <span class="dash-num" id="dash-open">—</span></div><div><span class="dash-label">最高</span> <span class="dash-num dash-num-up" id="dash-high">—</span></div><div><span class="dash-label">最低</span> <span class="dash-num dash-num-dn" id="dash-low">—</span></div><div><span class="dash-label">成交</span> <span class="dash-num" id="dash-vol">—</span></div></div></div></div>
 <div class="dash-grid-2"><div class="dash-panel"><div class="dash-panel-title" style="display:flex;justify-content:space-between;align-items:center">📈 近期走勢<div style="display:flex;gap:4px"><button class="dash-btn" onclick="setDashChartMode('line')" id="dash-mode-line" style="font-size:11px;padding:3px 8px">📉 折線</button><button class="dash-btn" onclick="setDashChartMode('candle')" id="dash-mode-candle" style="font-size:11px;padding:3px 8px;opacity:.5">🕯️ 蠟燭</button></div></div><div class="dash-chart-box"><canvas id="dash-chart"></canvas></div><div class="dash-volume-box"><canvas id="dash-volume"></canvas></div></div><div class="dash-panel"><div class="dash-panel-title">📋 技術指標總覽</div><div id="dash-indicators"></div></div></div>
-<div class="dash-panel"><div class="dash-panel-title">🤖 AI 深度分析報告</div><div id="dash-ai-loading" class="dash-loading"><div class="dash-spinner"></div><div>AI 正在分析中,大約需要 15–30 秒...</div></div><!-- 結構化卡片區(新增,Step 5A) -->
+<div class="dash-panel"><div class="dash-panel-title">🛡️ 下跌風險預警(六因子)</div><div id="dash-risk"></div></div><div class="dash-panel"><div class="dash-panel-title">🤖 AI 深度分析報告</div><div id="dash-ai-loading" class="dash-loading"><div class="dash-spinner"></div><div>AI 正在分析中,大約需要 15–30 秒...</div></div><!-- 結構化卡片區(新增,Step 5A) -->
 <div id="dash-ai-cards" style="display:none">
   <div class="dash-cards-grid">
     <div class="dash-card dash-card-trade">
