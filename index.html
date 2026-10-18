@@ -1771,29 +1771,17 @@ function switchPage(name, el){
 // ── 月營收(階段 4B:FinMind,上市+上櫃)───────────────────────
 let revenueData = {};   // {code: {ym, rev(千), mom, yoy, cumRev(千), cumYoy}}
 let revIndFilter = '';
-const REV_CACHE_KEY = 'cache_rev_v1';
+const REV_CACHE_KEY = 'cache_rev_v2';
 
 async function loadRevenue(force){
   const st = document.getElementById('rev-status');
-  const cached = !force && cacheRead(REV_CACHE_KEY);
-  if(cached){
-    revenueData = cached;
-    st.textContent = revStatusText() + '(本機快取,按按鈕可更新)';
-    renderRevenue();
-    return;
-  }
   st.textContent = '載入中...';
-  const fresh = {};
-  const codes = fmCodes();
-  const n = await fetchFmBatches('revenue_fm', codes, s => { fresh[s.code] = s; },
+  const res = await fmIncremental('revenue_fm', REV_CACHE_KEY, force ? 0 : 12*60*60*1000,
     (d, t) => { st.textContent = `載入中... ${d} / ${t}`; });
-  if(n > 0){
-    revenueData = fresh;
-    cacheWrite(REV_CACHE_KEY, fresh);
-    st.textContent = revStatusText();
-  } else {
-    st.textContent = '月營收暫時取不到,可能已達 FinMind 每小時上限,請稍後再按一次';
-  }
+  revenueData = res.data;
+  st.textContent = Object.keys(revenueData).length
+    ? revStatusText() + (res.quota ? '(FinMind 額度已用完,其餘約 1 小時後再補)' : '')
+    : '月營收暫時取不到,可能已達 FinMind 每小時上限,請稍後再按一次';
   renderRevenue();
 }
 
@@ -1892,58 +1880,18 @@ document.getElementById('rev-sort').addEventListener('change', renderRevenue);
 let quarterlyData = {}; // {code: {q1:{rev,yoy,qoq,label}, q2:..., q3:...}}
 
 async function loadQuarterly(){
-  document.getElementById('qtr-status').textContent = '載入中...';
+  const st = document.getElementById('qtr-status');
+  st.textContent = '整理中...';
+  if(!Object.keys(window.EPS||{}).length) await loadEps();
   quarterlyData = {};
-
-  // TWSE 季財報 API: 抓最近 3 季
-  // 計算近 3 季的年季
-  const quarters = [];
-  const now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth() + 1;
-  // 目前季別
-  let q = month <= 3 ? 4 : month <= 6 ? 1 : month <= 9 ? 2 : 3;
-  let qYear = month <= 3 ? year - 1 : year;
-  // 若在季初可能還未公布，往前退一季
-  for(let i = 0; i < 4; i++){
-    quarters.push({ year: qYear, q });
-    q--;
-    if(q === 0){ q = 4; qYear--; }
-  }
-
-  let loaded = false;
-  for(const qt of quarters){
-    try{
-      const url = `${CF_PROXY}?type=quarterly&year=${qt.year}&q=${qt.q}`;
-      const r = await fetch(url);
-      if(!r.ok) continue;
-      const data = await r.json();
-      if(!data.data || !data.data.length) continue;
-
-      const label = `${qt.year}Q${qt.q}`;
-      data.data.forEach(row => {
-        const code = row[0]?.trim();
-        if(!code) return;
-        const rev = parseInt((row[2]||'0').replace(/,/g,'')) || 0;
-        const yoy = parseFloat(row[4]||0);
-        if(!quarterlyData[code]) quarterlyData[code] = { quarters: [] };
-        quarterlyData[code].quarters.push({ label, rev, yoy });
-      });
-      loaded = true;
-      document.getElementById('qtr-status').textContent =
-        `已載入最新季別：${label}，共 ${Object.keys(quarterlyData).length} 筆`;
-      break;
-    }catch(e){ console.warn('quarterly error', e); }
-  }
-
-  if(!loaded){
-    // 嘗試用月營收累計推算
-    if(Object.keys(revenueData).length > 0){
-      document.getElementById('qtr-status').textContent = '季財報暫無法取得，顯示月累計推算值';
-    } else {
-      document.getElementById('qtr-status').textContent = '季營收資料暫無法取得，請先載入月營收';
-    }
-  }
+  let latest = '';
+  Object.keys(window.EPS||{}).forEach(code => {
+    const rows = quarterRows(code);
+    if(rows.length){ quarterlyData[code] = { quarters: rows }; if(rows[0].label > latest) latest = rows[0].label; }
+  });
+  st.textContent = Object.keys(quarterlyData).length
+    ? `已整理 ${Object.keys(quarterlyData).length} 檔季營收,最新季別 ${latest}(資料來源 FinMind)`
+    : '季營收需要先載入 EPS 資料,請約 1 小時後再按一次';
   renderQuarterly();
 }
 
@@ -2017,49 +1965,62 @@ function cacheWrite(key, d){
   try{ localStorage.setItem(key, JSON.stringify({t:Date.now(), d})); }catch(e){}
 }
 function fmCodes(){ return STOCKS.filter(s => s.ind !== '主動ETF').map(s => s.code); }
-async function fetchFmBatches(type, codes, onRow, onProgress){
+// 逐檔快取:每檔記錄抓取時間;只抓過期或沒有的;遇到 FinMind 額度用完就停,下次再補
+function fmCacheRead(key){ try{ return JSON.parse(localStorage.getItem(key) || '{}') || {}; }catch(e){ return {}; } }
+function fmCacheWrite(key, obj){ try{ localStorage.setItem(key, JSON.stringify(obj)); }catch(e){ console.warn('快取寫入失敗:', e.message); } }
+async function fmIncremental(type, key, ttl, onProgress){
+  const cache = fmCacheRead(key), now = Date.now();
+  const codes = fmCodes();
+  const todo = codes.filter(c => !cache[c] || now - cache[c].t > ttl);
   const queue = [];
-  for(let i=0; i<codes.length; i+=20) queue.push(codes.slice(i, i+20));
-  let done = 0, ok = 0;
+  for(let i=0; i<todo.length; i+=20) queue.push(todo.slice(i, i+20));
+  let done = 0, fetched = 0, quota = false;
   const lane = async () => {
-    while(queue.length){
+    while(queue.length && !quota){
       const b = queue.shift();
       try{
         const r = await fetch(`${CF_PROXY}/api/stock?type=${type}&codes=${b.join(',')}`);
         if(r.ok){
           const j = await r.json();
-          (j.stocks||[]).forEach(onRow);
-          ok += (j.stocks||[]).length;
+          const got = {};
+          (j.stocks||[]).forEach(s => { got[s.code] = s; });
+          b.forEach(c => {
+            if(got[c]){ cache[c] = {t:now, d:got[c]}; fetched++; }
+            else if(!j.quota) cache[c] = {t:now, d:null};   // 確定沒資料才記錄,額度不足的下次再補
+          });
+          if(j.quota) quota = true;
         }
       }catch(e){ console.warn(`⚠️ ${type} 批次錯誤:`, e.message); }
       done += b.length;
-      if(onProgress) onProgress(done, codes.length);
+      if(onProgress) onProgress(done, todo.length);
     }
   };
   await Promise.all([lane(), lane(), lane()]);
-  return ok;
+  if(todo.length) fmCacheWrite(key, cache);
+  const data = {};
+  codes.forEach(c => { if(cache[c] && cache[c].d) data[c] = cache[c].d; });
+  return { data, fetched, todo: todo.length, quota };
 }
+async function fmFetchOne(type, code){
+  try{
+    const r = await fetch(`${CF_PROXY}/api/stock?type=${type}&codes=${code}`);
+    if(!r.ok) return null;
+    const j = await r.json();
+    return (j.stocks||[]).find(s => s.code === code) || null;
+  }catch(e){ return null; }
+}
+try{ ['cache_eps_v2','cache_rev_v1'].forEach(k => localStorage.removeItem(k)); }catch(e){}
 
 // ═══════════════════════════════════════════════════
 // 階段 4A + 5:EPS(最新一季 + 近 8 季歷史)
 // ═══════════════════════════════════════════════════
-window.EPS = {};  // {code: {eps, date, originName, hist:[{d,v}]}}
-const EPS_CACHE_KEY = 'cache_eps_v2';
+window.EPS = {};  // {code: {eps, date, originName, hist:[{d,v,r}]}}
+const EPS_CACHE_KEY = 'cache_eps_v3';
 
 async function loadEps(force){
-  const cached = !force && cacheRead(EPS_CACHE_KEY);
-  if(cached){
-    window.EPS = cached;
-    console.log(`✅ EPS(本機快取):${Object.keys(cached).length} 檔`);
-  } else {
-    const fresh = {};
-    const codes = fmCodes();
-    const n = await fetchFmBatches('eps', codes, s => {
-      fresh[s.code] = { eps: s.eps, date: s.date, originName: s.originName, hist: s.hist || [] };
-    });
-    if(n > 0){ window.EPS = fresh; cacheWrite(EPS_CACHE_KEY, fresh); }
-    console.log(`✅ EPS 載入完成:${n} / ${codes.length} 檔`);
-  }
+  const res = await fmIncremental('eps', EPS_CACHE_KEY, force ? 0 : 12*60*60*1000);
+  window.EPS = res.data;
+  console.log(`✅ EPS:${Object.keys(res.data).length} 檔(本次新抓 ${res.fetched} / 待更新 ${res.todo})` + (res.quota ? ' — FinMind 額度已用完,其餘下次再補' : ''));
   if(typeof applyFilt === 'function') applyFilt();
 }
 async function loadChip(){
@@ -3016,78 +2977,65 @@ function switchDetSub(sub, btn){
 async function loadDetRev(code){
   const el = document.getElementById('det-rev-content');
   if(!el||!code) return;
-  if(el.dataset.loaded===code) return; // 避免重複載入
+  if(el.dataset.loaded===code) return;
   el.innerHTML='<span style="color:#94a3b8;font-size:14px">載入月營收中...</span>';
-
-  const s = STOCKS.find(x=>x.code===code);
-  const months = [];
-  const now = new Date();
-  // 抓近12個月
-  for(let i=11; i>=0; i--){
-    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    months.push(`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}10`);
+  let rv = revenueData[code];
+  if(!rv || !rv.hist){
+    rv = await fmFetchOne('revenue_fm', code);
+    if(rv) revenueData[code] = rv;
   }
-
-  const revRows = [];
-  // 批次抓最近幾個月（一次最多抓當月）
-  try{
-    // 用市場月營收 API 抓近期
-    const recentMonths = months.slice(-3); // 最近3個月
-    for(const ym of recentMonths){
-      const mkt = s?.ex||'tse';
-      const r = await fetch(`${CF_PROXY}?type=revenue&market=${mkt}&date=${ym}`);
-      if(!r.ok) continue;
-      const data = await r.json();
-      if(!data.data) continue;
-      const row = data.data.find(d=>d[0]===code);
-      if(!row) continue;
-      const rev = parseInt((row[2]||'0').replace(/,/g,''))||0;
-      const mom = parseFloat(row[3])||0;   // 當月比上月增減%
-      const yoy = parseFloat(row[5])||0;   // 當月比去年同月增減%
-      if(rev>0) revRows.push({ month: ym.slice(0,6), rev, yoy, mom });
-    }
-  }catch(e){}
-
-  if(!revRows.length){
-    el.innerHTML=`<div style="text-align:center;padding:16px">
-      <div style="color:#94a3b8;font-size:13px;margin-bottom:12px">月營收資料暫無法直接取得</div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <a href="https://tw.stock.yahoo.com/quote/${code}/revenue" target="_blank"
-          style="padding:6px 14px;border-radius:6px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;font-size:13px;text-decoration:none;font-weight:600">
-          📊 Yahoo 月營收
-        </a>
-        <a href="https://mops.twse.com.tw/mops/web/t21sc04?TYPEK=sii&co_id=${code}" target="_blank"
-          style="padding:6px 14px;border-radius:6px;background:#fefce8;color:#854d0e;border:1px solid #fde68a;font-size:13px;text-decoration:none;font-weight:600">
-          🏛 公開資訊觀測站
-        </a>
-      </div>
-    </div>`;
+  const rows = (rv && rv.hist) ? [...rv.hist].reverse() : [];
+  if(!rows.length){
+    el.innerHTML = detFallback('月營收', code, `https://tw.stock.yahoo.com/quote/${code}/revenue`, 'Yahoo 月營收', 't21sc04');
     el.dataset.loaded = code;
     return;
   }
-
-  const maxRev = Math.max(...revRows.map(r=>r.rev));
-  const fmt = v => v>=1000000 ? `${(v/1000000).toFixed(1)}B` : v>=1000 ? `${(v/1000).toFixed(0)}M` : v.toLocaleString();
-  const pct = v => `<span style="color:${v>=0?'#dc2626':'#16a34a'};font-weight:700">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
-
-  el.innerHTML=`
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">近期月營收（千元）</div>
-      ${revRows.map(r=>{
-        const barW = maxRev ? Math.round(r.rev/maxRev*100) : 0;
-        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <div style="font-size:12px;color:#64748b;width:55px;flex-shrink:0">${r.month.slice(0,4)}/${r.month.slice(4,6)}</div>
-          <div style="flex:1;background:#f1f5f9;border-radius:4px;height:22px;overflow:hidden">
-            <div style="height:100%;width:${barW}%;background:#3b82f6;border-radius:4px;display:flex;align-items:center;padding-left:6px">
-              <span style="font-size:11px;color:#fff;font-weight:600;white-space:nowrap">${fmt(r.rev)}</span>
-            </div>
-          </div>
-          <div style="font-size:12px;width:65px;text-align:right;flex-shrink:0">YoY ${pct(r.yoy)}</div>
-          <div style="font-size:12px;width:65px;text-align:right;flex-shrink:0">MoM ${pct(r.mom)}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
+  const maxRev = Math.max(...rows.map(r=>r.rev||0));
+  el.innerHTML = `<div style="margin-bottom:12px">
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">近 13 個月營收(千元)· 資料來源 FinMind</div>
+    ${rows.map((r,i)=>detBarRow(r.ym.replace('-','/'), r.rev, maxRev, i===0?'#2563eb':'#60a5fa', [['YoY',r.yoy],['MoM',r.mom]])).join('')}
+  </div>`;
   el.dataset.loaded = code;
+}
+function detFmt(v){ return v>=1000000 ? `${(v/1000000).toFixed(1)}B` : v>=1000 ? `${(v/1000).toFixed(0)}M` : (v||0).toLocaleString(); }
+function detPct(v){
+  if(v==null || isNaN(v)) return '<span style="color:#94a3b8">—</span>';
+  return `<span style="color:${v>=0?'#dc2626':'#16a34a'};font-weight:700">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
+}
+function detBarRow(label, val, max, color, tags){
+  const w = max ? Math.max(2, Math.round((val||0)/max*100)) : 0;
+  return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+    <div style="font-size:12px;color:#64748b;width:60px;flex-shrink:0">${label}</div>
+    <div style="flex:1;background:#f1f5f9;border-radius:4px;height:22px;overflow:hidden">
+      <div style="height:100%;width:${w}%;background:${color};border-radius:4px;display:flex;align-items:center;padding-left:6px">
+        <span style="font-size:11px;color:#fff;font-weight:600;white-space:nowrap">${detFmt(val)}</span>
+      </div>
+    </div>
+    ${tags.map(([k,v])=>`<div style="font-size:12px;width:${k==='EPS'?'70':'78'}px;text-align:right;flex-shrink:0">${k} ${k==='EPS'?`<b>${v==null?'—':v.toFixed(2)}</b>`:detPct(v)}</div>`).join('')}
+  </div>`;
+}
+function detFallback(name, code, yahooUrl, yahooLabel, mopsPage){
+  const typ = STOCKS.find(x=>x.code===code)?.ex === 'otc' ? 'otc' : 'sii';
+  return `<div style="text-align:center;padding:16px">
+    <div style="color:#94a3b8;font-size:13px;margin-bottom:12px">${name}暫時取不到(可能是 FinMind 每小時額度已用完,約 1 小時後再試)</div>
+    <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <a href="${yahooUrl}" target="_blank" style="padding:6px 14px;border-radius:6px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;font-size:13px;text-decoration:none;font-weight:600">📊 ${yahooLabel}</a>
+      <a href="https://mops.twse.com.tw/mops/web/${mopsPage}?TYPEK=${typ}&co_id=${code}" target="_blank" style="padding:6px 14px;border-radius:6px;background:#fefce8;color:#854d0e;border:1px solid #fde68a;font-size:13px;text-decoration:none;font-weight:600">🏛 公開資訊觀測站</a>
+    </div>
+  </div>`;
+}
+// 由 EPS 歷史(含單季營收)整理出季別資料,新到舊
+function quarterRows(code){
+  const h = (window.EPS?.[code]?.hist) || [];
+  const byDate = {}; h.forEach(x => byDate[x.d] = x);
+  return h.filter(x => x.r != null).map(x => {
+    const ly = byDate[`${+x.d.slice(0,4)-1}${x.d.slice(4)}`];
+    return {
+      label: `${x.d.slice(0,4)}Q${Math.ceil(+x.d.slice(5,7)/3)}`,
+      rev: x.r, eps: x.v,
+      yoy: (ly && ly.r) ? (x.r - ly.r) / Math.abs(ly.r) * 100 : null,
+    };
+  }).reverse();
 }
 
 async function loadDetQrev(code){
@@ -3095,74 +3043,21 @@ async function loadDetQrev(code){
   if(!el||!code) return;
   if(el.dataset.loaded===code) return;
   el.innerHTML='<span style="color:#94a3b8;font-size:14px">載入季營收中...</span>';
-
-  // 抓近5季（含1年前比較）
-  const now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth()+1;
-  let q = month<=3?4:month<=6?1:month<=9?2:3;
-  let qYear = month<=3?year-1:year;
-
-  const quarters = [];
-  for(let i=0;i<5;i++){
-    quarters.push({year:qYear, q});
-    q--; if(q===0){q=4;qYear--;}
+  if(!quarterRows(code).length){
+    const e = await fmFetchOne('eps', code);
+    if(e) window.EPS[code] = e;
   }
-
-  const qRows = [];
-  for(const qt of quarters){
-    try{
-      const r = await fetch(`${CF_PROXY}?type=quarterly&year=${qt.year}&q=${qt.q}`);
-      if(!r.ok) continue;
-      const data = await r.json();
-      if(!data.data) continue;
-      const row = data.data.find(d=>d[0]===code);
-      if(!row) continue;
-      const rev = parseInt((row[2]||'0').replace(/,/g,''))||0;
-      const yoy = parseFloat(row[4])||0;
-      if(rev>0) qRows.push({ label:`${qt.year}Q${qt.q}`, rev, yoy });
-    }catch(e){}
-  }
-
-  if(!qRows.length){
-    el.innerHTML=`<div style="text-align:center;padding:16px">
-      <div style="color:#94a3b8;font-size:13px;margin-bottom:12px">季營收資料暫無法直接取得</div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <a href="https://tw.stock.yahoo.com/quote/${code}/eps" target="_blank"
-          style="padding:6px 14px;border-radius:6px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;font-size:13px;text-decoration:none;font-weight:600">
-          📊 Yahoo 季財報
-        </a>
-        <a href="https://mops.twse.com.tw/mops/web/t163sb05?TYPEK=sii&co_id=${code}" target="_blank"
-          style="padding:6px 14px;border-radius:6px;background:#fefce8;color:#854d0e;border:1px solid #fde68a;font-size:13px;text-decoration:none;font-weight:600">
-          🏛 公開資訊觀測站
-        </a>
-      </div>
-    </div>`;
+  const rows = quarterRows(code);
+  if(!rows.length){
+    el.innerHTML = detFallback('季營收', code, `https://tw.stock.yahoo.com/quote/${code}/eps`, 'Yahoo 季財報', 't163sb05');
     el.dataset.loaded = code;
     return;
   }
-
-  const maxRev = Math.max(...qRows.map(r=>r.rev));
-  const fmt = v => v>=1000000?`${(v/1000000).toFixed(1)}B`:v>=1000?`${(v/1000).toFixed(0)}M`:v.toLocaleString();
-  const pct = v=>`<span style="color:${v>=0?'#dc2626':'#16a34a'};font-weight:700">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
-
-  el.innerHTML=`
-    <div style="margin-bottom:12px">
-      <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">近5季營收（千元）含1年前比較</div>
-      ${qRows.map((r,i)=>{
-        const barW = maxRev?Math.round(r.rev/maxRev*100):0;
-        const isOld = i>=4;
-        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px${isOld?';opacity:.6':''}">
-          <div style="font-size:12px;color:${isOld?'#94a3b8':'#64748b'};width:60px;flex-shrink:0;font-weight:${isOld?'400':'500'}">${r.label}</div>
-          <div style="flex:1;background:#f1f5f9;border-radius:4px;height:22px;overflow:hidden">
-            <div style="height:100%;width:${barW}%;background:${isOld?'#94a3b8':'#8b5cf6'};border-radius:4px;display:flex;align-items:center;padding-left:6px">
-              <span style="font-size:11px;color:#fff;font-weight:600;white-space:nowrap">${fmt(r.rev)}</span>
-            </div>
-          </div>
-          <div style="font-size:12px;width:65px;text-align:right;flex-shrink:0">YoY ${pct(r.yoy)}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
+  const maxRev = Math.max(...rows.map(r=>r.rev||0));
+  el.innerHTML = `<div style="margin-bottom:12px">
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">近 ${rows.length} 季營收(千元)與 EPS · 資料來源 FinMind</div>
+    ${rows.map((r,i)=>detBarRow(r.label, r.rev, maxRev, i===0?'#7c3aed':'#a78bfa', [['YoY',r.yoy],['EPS',r.eps]])).join('')}
+  </div>`;
   el.dataset.loaded = code;
 }
 
@@ -3463,6 +3358,26 @@ function switchDetTab(tab, btn){
   if(tab==='chip') loadChipDet(document.getElementById('det').dataset.code);
 }
 
+let _t86 = null;
+async function loadT86Once(){
+  if(_t86) return _t86;
+  try{
+    const r = await fetch(`${CF_PROXY}?type=chip_otc`);
+    if(!r.ok) return null;
+    const data = await r.json();
+    if(!Array.isArray(data)) return null;
+    const bi = v => parseInt(String(v||'0').replace(/,/g,'').replace(/\+/g,''))||0;
+    const z = v => Math.round(bi(v)/1000);
+    _t86 = {};
+    data.forEach(row => {
+      const c = (row.SecuritiesCompanyCode||'').trim();
+      if(c) _t86[c] = { foreignBuy:z(row.ForeignInvestmentBuyShares), foreignSell:z(row.ForeignInvestmentSellShares),
+        trustBuy:z(row.InvestmentTrustBuyShares), trustSell:z(row.InvestmentTrustSellShares),
+        dealer:z(row.DealerNetBuySell), date:row.Date||'' };
+    });
+    return _t86;
+  }catch(e){ return null; }
+}
 async function loadChipDet(code){
   const el=document.getElementById('det-chip-content');
   if(!el||!code) return;
@@ -3477,14 +3392,22 @@ async function loadChipDet(code){
       return;
     }
     // 否則用 FinMind 即時查詢
-    const r = await fetch(`${CF_PROXY}?type=chip_finmind&codes=${code}`);
-    if(!r.ok) throw new Error('API error');
-    const data = await r.json();
-    const row = (data.stocks||[])[0];
+    let row = null;
+    try{
+      const r = await fetch(`${CF_PROXY}?type=chip_finmind&codes=${code}`);
+      if(r.ok){ const data = await r.json(); row = (data.stocks||[])[0] || null; }
+    }catch(e){}
     if(row){
       renderChipDet(el, code, row.foreignBuy||0, row.foreignSell||0, row.trustBuy||0, row.trustSell||0, row.dealer||0, row.date||'');
     } else {
-      el.innerHTML='<span style="color:#94a3b8;font-size:13px">籌碼資料暫無法取得</span>';
+      const t = await loadT86Once();
+      const ch = t && t[code];
+      if(ch){
+        renderChipDet(el, code, ch.foreignBuy, ch.foreignSell, ch.trustBuy, ch.trustSell, ch.dealer, `（證交所 ${ch.date}）`);
+      } else {
+        const isOtc = STOCKS.find(x=>x.code===code)?.ex === 'otc';
+        el.innerHTML = `<span style="color:#94a3b8;font-size:13px">籌碼資料暫時取不到${isOtc ? '(上櫃股只能用 FinMind,可能額度已用完,約 1 小時後再試)' : ''}</span>`;
+      }
     }
     el.dataset.loaded = code;
   }catch(e){
