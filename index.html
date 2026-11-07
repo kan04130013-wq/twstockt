@@ -140,6 +140,42 @@ tr:last-child td{border-bottom:none}
 .det-ml{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
 .det-mv{font-size:14px;font-weight:600;font-family:monospace}
 .chart-box{position:relative;height:160px;margin-bottom:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;padding:8px}
+/* ── 個股面板改版(看盤網站式報價頁)── */
+.det{padding:18px 22px 20px;border-radius:10px}
+.det-hdr{align-items:center;margin-bottom:6px;gap:10px}
+.det-title{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
+.det-nm{font-size:24px;font-weight:700;color:#0f172a;letter-spacing:.01em}
+.det-code{font-size:15px;color:#64748b;font-weight:500;font-variant-numeric:tabular-nums}
+.det-ex{font-size:11px;padding:1px 7px;border-radius:4px;font-weight:600;border:1px solid}
+.det-ex.tse{background:#eff6ff;color:#2563eb;border-color:#bfdbfe}
+.det-ex.otc{background:#f0fdf4;color:#16a34a;border-color:#86efac}
+.det-actions{display:flex;align-items:center;gap:8px;flex:none}
+.det-wl{padding:5px 12px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;color:#334155;font-size:13px;font-weight:600;cursor:pointer}
+.det-wl:hover{border-color:#f59e0b;color:#b45309}
+.det-wl.on{background:#fffbeb;border-color:#fcd34d;color:#b45309}
+.det .xbtn{border:none;background:#f1f5f9}
+.det-quote{padding:4px 0 14px;border-bottom:1px solid #e2e8f0;margin-bottom:12px}
+.det-pr{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin:0}
+.det-p{font-size:44px;font-weight:700;line-height:1.1;font-family:inherit;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.det-c{display:inline-flex;gap:8px;font-size:20px;font-weight:600;font-family:inherit;font-variant-numeric:tabular-nums}
+.det-meta{font-size:12px;color:#94a3b8;margin:4px 0 0}
+.det-perf{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:13px;font-variant-numeric:tabular-nums}
+.det-perf:empty{display:none}
+.det-perf-i{display:inline-flex;gap:6px}
+.det-perf-l{color:#94a3b8}
+.det-mg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 28px;margin-bottom:18px}
+.det-mc{min-width:0;display:flex;justify-content:space-between;align-items:center;gap:8px;background:none;border:none;border-radius:0;border-bottom:1px solid #f1f5f9;padding:8px 0}
+.det-ml{font-size:13px;color:#64748b;text-transform:none;letter-spacing:0;margin:0;white-space:nowrap}
+.det-mv{font-size:14px;font-weight:600;color:#0f172a;font-family:inherit;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.det-tabs{display:flex;gap:4px;border-bottom:1px solid #e2e8f0;margin-bottom:14px;overflow-x:auto}
+.det .det-tab{padding:10px 14px;font-size:15px;color:#475569;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.det .det-tab.on{color:#0f172a;border-bottom-color:#7c3aed;font-weight:700}
+.det .det-tab:hover{color:#0f172a}
+.det-subs{display:inline-flex;gap:2px;padding:3px;background:#f1f5f9;border-radius:8px;margin-bottom:12px}
+.det .det-sub-tab{padding:5px 14px;border:none;border-radius:6px;margin:0;font-size:13px;color:#475569}
+.det .det-sub-tab.on{background:#fff;color:#0f172a;border:none;box-shadow:0 1px 2px rgba(15,23,42,.12);font-weight:700}
+@media(max-width:900px){.det-mg{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 20px}}
+@media(max-width:560px){.det-hdr{align-items:flex-start}.det-wl{padding:5px 9px;font-size:12px}.det{padding:14px 14px 16px}.det-nm{font-size:20px}.det-p{font-size:36px}.det-c{font-size:17px}.det-mg{gap:0 12px}.det-quote,.det-mg{padding-right:4px}.det-ml,.det-mv{font-size:12.5px}}
 .det-note{font-size:13px;color:#475569;line-height:1.7;padding:10px 14px;background:#f8fafc;border-radius:7px;border-left:3px solid #3b82f6;margin-bottom:12px}
 .xbtn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;background:#f1f5f9;cursor:pointer;border:1px solid #e2e8f0;color:#64748b;font-size:14px}
 .xbtn:hover{background:#e2e8f0}
@@ -447,37 +483,44 @@ tr:last-child td{border-bottom:none}
     <div class="det" id="det">
       <!-- 個股標題 -->
       <div class="det-hdr">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span class="code" style="font-size:18px" id="det-code"></span>
-          <span style="font-size:17px;font-weight:700" id="det-nm"></span>
-          <span id="det-ib" style="margin-left:2px"></span>
+        <div class="det-title">
+          <span class="det-nm" id="det-nm"></span>
+          <span class="det-code" id="det-code"></span>
+          <span class="det-ex" id="det-ex"></span>
+          <span id="det-ib"></span>
         </div>
-        <div class="xbtn" onclick="closeDet()">&#x2715;</div>
+        <div class="det-actions">
+          <button class="det-wl" id="det-wl" onclick="toggleDetWatch()">☆ 加入自選</button>
+          <button class="xbtn" onclick="closeDet()" aria-label="關閉">&#x2715;</button>
+        </div>
       </div>
-      <!-- 股價列 -->
-      <div class="det-pr">
-        <span class="det-p" id="det-p">—</span>
-        <span class="det-c" id="det-c">—</span>
-        <span class="det-meta" id="det-meta"></span>
+      <!-- 報價區 -->
+      <div class="det-quote">
+        <div class="det-pr">
+          <span class="det-p" id="det-p">—</span>
+          <span class="det-c" id="det-c">—</span>
+        </div>
+        <div class="det-meta" id="det-meta"></div>
+        <div class="det-perf" id="det-perf"></div>
       </div>
       <div id="det-disp" style="display:none;margin-bottom:10px"></div>
-      <!-- 基本數據 -->
+      <!-- 重點數據 -->
       <div class="det-mg" id="det-mg"></div>
       <!-- 分頁切換 -->
-      <div style="display:flex;gap:0;border-bottom:2px solid #e2e8f0;margin-bottom:14px">
-        <button class="det-tab on" onclick="switchDetTab('chart',this)">📈 走勢圖</button>
-        <button class="det-tab" onclick="switchDetTab('tech',this)">📊 技術分析</button>
-        <button class="det-tab" onclick="switchDetTab('chip',this)">🏦 籌碼</button>
-        <button class="det-tab" onclick="switchDetTab('target',this)">🎯 目標價</button>
-        <button class="det-tab" onclick="switchDetTab('ai',this)">🤖 AI分析</button>
+      <div class="det-tabs" role="tablist">
+        <button class="det-tab on" onclick="switchDetTab('chart',this)">走勢與營收</button>
+        <button class="det-tab" onclick="switchDetTab('tech',this)">技術分析</button>
+        <button class="det-tab" onclick="switchDetTab('chip',this)">法人籌碼</button>
+        <button class="det-tab" onclick="switchDetTab('target',this)">目標價</button>
+        <button class="det-tab" onclick="switchDetTab('ai',this)">AI 分析</button>
       </div>
       <!-- 走勢圖分頁 -->
       <div id="det-tab-chart">
         <!-- 子頁籤 -->
-        <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:1px solid #e2e8f0">
-          <button class="det-sub-tab on" onclick="switchDetSub('price',this)">📈 股價走勢</button>
-          <button class="det-sub-tab" onclick="switchDetSub('rev',this)">💰 月營收</button>
-          <button class="det-sub-tab" onclick="switchDetSub('qrev',this)">📊 季營收</button>
+        <div class="det-subs">
+          <button class="det-sub-tab on" onclick="switchDetSub('price',this)">股價走勢</button>
+          <button class="det-sub-tab" onclick="switchDetSub('rev',this)">月營收</button>
+          <button class="det-sub-tab" onclick="switchDetSub('qrev',this)">季營收</button>
         </div>
         <!-- 股價走勢 -->
         <div id="det-sub-price">
@@ -2859,12 +2902,7 @@ async function openDet(code){
   document.getElementById('det-code').textContent=s.code;
   document.getElementById('det-nm').textContent=s.name;
   document.getElementById('det-ib').innerHTML=ib(s.ind);
-  document.getElementById('det-p').textContent=p?p.close.toFixed(2):'—';
-  document.getElementById('det-p').className='det-p '+(p?cc(p.chg):'');
-  document.getElementById('det-c').textContent=p?(p.chg>=0?'+':'')+p.chgPct.toFixed(2)+'%':'—';
-  document.getElementById('det-c').className='det-c '+(p?cc(p.chg):'');
-  const srcLabel = p?.src==='MIS' ? 'MIS備援' : p?.src==='MIS即時' ? 'MIS即時' : p?.src||'TWSE';
-  document.getElementById('det-meta').textContent = p ? `(${srcLabel} · ${p.date||''})` : '';
+  renderDetQuote(s, p);
   const dispEl = document.getElementById('det-disp');
   if(dispEl){
     if(DISP.has(code)){
@@ -2876,14 +2914,7 @@ async function openDet(code){
       dispEl.style.display='none';
     }
   }
-  document.getElementById('det-mg').innerHTML=[
-    {l:'開盤',v:p?p.open.toFixed(2):'—'},
-    {l:'最高',v:p?p.high.toFixed(2):'—',c:'up'},
-    {l:'最低',v:p?p.low.toFixed(2):'—',c:'dn'},
-    {l:'成交量',v:p?fv(p.vol)+'千股':'—'},
-    {l:'漲跌額',v:p?(p.chg>=0?'+':'')+p.chg.toFixed(2):'—',c:p?cc(p.chg):''},
-    {l:'AI訊號',v:sb(s.sig)},{l:'評分',v:stars(s.sc)},
-  ].map(m=>`<div class="det-mc"><div class="det-ml">${m.l}</div><div class="det-mv ${m.c||''}">${m.v}</div></div>`).join('');
+  renderDetStats(s, p);
 
   // 指標區
   if(ind){
@@ -3458,6 +3489,78 @@ function renderChipDet(el, code, fBuy, fSell, tBuy, tSell, dealer, dateStr){
     </div>`;
 }
 
+
+// ── 個股面板:報價區、區間漲跌、重點數據(參考看盤網站常見版面)──
+function detArrow(v){ return v>0 ? '▲' : v<0 ? '▼' : ''; }
+function renderDetQuote(s, p){
+  document.getElementById('det-ex').textContent = s.ex==='tse' ? '上市' : '上櫃';
+  document.getElementById('det-ex').className = 'det-ex ' + (s.ex==='tse' ? 'tse' : 'otc');
+  const pe = document.getElementById('det-p'), ce = document.getElementById('det-c');
+  if(p){
+    const cls = cc(p.chg);
+    pe.textContent = p.close.toFixed(2); pe.className = 'det-p ' + cls;
+    ce.innerHTML = `<span>${detArrow(p.chg)} ${Math.abs(p.chg).toFixed(2)}</span><span>(${p.chgPct>=0?'+':''}${p.chgPct.toFixed(2)}%)</span>`;
+    ce.className = 'det-c ' + cls;
+    const srcLabel = p.src==='MIS' ? 'MIS 備援' : p.src==='MIS即時' ? '證交所即時' : (p.src||'證交所');
+    document.getElementById('det-meta').textContent = `${p.isRT ? '盤中即時' : '收盤'} · ${p.date && p.date!=='盤中即時' ? p.date : ''} · 資料來源 ${srcLabel}`;
+  } else {
+    pe.textContent = '—'; pe.className = 'det-p'; ce.textContent = ''; 
+    document.getElementById('det-meta').textContent = '尚未取得報價';
+  }
+  // 區間漲跌(用 K 線收盤價)
+  const C = HIST[s.code] || [], real = !!OHLC[s.code];
+  const span = (n, lbl) => {
+    if(!real || C.length <= n) return '';
+    const r = (C[C.length-1] / C[C.length-1-n] - 1) * 100;
+    return `<span class="det-perf-i"><span class="det-perf-l">${lbl}</span><span class="${cc(r)}">${r>=0?'+':''}${r.toFixed(2)}%</span></span>`;
+  };
+  document.getElementById('det-perf').innerHTML = span(5,'近 1 週') + span(20,'近 1 月') + span(60,'近 3 月');
+  updateDetWatchBtn(s.code);
+}
+function renderDetStats(s, p){
+  const cd = OHLC[s.code] || [];
+  const prev = p ? p.close - p.chg : null;
+  const amp = p && prev ? (p.high - p.low) / prev * 100 : null;
+  const avgV = cd.length >= 20 ? cd.slice(-20).reduce((a,c)=>a+(c.vol||0),0) / 20 : null;
+  const eh = (window.EPS?.[s.code]?.hist) || [];
+  const eps4 = eh.length >= 4 ? eh.slice(-4).reduce((a,h)=>a+h.v,0) : null;
+  const per = p && eps4 > 0 ? p.close / eps4 : null;
+  const rv = (typeof revenueData!=='undefined') ? revenueData[s.code] : null;
+  const rk = (typeof calcRisk==='function') ? calcRisk(s.code) : null;
+  const num = (v, d=2) => v==null || isNaN(v) ? '—' : v.toFixed(d);
+  const pc = v => v==null || isNaN(v) ? '—' : `<span class="${cc(v)}">${v>=0?'+':''}${v.toFixed(1)}%</span>`;
+  const items = [
+    ['成交', p ? `<span class="${cc(p.chg)}">${p.close.toFixed(2)}</span>` : '—'],
+    ['昨收', num(prev)],
+    ['開盤', p && p.open ? `<span class="${cc(p.open-prev)}">${p.open.toFixed(2)}</span>` : '—'],
+    ['最高', p && p.high ? `<span class="${cc(p.high-prev)}">${p.high.toFixed(2)}</span>` : '—'],
+    ['最低', p && p.low ? `<span class="${cc(p.low-prev)}">${p.low.toFixed(2)}</span>` : '—'],
+    ['振幅', amp==null ? '—' : amp.toFixed(2)+'%'],
+    ['成交量', p && p.vol ? fv(p.vol)+' 張' : '—'],
+    ['20 日均量', avgV ? fv(avgV)+' 張' : '—'],
+    ['近四季 EPS', eps4==null ? '—' : `<span class="${eps4>=0?'':'dn'}">${eps4.toFixed(2)}</span>`],
+    ['本益比', per ? per.toFixed(1)+' 倍' : '—'],
+    ['月營收年增', rv ? pc(rv.yoy) : '—'],
+    ['下跌風險', rk ? `<span class="rk-badge ${rk.level.cls}">${rk.score} ${rk.level.name}</span>` : '—'],
+    ['AI 訊號', sb(typeof autoSig==='function' ? autoSig(s.code) : s.sig)],
+    ['評分', stars(s.sc)],
+  ];
+  document.getElementById('det-mg').innerHTML = items.map(([l,v]) =>
+    `<div class="det-mc"><span class="det-ml">${l}</span><span class="det-mv">${v}</span></div>`).join('');
+}
+function updateDetWatchBtn(code){
+  const b = document.getElementById('det-wl');
+  if(!b) return;
+  const on = watchList.some(w => w.code === code);
+  b.textContent = on ? '★ 已加入自選' : '☆ 加入自選';
+  b.classList.toggle('on', on);
+}
+function toggleDetWatch(){
+  const code = document.getElementById('det').dataset.code || document.getElementById('det-code').textContent;
+  if(!code) return;
+  addToWatchFromTable(code);
+  updateDetWatchBtn(code);
+}
 function closeDet(){document.getElementById('det').className='det';if(detChart){detChart.destroy();detChart=null}}
 
 function saveDisp(){
